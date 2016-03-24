@@ -2,11 +2,6 @@
 						***NEW COMPUTER DEPOYMENT APP***
 	App that allows for the quick, automatic installation of new computers.
 	Author: Christopher Roth
-	Version 1.1 (3.18.16)
-	Version Notes:
-		* Established GUI and framework for subroutine implimentation. 3.17.16
-		* Began testing array setup for running installers 3.18.16
-		* Added button for Self-Check Stations 3.18.16
 */
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -47,66 +42,77 @@ Gui, Add, Button, gBpatrn w100, Patron
 Gui, Add, Button, gBlpton w100, Kiosk
 Gui, Add, Button, gBslfch w100, Self-Check
 Gui, Show, AutoSize
-Return
+Return ;Initializes variables and creates GUI. 
 
 Setloc: ;Subroutine to change branch location
-	Gui, Submit, NoHide
-	vMyloc = Branch
-	Return
-
+	{	
+		Gui, Submit, NoHide
+		vMyloc = Branch
+		Return
+	}
 FinalRun: ;Subrotine that contains the final path to run the installers
-{	
-	if(vMyloc == null)
-	{
-		MsgBox, 48, No Library, Please select a library branch.
-		Return
-	}
-	else
-	{
-		MsgBox, 64, Running Installer, Running Installer at C:\Users\croth\Documents\Script Projects\Deployment\%Installer%.ahk
-		Return
-	}
-}	
-Bstaff: ;Staff Computer subroutine
-{
-	Installer := aStaff[Branch]
-	Gosub, FinalRun
+	{	
+		if(vMyloc == null)
+		{
+			MsgBox, 48, No Library, Please select a library branch.
+			Return
+		}
+		else
+		{
+			IfExist, C:\Users\croth\Documents\GitHub\Deployment\Deployment\%Installer%.ahk
+			{
+				Run, C:\Users\croth\Documents\GitHub\Deployment\Deployment\%Installer%.ahk
+				Return
+			}
+			else
+			{
+				MsgBox, 48, Installer Not Found, The installer cannot be found at the specified path.
+				Return
+			}
+			Return
+		}
 	Return
-}
+	}	
+Bstaff: ;Staff Computer subroutine
+	{
+		Installer := aStaff[Branch]
+		Gosub, FinalRun
+		Return
+	}
 
 Boffce: ;Office Computer subroutine.
-{
-	Installer := aOffce[Branch]
-	Gosub, FinalRun
-	Return
-}
+	{
+		Installer := aOffce[Branch]
+		Gosub, FinalRun
+		Return
+	}
 
 Bpatrn: ;Paton computer subroutine.
-{
-	Installer := aPatrn[Branch]
-	Gosub, FinalRun
-	Return
-}
+	{
+		Installer := aPatrn[Branch]
+		Gosub, FinalRun
+		Return
+	}
 
 Bcatlg: ;Catalog subroutine.
-{
-	Installer := aCatlg[Branch]
-	Gosub, FinalRun
-	Return
-}
+	{
+		Installer := aCatlg[Branch]
+		Gosub, FinalRun
+		Return
+	}
 
 Blpton: ;Print/Reservation Kiosk computer.
-{
-	Installer := aLpton[Branch]
-	Gosub, FinalRun
-	Return
-}
+	{
+		Installer := aLpton[Branch]
+		Gosub, FinalRun
+		Return
+	}
 
 Bslfch: ;Self-check subroutine
-{
-	Installer := aSelfc[Branch]
-	Gosub, FinalRun
-	Return
-}
+	{
+		Installer := aSelfc[Branch]
+		Gosub, FinalRun
+		Return
+	}
 GuiClose:
 	ExitApp
