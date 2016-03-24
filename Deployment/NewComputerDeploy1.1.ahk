@@ -3,7 +3,11 @@
 	App that allows for the quick, automatic installation of new computers.
 	Author: Christopher Roth
 */
-
+if not A_IsAdmin ;checks that script is running in admin mode, and restarts in that mode if not.
+{
+   Run *RunAs "%A_ScriptFullPath%"
+   ExitApp
+}
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
