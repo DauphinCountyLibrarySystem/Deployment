@@ -35,7 +35,7 @@ Gui, Add, Radio, altsubmit gSetloc, Alexander Family
 Gui, Add, Radio, altsubmit gSetloc, Johnson Memorial
 Gui, Add, Radio, altsubmit gSetloc, Elizabethville
 Gui, Add, Radio, altsubmit gSetloc, Northern Dauphin
-Gui, Add, Checkbox, vWrls, This is a wireless computer. 
+
 ; This section creates the buttons that select the type of computer.
 Gui, Font, Bold
 Gui, Add, Text, ym, Select Computer Type:
@@ -46,6 +46,7 @@ Gui, Add, Button, gBcatlg w100, Catalog
 Gui, Add, Button, gBpatrn w100, Patron
 Gui, Add, Button, gBlpton w100, Kiosk
 Gui, Add, Button, gBslfch w100, Self-Check
+Gui, Add, Checkbox, ym vWrls, This is a wireless computer.
 Gui, Show, AutoSize
 Return ;Initializes variables and creates GUI. 
 
@@ -57,6 +58,7 @@ Setloc: ;Subroutine to change branch location
 	}
 FinalRun: ;Subrotine that contains the final path to run the installers
 	{	
+		Gui, Submit, NoHide
 		if(vMyloc == null)
 		{
 			MsgBox, 48, No Library, Please select a library branch.
@@ -64,14 +66,32 @@ FinalRun: ;Subrotine that contains the final path to run the installers
 		}
 		else
 		{
-			IfExist, C:\Users\croth\Documents\GitHub\Deployment\Deployment\%FinalPath%.ahk
+			if(Wrls == 1) ;check for wireless toggle
 			{
-				Run, C:\Users\croth\Documents\GitHub\Deployment\Deployment\%FinalPath%.ahk
+				IfExist, C:\Users\croth\Documents\GitHub\Deployment\Deployment\w%vInstaller%.ahk
+				{
+					Run, C:\Users\croth\Documents\GitHub\Deployment\Deployment\w%vInstaller%.ahk
+					Return
+				}
+				else
+				{
+					MsgBox, 48, Installer Not Found, The installer cannot be found at the specified path.
+					Return
+				}
 				Return
 			}
 			else
 			{
-				MsgBox, 48, Installer Not Found, The installer cannot be found at the specified path.
+				IfExist, C:\Users\croth\Documents\GitHub\Deployment\Deployment\%vInstaller%.ahk
+				{
+					Run, C:\Users\croth\Documents\GitHub\Deployment\Deployment\%vInstaller%.ahk
+					Return
+				}
+				else
+				{
+					MsgBox, 48, Installer Not Found, The installer cannot be found at the specified path.
+					Return
+				}
 				Return
 			}
 			Return
@@ -80,42 +100,42 @@ FinalRun: ;Subrotine that contains the final path to run the installers
 	}	
 Bstaff: ;Staff Computer subroutine
 	{
-		Installer := aStaff[Branch]
+		vInstaller := aStaff[Branch]
 		Gosub, FinalRun
 		Return
 	}
 
 Boffce: ;Office Computer subroutine.
 	{
-		Installer := aOffce[Branch]
+		vInstaller := aOffce[Branch]
 		Gosub, FinalRun
 		Return
 	}
 
 Bpatrn: ;Paton computer subroutine.
 	{
-		Installer := aPatrn[Branch]
+		vInstaller := aPatrn[Branch]
 		Gosub, FinalRun
 		Return
 	}
 
 Bcatlg: ;Catalog subroutine.
 	{
-		Installer := aCatlg[Branch]
+		vInstaller := aCatlg[Branch]
 		Gosub, FinalRun
 		Return
 	}
 
 Blpton: ;Print/Reservation Kiosk computer.
 	{
-		Installer := aLpton[Branch]
+		vInstaller := aLpton[Branch]
 		Gosub, FinalRun
 		Return
 	}
 
 Bslfch: ;Self-check subroutine
 	{
-		Installer := aSelfc[Branch]
+		vInstaller := aSelfc[Branch]
 		Gosub, FinalRun
 		Return
 	}
