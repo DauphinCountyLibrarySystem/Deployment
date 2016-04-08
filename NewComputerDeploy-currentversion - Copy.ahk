@@ -16,14 +16,9 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 FileInstall, C:\Users\croth\Documents\GitHub\Deployment\wesastf.ahk, wesastf.ahk
 FileInstall, C:\Users\croth\Documents\GitHub\Deployment\esastf.ahk, esastf.ahk
 ;----Initialize GUI, global variables, and arrays----
+aLoca:= {1: "esa", 2: "kl", 3: "mom", 4: "mrl", 5: "afl", 6: "joh", 7: "ev", 8: "nd"}
+aComp:= {1: "stf", 2: "off", 3: "pat", 4: "lpt", 5: "ksk", 6: "chk"}
 Gui, New, , Computer Deployment
-vMyloc := null
-aStaff := {1: "esastf", 2: "klstf", 3: "momstf", 4: "mrlstf", 5: "aflstf", 6: "johstf", 7: "evstf", 8: "ndstf"}
-aOffce := {1: "esaoff", 2: "kloff", 3: "momoff", 4: "mrloff", 5: "afloff", 6: "johoff", 7: "evoff", 8: "ndoff"}
-aPatrn := {1: "esapat", 2: "klpat", 3: "mompat", 4: "mrlpat", 5: "aflpat", 6: "johpat", 7: "evpat", 8: "ndpat"}
-aCatlg := {1: "esacat", 2: "klcat", 3: "momcat", 4: "mrlcat", 5: "aflcat", 6: "johcat", 7: "evcat", 8: "ndcat"}
-aLpton := {1: "esaplt", 2: "kllpt", 3: "momlpt", 4: "mrllpt", 5: "afllpt", 6: "johlpt", 7: "evlpt", 8: "ndlpt"}
-aSelfc := {1: "esaslf", 2: "klslf", 3: "momslf", 4: "mrlslf", 5: "aflslf", 6: "johslf", 7: "evslf", 8: "ndslf"}
 ; This section creates a toggle for Library locations.
 Gui, Font, Bold s10
 Gui, Add, GroupBox, r8, Select Branch:
@@ -53,6 +48,7 @@ Return ;Initializes variables and creates GUI.
 
 FinalRun: ;Subrotine that contains the final path to run the installers
 	{	
+		Gui, Submit, NoHide
 		if(Branch == 0)
 		{
 			MsgBox, 48, No Library, Please select a library branch.
@@ -66,6 +62,10 @@ FinalRun: ;Subrotine that contains the final path to run the installers
 				{
 					Run, w%vInstaller%.ahk
 					Return
+					; MOBILE
+					; - Wireless Profile
+					; - Spiceworks Agent
+
 				}
 				else
 				{
@@ -80,6 +80,13 @@ FinalRun: ;Subrotine that contains the final path to run the installers
 				{
 					Run, %vInstaller%.ahk
 					Return
+					; ALL
+					; - Rename
+					; - Domain Join
+					; - Autologon
+					; - Logmein
+					; - Vipre
+					; - OU move
 				}
 				else
 				{
@@ -95,7 +102,13 @@ FinalRun: ;Subrotine that contains the final path to run the installers
 Bstaff: ;Staff Computer subroutine
 	{
 		Gui, Submit, NoHide
-		vInstaller := aStaff[Branch]
+		vType := 1
+		vInstaller := aLoca[Branch]aComp[vType]
+		; FRONTLINE
+		; - Printers
+		; - Sierra
+		; - Offline Circ
+		; - PC Reservation Station
 		Gosub, FinalRun
 		Return
 	}
@@ -103,23 +116,35 @@ Bstaff: ;Staff Computer subroutine
 Boffce: ;Office Computer subroutine.
 	{
 		Gui, Submit, NoHide
-		vInstaller := aOffce[Branch]
+		vType := 2
+		vInstaller := aLoca[Branch]aComp[vType]
+		; OFFICE
+		; - Printers
+		; - MS Office
 		Gosub, FinalRun
 		Return
 	}
 
-Bpatrn: ;Paton computer subroutine.
+Bpatrn: ;Patron computer subroutine.
 	{
 		Gui, Submit, NoHide
-		vInstaller := aPatrn[Branch]
+		vType := 3
+		vInstaller := aLoca[Branch]aComp[vType]
+		; PATRON
+		; - PC Reservation
+		; - LPTOne
+		; - MS Office (No Outlook)
 		Gosub, FinalRun
 		Return
 	}
 
 Bcatlg: ;Catalog subroutine.
-	{
+	{	
 		Gui, Submit, NoHide
-		vInstaller := aCatlg[Branch]
+		vType := 4
+		vInstaller := aLoca[Branch]aComp[vType]
+		; CATALOG
+		; - Catalog Script
 		Gosub, FinalRun
 		Return
 	}
@@ -127,7 +152,10 @@ Bcatlg: ;Catalog subroutine.
 Blpton: ;Print/Reservation Kiosk computer.
 	{
 		Gui, Submit, NoHide
-		vInstaller := aLpton[Branch]
+		vType := 5
+		vInstaller := aLoca[Branch]aComp[vType]
+		; KIOSK
+		; Kiosk Software
 		Gosub, FinalRun
 		Return
 	}
@@ -135,7 +163,10 @@ Blpton: ;Print/Reservation Kiosk computer.
 Bslfch: ;Self-check subroutine
 	{
 		Gui, Submit, NoHide
-		vInstaller := aSelfc[Branch]
+		vType := 6
+		vInstaller := aLoca[Branch]aComp[vType]
+		; SELF CHECK
+		; Self-Check Software
 		Gosub, FinalRun
 		Return
 	}
