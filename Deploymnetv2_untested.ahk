@@ -1,15 +1,15 @@
 /* 	
 	Name: New Computer Deployment		
-	Version: 2.0
+	Version: 2.3
 	Author:	Christopher Roth
 
 	Changelog:
-
-		2.0
-		* Improved interface design
-		* Improved code readability
-		* Uses some code from Lucas Bodnyk's SierraWrapper
+		* Improved interface design.
+		* Improved code readability.
+		* Uses some code from Lucas Bodnyk's SierraWrapper.
 		* Code now uses functions!
+		* Added checks for filled fields.
+		* Added confirmation window.
 */
 ;   ================================================================================
 ;   ALL THAT MESSY STUFF THAT DOES CRAZY THINGS. HALF OF THIS IS PROBABLY UNNECCESSARY.
@@ -28,12 +28,12 @@ StringReplace, AppTitle, ScriptBasename, _, %A_SPACE%, All
 OnExit("ExitFunc") ; Register a function to be called on exit
 Global aLocation := {1: "ESA", 2: "KL", 3: "MOM", 4: "MRL", 5: "AFL", 6: "JOH", 7: "EV", 8: "ND"} ; Stores list of library locations.
 Global aCompType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog", 5: "Selfcheck"} ; Stores list of computer types to deploy.
-Global vBranch := null
-Global vType := null	
-Global vWireless := ""
-Global vCompname := ""
-Global vMyLocation := ""
-Global vMyComp := ""
+Global vBranch ; Stores the value of the Location array index.
+Global vType ; Stores the value of the CompType array index.
+Global vWireless ; Stores wireless toggle value.
+Global vCompname ; Stores input computer name.
+Global vMyLocation ; Stores the value extracted from Location array at vBranch index.
+Global vMyComp ; Stores the value extracted from CompType array at vType index.
 
 ;   ================================================================================
 ;	BEGIN INITIALIZATION
@@ -60,8 +60,6 @@ Return
 ; here we want to make sure that everything will work, so let's test that we have the files for the actions we want to perform.
 ; the following should tell us if the file is locked.
 Log("== Performing file checks...")
-checkFile("wirelessprofile.ahk")
-checkFile("missingfiletest.ahk")
 Return
 
 ;   ================================================================================
@@ -70,7 +68,9 @@ Return
 __main__:
 {
 	Log("== Main Process...")
-	MsgBox, 64, Huzzah!, Testing main fucntion!
+	if(vWireless == 1)
+		RunWait wirelessprofile.ahk
+	Install(vMyLocation, vMyComp)
 	Return
 }
 ;   ================================================================================
@@ -183,8 +183,8 @@ ConfirmationWindow() ; Checks that selections are correct before continuing.
 	if(vWireless = 1)
 		vIsWireless := "This is a Wireless computer."
 	if(vWireless = 0)
-		vIsWireless := "This is not a Wireless computer"
-		if(vCompname == "")
+		vIsWireless := "This is a Ethernet computer."
+	if(vCompname == "")
 	{
 		MsgBox, 48, Not Named, Please type in a name for the computer.
 		Return
@@ -204,12 +204,9 @@ ConfirmationWindow() ; Checks that selections are correct before continuing.
 		Gosub __main__
 	Return
 }
-	
-checkFile(File) 
+
+Install(loc, com) ; Passed the location and computer types runs an installer with a matching name.
 {
-Log("Checking for %File%")
-Try { FileMove, %File%, %File%
-	} Catch {
-		Log("%File%  not found! Can't install this!")	
-	}
+	RunWait %loc%%com%.ahk
+	Return
 }
