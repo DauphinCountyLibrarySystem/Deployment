@@ -31,7 +31,7 @@ Global aCompType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog", 5: 
 Global vBranch ; Stores the value of the Location array index.
 Global vType ; Stores the value of the CompType array index.
 Global vWireless ; Stores wireless toggle value.
-Global vCompname ; Stores input computer name.
+Global vCompName ; Stores input computer name.
 Global vMyLocation ; Stores the value extracted from Location array at vBranch index.
 Global vMyComp ; Stores the value extracted from CompType array at vType index.
 
@@ -47,19 +47,20 @@ Try {
 }
 
 ;   ================================================================================
+;	PRE-INSTALL CHECKS
+;   ================================================================================
+; here we want to make sure that everything will work, so let's test that we have the files for the actions we want to perform.
+; the following should tell us if the file is locked.
+;Log("== Performing file checks...")
+;CheckFile("ESAOffice.ahk")
+;CheckFile("WillFail.ahk")
+
+;   ================================================================================
 ;	STARTUP
 ;   ================================================================================
 Log("== Starting Up...")
 WinMinimizeAll
 createWindow() ; Here is where we construct the GUI 
-Return
-
-;   ================================================================================
-;	PRE-INSTALL CHECKS
-;   ================================================================================
-; here we want to make sure that everything will work, so let's test that we have the files for the actions we want to perform.
-; the following should tell us if the file is locked.
-Log("== Performing file checks...")
 Return
 
 ;   ================================================================================
@@ -69,13 +70,19 @@ __main__:
 {
 	Log("== Main Process...")
 	if(vWireless == 1)
-		RunWait wirelessprofile.ahk
-	Install(vMyLocation, vMyComp)
+		Install("Wireless", "Default_Installs")
+	Install("Default","Default_Installs")
+	Install(vMyLocation, "Branch_Installs")
+	Install(vMyComp, "Comtype_Installs")
 	Return
 }
 ;   ================================================================================
 ;	FUNCTIONS AND LABELS
 ;   ================================================================================
+
+ButtonExit: ; Label for the Exit button.
+	ExitApp
+	
 ButtonInstall: ; Label that takes user input and prepares to run installers, confirming first.
 {
 	Gui, Submit, NoHide
@@ -84,9 +91,6 @@ ButtonInstall: ; Label that takes user input and prepares to run installers, con
 	ConfirmationWindow()
 	Return
 }
-
-ButtonExit:
-	ExitApp
 	
 GuiClose:
 	ExitApp
@@ -138,6 +142,34 @@ ExitFunc(ExitReason, ExitCode)
     ; Do not call ExitApp -- that would prevent other OnExit functions from being called.
 }
 
+ConfirmationWindow() ; Checks that selections are correct before continuing.
+{
+	Gui +OwnDialogs
+	if(vWireless = 1)
+		vIsWireless := "This is a Wireless computer."
+	else
+		vIsWireless := "This is an Ethernet computer."
+	if(vCompName == "")
+	{
+		MsgBox, 48, Not Named, Please type in a name for the computer.
+		Return
+	}
+	if(vMyLocation == "")
+	{
+		MsgBox, 48, No Library, Please select a library branch.
+		Return
+	}
+	if(vMyComp == "")
+	{
+		MsgBox, 48, No Computer, Please select a computer type.
+		Return
+	}
+	MsgBox, 36, Confirm, This will rename the computer to %vCompname%.`nThis is a %vMyComp% computer at %vMyLocation%.`n%vIsWireless% `nIs this correct?
+	IfMsgBox, Yes
+		Gosub __main__
+	Return
+}
+
 CreateWindow() ; Create the main GUI. 
 {
 	Gui, New, , Computer Deployment
@@ -177,36 +209,12 @@ CreateWindow() ; Create the main GUI.
 	Return
 }
 
-ConfirmationWindow() ; Checks that selections are correct before continuing.
+Install(vInstaller, vFolder) ; locates installer file with passed name sting, and logs if it fails.
 {
-	Gui +OwnDialogs
-	if(vWireless = 1)
-		vIsWireless := "This is a Wireless computer."
-	if(vWireless = 0)
-		vIsWireless := "This is a Ethernet computer."
-	if(vCompname == "")
-	{
-		MsgBox, 48, Not Named, Please type in a name for the computer.
-		Return
-	}
-	if(vMyLocation == "")
-	{
-		MsgBox, 48, No Library, Please select a library branch.
-		Return
-	}
-	if(vMyComp == "")
-	{
-		MsgBox, 48, No Computer, Please select a computer type.
-		Return
-	}
-	MsgBox, 36, Confirm, This will install to a computer named %vCompname%.`nThis is a %vMyComp% computer at %vMyLocation%.`n%vIsWireless% `nIs this correct?
-	IfMsgBox, Yes
-		Gosub __main__
-	Return
-}
-
-Install(loc, com) ; Passed the location and computer types runs an installer with a matching name.
-{
-	RunWait %loc%%com%.ahk
+	Try {
+		RunWait %A_ScriptDir%\%vFolder%\%vInstaller%.ahk
+		} Catch {
+		Log("Error intalling.")
+		}
 	Return
 }
