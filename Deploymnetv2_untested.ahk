@@ -27,13 +27,14 @@ SplitPath, A_ScriptName, , , , ScriptBasename
 StringReplace, AppTitle, ScriptBasename, _, %A_SPACE%, All
 OnExit("ExitFunc") ; Register a function to be called on exit
 Global aLocation := {1: "ESA", 2: "KL", 3: "MOM", 4: "MRL", 5: "AFL", 6: "JOH", 7: "EV", 8: "ND"} ; Stores list of library locations.
-Global aCompType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog", 5: "Selfcheck"} ; Stores list of computer types to deploy.
-Global vBranch ; Stores the value of the Location array index.
-Global vType ; Stores the value of the CompType array index.
+Global aComputerType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog", 5: "Selfcheck"} ; Stores list of computer types to deploy.
+Global vBranchNumber ; Stores the value of the Location array index.
+Global vTypeNumber ; Stores the value of the CompType array index.
 Global vWireless ; Stores wireless toggle value.
-Global vCompName ; Stores input computer name.
-Global vMyLocation ; Stores the value extracted from Location array at vBranch index.
-Global vMyComp ; Stores the value extracted from CompType array at vType index.
+Global vComputerName ; Stores input computer name.
+Global vLocation ; Stores the value extracted from Location array at vBranchNumber index.
+Global vComputerType ; Stores the value extracted from CompType array at vTypeNumber index.
+Global vNumInstallErrors := 0
 
 ;   ================================================================================
 ;	BEGIN INITIALIZATION
@@ -69,11 +70,37 @@ Return
 __main__:
 {
 	Log("== Main Process...")
-	if(vWireless == 1)
-		Install("Wireless", "Default_Installs")
-	Install("Default","Default_Installs")
-	Install(vMyLocation, "Branch_Installs")
-	Install(vMyComp, "Comtype_Installs")
+	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
+		Install("default\wireless.ahk")
+	Install("default\rename.ahk",vComputerName) ;--|
+	Install("default\join-domain.ahk")			;  |-- Renames, joins domain, and sends to OU.
+	Install("default\SendTo-OU.ahk")			;--|
+	if(vTypeNumber > 1 ) ; If a type other than Office, install autologon.
+		Install("computers\autologon.ahk", vLocation, vComputerType)
+	if(vTypeNumber == 1 or vTypeNumber == 2) ; Office or Staff computers get printers and Sierra.
+	{
+		Install("computers\printers.ahk", vLocation, vComputerType)
+		Install("computers\sierra.ahk")
+	}
+	if(vTypeNumber ==1) ; Office staff get full Microsoft Office software.
+		Install("computers\msoffice.ahk", vComputerType)
+	if(vTypeNumber == 2) ; Staff computers get Offline Circ and PC Reservation Station.
+	{
+		Install("computers\offlinecirc.ahk")
+		Install("computers\PCresstation.ahk", vLocation)
+	}
+	if(vTypeNumber == 3) ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
+	{
+		Install("computers\PCresclient.ahk")
+		Install("computers\msoffice.ahk", vComputerType)
+		Install("computers\lptone.ahk")
+	}
+	if(vTypeNumber == 4) ; Catalog script is installed.
+		Install("computers\catalog.ahk")
+	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
+		Install("computers\selfcheck.ahk")
+	if(vNumInstallErrors != 0)
+		MsgBox, 16, Installation Error,  There were %vNumInstallErrors% errors during the installation! Check the log for more details.
 	Return
 }
 ;   ================================================================================
@@ -86,8 +113,8 @@ ButtonExit: ; Label for the Exit button.
 ButtonInstall: ; Label that takes user input and prepares to run installers, confirming first.
 {
 	Gui, Submit, NoHide
-	vMyLocation := aLocation[vBranch]
-	vMyComp := aCompType[vType]
+	vLocation := aLocation[vBranchNumber]
+	vComputerType := aComputerType[vTypeNumber]
 	ConfirmationWindow()
 	Return
 }
@@ -149,22 +176,22 @@ ConfirmationWindow() ; Checks that selections are correct before continuing.
 		vIsWireless := "This is a Wireless computer."
 	else
 		vIsWireless := "This is an Ethernet computer."
-	if(vCompName == "")
+	if(vComputerName == "")
 	{
 		MsgBox, 48, Not Named, Please type in a name for the computer.
 		Return
 	}
-	if(vMyLocation == "")
+	if(vLocation == "")
 	{
 		MsgBox, 48, No Library, Please select a library branch.
 		Return
 	}
-	if(vMyComp == "")
+	if(vComputerType == "")
 	{
 		MsgBox, 48, No Computer, Please select a computer type.
 		Return
 	}
-	MsgBox, 36, Confirm, This will rename the computer to %vCompname%.`nThis is a %vMyComp% computer at %vMyLocation%.`n%vIsWireless% `nIs this correct?
+	MsgBox, 36, Confirm, This will rename the computer to %vComputerName%.`nThis is a %vComputerType% computer at %vLocation%.`n%vIsWireless% `nIs this correct?
 	IfMsgBox, Yes
 		Gosub __main__
 	Return
@@ -177,12 +204,12 @@ CreateWindow() ; Create the main GUI.
 	Gui, Font, Bold s10
 	Gui, Add, Text,, Type in new computer name:
 	Gui, Font, Norm
-	Gui, Add, Edit, Uppercase vvCompname,
+	Gui, Add, Edit, Uppercase vvComputerName,
 ;----This section contains a Radio toggle for Library locations.----
 	Gui, Font, Bold s10
 	Gui, Add, GroupBox, Section r8, Select Branch:
 	Gui, Font, Norm
-	Gui, Add, Radio, altsubmit vvBranch xp+10 yp+20, East Shore
+	Gui, Add, Radio, altsubmit vvBranchNumber xp+10 yp+20, East Shore
 	Gui, Add, Radio, altsubmit, Kline Library
 	Gui, Add, Radio, altsubmit, Madeline Olewine
 	Gui, Add, Radio, altsubmit, McCormick Riverfront
@@ -194,7 +221,7 @@ CreateWindow() ; Create the main GUI.
 	Gui, Font, Bold s10
 	Gui, Add, GroupBox, Section r5 ys, Select computer type:
 	Gui, Font, Norm
-	Gui, Add, Radio, altsubmit vvType xp+10 yp+20, Office Staff
+	Gui, Add, Radio, altsubmit vvTypeNumber xp+10 yp+20, Office Staff
 	Gui, Add, Radio, altsubmit, Frontline Staff
 	Gui, Add, Radio, altsubmit, Patron Computer
 	Gui, Add, Radio, altsubmit, Catalog Computer
@@ -209,12 +236,14 @@ CreateWindow() ; Create the main GUI.
 	Return
 }
 
-Install(vInstaller, vFolder) ; locates installer file with passed name sting, and logs if it fails.
+Install(vInstallPath, vParameter1 :="", vParameter2 :="") ; locates installer file with passed name sting, and logs if it fails.
 {
 	Try {
-		RunWait %A_ScriptDir%\%vFolder%\%vInstaller%.ahk
+		Log("Installing: "vInstallPath . " with parameters: "vParameter1 . ", "vParameter2)
+		RunWait %A_ScriptDir%\%vInstallPath% "%vParameter1% %vParameter2%"
 		} Catch {
-		Log("Error intalling.")
+		vNumInstallErrors += 1
+		Log("Error installing "vInstallPath . "!")
 		}
 	Return
 }
