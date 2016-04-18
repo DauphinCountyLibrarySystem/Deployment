@@ -1,0 +1,224 @@
+
+2016-04-14 16:04:41.850	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:04:41.903	== Starting Up...
+2016-04-14 16:04:48.872	== Main Process...
+2016-04-14 16:04:48.915	Commanding: default\rename.ahk with parameters: DGFDF, 
+2016-04-14 16:05:07.730	Commanding: default\join-domain.ahk with parameters: , 
+2016-04-14 16:05:08.305	Commanding: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:05:08.651	Commanding: computers\printers.ahk with parameters: ESA, Office
+2016-04-14 16:05:09.123	Commanding: computers\sierra.ahk with parameters: , 
+2016-04-14 16:05:09.541	Commanding: computers\msoffice.ahk with parameters: Office, 
+2016-04-14 16:05:10.058	==Commandation Complete! There were 0 errors with this Commandation.
+
+2016-04-14 16:05:40.013	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:05:40.063	== Starting Up...
+2016-04-14 16:05:43.549	== Main Process...
+2016-04-14 16:05:43.590	Commanding:  with parameters: 54, 
+2016-04-14 16:05:44.414	Error Commanding !
+2016-04-14 16:05:44.467	Commanding: default\join-domain.ahk with parameters: , 
+2016-04-14 16:05:46.939	Commanding: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:05:49.500	Commanding: computers\autologon.ahk with parameters: MRL, Patron
+2016-04-14 16:05:50.279	Commanding: computers\PCresclient.ahk with parameters: , 
+2016-04-14 16:05:50.917	Commanding: computers\msoffice.ahk with parameters: Patron, 
+2016-04-14 16:05:51.524	Commanding: computers\lptone.ahk with parameters: , 
+2016-04-14 16:05:52.121	==Commandation Incomplete! There were  errors with this Commandation.
+2016-04-14 16:05:58.294	-- User is exiting Deployment, dying now.
+
+2016-04-14 16:07:04.743	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:07:04.794	== Starting Up...
+2016-04-14 16:07:09.391	== Main Process...
+2016-04-14 16:07:09.434	Commanding: cmd.exe /c pause with parameters: REWFREF, 
+2016-04-14 16:07:09.517	Error Commanding cmd.exe /c pause!
+2016-04-14 16:07:09.559	Commanding: default\join-domain.ahk with parameters: , 
+2016-04-14 16:07:10.688	Commanding: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:07:11.450	Commanding: computers\autologon.ahk with parameters: MRL, Catalog
+2016-04-14 16:07:12.390	Commanding: computers\catalog.ahk with parameters: , 
+2016-04-14 16:07:12.918	==Commandation Incomplete! There were  errors with this Commandation.
+2016-04-14 16:07:15.410	-- User is exiting Deployment, dying now.
+
+2016-04-14 16:07:42.292	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:07:42.345	== Starting Up...
+2016-04-14 16:07:46.517	== Main Process...
+2016-04-14 16:07:46.558	Commanding: cmd.exe /c pause with parameters: , 
+2016-04-14 16:07:46.644	Error Commanding cmd.exe /c pause!
+2016-04-14 16:07:46.687	Commanding: default\join-domain.ahk with parameters: , 
+2016-04-14 16:07:47.544	Commanding: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:07:47.905	Commanding: computers\autologon.ahk with parameters: MRL, Catalog
+2016-04-14 16:07:48.528	Commanding: computers\catalog.ahk with parameters: , 
+2016-04-14 16:07:49.050	==Commandation Incomplete! There were  errors with this Commandation.
+2016-04-14 16:07:50.982	-- User is exiting Deployment, dying now.
+
+2016-04-14 16:09:00.972	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:09:00.020	== Starting Up...
+2016-04-14 16:09:04.880	== Main Process...
+2016-04-14 16:09:04.923	Commanding: cmd.exe /c pause with parameters: , 
+2016-04-14 16:09:06.505	Commanding: default\join-domain.ahk with parameters: , 
+2016-04-14 16:09:07.658	Commanding: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:09:10.095	-- User is exiting Deployment, dying now.
+
+2016-04-14 16:15:37.335	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:15:37.382	== Starting Up...
+2016-04-14 16:15:43.175	== Main Process...
+2016-04-14 16:15:43.221	Installing: default\rename.ahk with parameters: REF34, 
+2016-04-14 16:15:45.010	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:15:45.651	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:15:46.042	Installing: computers\autologon.ahk with parameters: ESA, Patron
+2016-04-14 16:15:46.448	Installing: computers\PCresclient.ahk with parameters: , 
+2016-04-14 16:15:47.089	Installing: computers\msoffice.ahk with parameters: Patron, 
+2016-04-14 16:15:47.745	Installing: computers\lptone.ahk with parameters: , 
+2016-04-14 16:15:48.370	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:16:14.125	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:16:14.167	== Starting Up...
+2016-04-14 16:16:17.534	== Main Process...
+2016-04-14 16:16:17.576	Installing: default\rename.ahk with parameters: 5454, 
+2016-04-14 16:16:19.032	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:16:19.792	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:16:20.171	Installing: computers\autologon.ahk with parameters: MOM, Patron
+2016-04-14 16:16:21.026	Installing: computers\PCresclient.ahk with parameters: , 
+2016-04-14 16:16:21.794	Installing: computers\msoffice.ahk with parameters: Patron, 
+2016-04-14 16:16:22.454	Installing: computers\lptone.ahk with parameters: , 
+2016-04-14 16:16:23.078	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:17:05.731	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:17:05.781	== Starting Up...
+2016-04-14 16:17:09.660	== Main Process...
+2016-04-14 16:17:09.701	Installing: default\rename.ahk with parameters: 54454, 
+2016-04-14 16:17:10.613	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:17:11.185	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:17:11.500	Installing: computers\autologon.ahk with parameters: MOM, Catalog
+2016-04-14 16:17:12.318	Installing: computers\catalog.ahk with parameters: , 
+2016-04-14 16:17:13.170	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:17:30.609	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:17:30.659	== Starting Up...
+2016-04-14 16:17:33.908	== Main Process...
+2016-04-14 16:17:33.949	Installing: default\rename.ahk with parameters: 343434, 
+2016-04-14 16:17:35.097	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:17:35.831	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:17:36.422	Installing: computers\autologon.ahk with parameters: MOM, Catalog
+2016-04-14 16:17:36.842	Installing: computers\catalog.ahk with parameters: , 
+2016-04-14 16:17:37.465	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:17:40.035	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:17:40.077	== Starting Up...
+2016-04-14 16:17:44.115	== Main Process...
+2016-04-14 16:17:44.157	Installing: default\rename.ahk with parameters: RERE, 
+2016-04-14 16:17:45.050	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:17:45.826	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:17:46.045	Installing: computers\autologon.ahk with parameters: MOM, Patron
+2016-04-14 16:17:46.506	Installing: computers\PCresclient.ahk with parameters: , 
+2016-04-14 16:17:46.803	Installing: computers\msoffice.ahk with parameters: Patron, 
+2016-04-14 16:17:47.171	Installing: computers\lptone.ahk with parameters: , 
+2016-04-14 16:17:47.754	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:21:47.901	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:21:47.943	== Starting Up...
+2016-04-14 16:21:53.164	== Main Process...
+2016-04-14 16:21:53.216	Commanding: cmd.exe /c pause
+2016-04-14 16:21:57.422	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:21:59.027	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:21:59.632	Installing: computers\printers.ahk with parameters: ESA, Office
+2016-04-14 16:22:00.197	Installing: computers\sierra.ahk with parameters: , 
+2016-04-14 16:22:00.728	Installing: computers\msoffice.ahk with parameters: Office, 
+2016-04-14 16:22:01.223	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:22:18.088	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:22:18.129	== Starting Up...
+2016-04-14 16:22:26.198	== Main Process...
+2016-04-14 16:22:26.241	Commanding: cmd.exe /c pause
+2016-04-14 16:22:28.280	Installing: default\rename.ahk with parameters: W, 
+2016-04-14 16:22:29.272	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:22:30.184	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:22:30.943	Installing: computers\printers.ahk with parameters: ESA, Office
+2016-04-14 16:22:31.901	Installing: computers\sierra.ahk with parameters: , 
+2016-04-14 16:22:32.698	Installing: computers\msoffice.ahk with parameters: Office, 
+2016-04-14 16:22:33.323	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:23:47.108	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:23:47.148	== Starting Up...
+2016-04-14 16:23:57.686	-- User is exiting Deployment, dying now.
+
+2016-04-14 16:24:43.169	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:24:43.222	== Starting Up...
+2016-04-14 16:24:51.377	-- User is exiting Deployment, dying now.
+
+2016-04-14 16:25:32.452	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:25:32.497	== Starting Up...
+2016-04-14 16:25:43.206	== Main Process...
+2016-04-14 16:25:43.248	Commanding: cmd.exe /c pause
+2016-04-14 16:25:56.174	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:25:57.862	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:25:58.435	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:27:28.616	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:27:28.658	== Starting Up...
+2016-04-14 16:27:32.991	== Main Process...
+2016-04-14 16:27:32.034	Commanding: cmd.exe /c pause
+2016-04-14 16:27:36.136	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:27:37.414	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:27:38.034	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:28:10.438	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:28:10.496	== Starting Up...
+2016-04-14 16:28:14.103	== Main Process...
+2016-04-14 16:28:14.144	Commanding: cmd.exe /c pause
+2016-04-14 16:28:17.995	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:28:21.897	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:28:23.493	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:31:34.124	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:31:34.163	== Starting Up...
+2016-04-14 16:31:38.814	== Main Process...
+2016-04-14 16:31:38.855	Commanding: cmd.exe /c echo netsh wlan add profile filename="Wi-Fi-dclsstaff.xml" user=all & pause 
+2016-04-14 16:31:47.356	Installing: default\rename.ahk with parameters: Q, 
+2016-04-14 16:31:49.743	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:31:50.736	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:31:51.886	Installing: computers\printers.ahk with parameters: ESA, Office
+2016-04-14 16:31:53.899	Installing: computers\sierra.ahk with parameters: , 
+2016-04-14 16:32:01.030	Installing: computers\msoffice.ahk with parameters: Office, 
+2016-04-14 16:32:02.056	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:32:56.552	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:32:56.597	== Starting Up...
+2016-04-14 16:33:01.526	== Main Process...
+2016-04-14 16:33:01.579	Commanding: cmd.exe /c echo netsh wlan add profile filename="C:\Users\croth\Documents\GitHub\DeploymentWi-Fi-dclsstaff.xml" user=all & pause 
+2016-04-14 16:33:15.783	Installing: default\rename.ahk with parameters: Q, 
+2016-04-14 16:33:16.970	Installing: default\join-domain.ahk with parameters: , 
+2016-04-14 16:33:17.264	Installing: default\SendTo-OU.ahk with parameters: , 
+2016-04-14 16:33:17.545	Installing: computers\printers.ahk with parameters: ESA, Office
+2016-04-14 16:33:17.721	Installing: computers\sierra.ahk with parameters: , 
+2016-04-14 16:33:17.863	Installing: computers\msoffice.ahk with parameters: Office, 
+2016-04-14 16:33:18.559	==Installation Complete! There were 0 errors with this installation.
+
+2016-04-14 16:35:36.691	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:35:36.738	== Starting Up...
+2016-04-14 16:35:41.644	== Main Process...
+2016-04-14 16:35:41.688	Commanding: cmd.exe /c echo netsh wlan add profile filename="C:\Users\croth\Documents\GitHub\Deployment\WirelessProfile\WirelessProfile.xml" user=all & pause 
+2016-04-14 16:36:00.843	-- User is exiting Deployment, dying now.
+
+2016-04-14 16:36:10.410	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:36:10.456	== Starting Up...
+2016-04-14 16:36:14.991	== Main Process...
+2016-04-14 16:36:14.033	Commanding: cmd.exe /c netsh wlan add profile filename="C:\Users\croth\Documents\GitHub\Deployment\WirelessProfile\WirelessProfile.xml" user=all & pause 
+2016-04-14 16:36:41.600	-- User is exiting Deployment, dying now.
+
+2016-04-14 16:42:54.974	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:42:54.021	== Starting Up...
+2016-04-14 16:43:05.639	== Main Process...
+2016-04-14 16:43:05.686	Commanding: powershell.exe -Command { Rename-Computer -NewName ESA-TEST-1 } -NoExit
+2016-04-14 16:43:55.906	-- User is exiting Deployment, dying now.
+
+2016-04-14 16:50:16.341	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:50:16.391	== Starting Up...
+2016-04-14 16:50:27.081	== Main Process...
+2016-04-14 16:50:27.129	Commanding: powershell.exe -NoExit -Command Rename-Computer -NewName ESA-WS-88
+2016-04-14 16:50:45.145	== Main Process...
+2016-04-14 16:50:45.187	Commanding: powershell.exe -NoExit -Command Rename-Computer -NewName ESA-WS-89
+2016-04-14 16:50:58.566	-- User is exiting Deployment, dying now.
+
+2016-04-14 16:51:02.314	   ComputerDeployer v2.0 initializing for machine: ESA-WS-88
+2016-04-14 16:51:02.359	== Starting Up...
+2016-04-14 16:51:44.974	== Main Process...
+2016-04-14 16:51:44.025	Commanding: powershell.exe -NoExit -Command Rename-Computer -NewName ESA-WS-89
+2016-04-14 16:52:05.957	-- User is exiting Deployment, dying now.
