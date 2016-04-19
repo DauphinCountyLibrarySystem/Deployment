@@ -1,1 +1,0 @@
-netsh wlan add profile filename="%~dp0\Wi-Fi-dclsstaff.xml" user=all
