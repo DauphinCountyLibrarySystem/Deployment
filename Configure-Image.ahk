@@ -11,6 +11,10 @@
 		* Added checks for filled fields.
 		* Added confirmation window.
 */
+
+; ELEVATE
+
+
 ;   ================================================================================
 ;   ALL THAT MESSY STUFF THAT DOES CRAZY THINGS. HALF OF THIS IS PROBABLY UNNECCESSARY.
 ;   ================================================================================
@@ -64,36 +68,51 @@ __main__:
 	Log("== Main Process...")
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
-		Command("cmd.exe /c netsh wlan add profile filename="""A_ScriptDir . "\WirelessProfile\WirelessProfile.xml"" user=all & pause ")
-		Sleep 5000
-		Command("I:\Spiceworks\Spiceworks Agent.msi")
+		Command("cmd.exe /c netsh wlan add profile filename="""A_ScriptDir . "\WirelessProfile\WirelessProfile.xml"" user=all & pause")
+		Sleep 5000 ; Wait for profile to update.
+		Command("msiexec.exe /I "A_ScriptDir . "_Spiceworks.msi SPICEWORKS_SERVER=spiceworks.dcls.org SPICEWORKS_AUTH_KEY= ***REMOVED*** SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "spiceworks_install.log")
 	}
-	Command("powershell.exe -NoExit -Command Rename-Computer -NewName "vComputerName) ; Rename computer
-	Command("powershell.exe -NoExit -Command $pass = cat C:\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist "DomainJoin . ",$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Move OU
 	
-	if(vTypeNumber > 1 ) ; If a type other than Office, install autologon.
+	Command("powershell.exe -NoExit -Command Rename-Computer -NewName "vComputerName) ; Rename computer.
+	CreateDistinguishedName()
+	Command("powershell.exe -NoExit -Command $pass = cat C:\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist "DomainJoin . ",$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Move OU.
+	Command("msiexec.exe /I "A_ScriptDir . "_Vipre.MSI /quiet /norestart /log "A_ScriptDir . "vipre_install.log") ; Install VIPRE antivirus. 
+	Command("msiexec.exe /I "A_ScriptDir . "_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "logmein_install.log") ; Install LogMeIn.
+	RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
+	FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"
+	FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"
+
+	if(vTypeNumber == 1) ; Office staff get printers and Sierra.
+		InstallPrinters()
+		Command("I:\Sierra\install.exe -D$USER_INSTALL_DIR$="C:\Sierra Desktop App" -D$PARAM_port$=63000 -D$PARAM_ip$=dcls.iii.com")
+		
+	if(vTypeNumber == 2) ; Frontline computers get printers, Sierra, Offline Circ and remove Office.
+	{
 		AddAutoLogon()
-	if(vTypeNumber == 1 or vTypeNumber == 2) ; Office or Staff computers get printers and Sierra.
-	{
-;		Install("computers\printers.ahk", vLocation, vComputerType)
-		Command("I:\Sierra\install.exe")
+		InstallPrinters()
+		Command("I:\Sierra\install.exe -D$USER_INSTALL_DIR$="C:\Sierra Desktop App" -D$PARAM_port$=63000 -D$PARAM_ip$=dcls.iii.com")
+		;Command("I:\Sierra\offline106_02.exe")
+		RemoveOffice("all")
 	}
-	if(vTypeNumber ==1) ; Office staff get full Microsoft Office software.
-		Command("")
-	if(vTypeNumber == 2) ; Staff computers get Offline Circ and PC Reservation Station.
-	{
-		Command("I:\Sierra\offline106_02.exe")
-	}
+	
 	if(vTypeNumber == 3) ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
 	{
+		AddAutoLogon()
 		Command("I:\Envisionware\Patron\lptone.exe")
 		Command("I:\Envisionware\Patron\pcres.exe")
+		RemoveOffice("outlook", "skype")
+		;AutomateOfficeActivation()
 	}
+	
 	if(vTypeNumber == 4) ; Catalog script is installed.
+		AddAutoLogon()
 		;Command("")
+		
 	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
+		AddAutoLogon()
 		Command("I:\Envisionware\OneStop (Self-Checkout)\InstallOneStop_2.0.1.23344_Hotfix.exe")
-	if(vNumErrors != 0)
+		
+	if(vNumErrors != 0) ; Final Check for errors and closes program.
 		{
 		Log("==Configuration Incomplete! There were "%vNumErrors% . " errors with this program.")
 		MsgBox, 16, Configuration Error,  There were %vNumErrors% errors during the configuration process!`nSomething may not have configured or installed propery.`nCheck the log for more details.
@@ -203,11 +222,11 @@ ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closure
 Command(vCommand, vParameter1 :="", vParameter2 :="") ; Runs a configuration command.
 {
 	Try {
-		Log("Commanding: "vCommand)
-		RunWait %vCommand%
+		Log("Executing: "vCommand)
+		RunWait %vCommand%%vParameter1%%vParameter2%
 		} Catch {
 		vNumErrors += 1
-		Log("Error Commanding "vCommand . "!")
+		Log("Error executing "vCommand . "!")
 		}
 	Return
 }
@@ -324,6 +343,20 @@ CreateWindow() ; Create the main GUI.
 	Gui, Add, Button, yp xp+110 gButtonExit w100, Exit
 	Gui, Show
 	Return
+}
+
+InstallPrinters()
+{
+	if(vBranchNumber >= 2 or <= 4)
+	{
+		RunWait %vLocation%"-Print"
+		return
+	}
+	else
+	{
+		RunWait %vLocation%"-IT-APP01"
+		return
+	}
 }
 
 Log(Message, Type="1") ; Type=1 shows an info icon, Type=2 a warning one, and Type=3 an error one ; I'm not implementing this right now, since I already have custom markers everywhere.
