@@ -23,7 +23,6 @@ if not A_IsAdmin ; Check for elevation
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #Persistent ; Keeps a script permanently running (that is, until the user closes it or ExitApp is encountered).
-#SingleInstance FORCE ; automatically replaces an old version of the script - useful when auto-elevating.
 ;   ================================================================================
 ;   INCLUDES, GLOBAL VARIABLES, ONEXIT, ETC...
 ;   ================================================================================
@@ -47,17 +46,8 @@ Global vNumErrors := 0	; Tracks the number of errors, if any.
 ;	BEGIN INITIALIZATION
 ;   ================================================================================
 Try {
-	Gui, Font,, Lucida Console
-	Gui, Add, Edit, Readonly x10 y10 w620 h460 vConsole ; I guess not everything has to be a function...
-	Gui, Show, x20 y20 w640 h480, Console Window
-	Log("   Console window up.",2)
-} Catch {
-	MsgBox failed to create console window! I can't run without console output! Dying now.
-	ExitApp
-}
-Try {
 	Log("")
-	Log("   Configure-Image v2.0 initializing for machine: " A_ComputerName)
+	Log("   ComputerDeployer v2.0 initializing for machine: " A_ComputerName)
 } Catch	{
 	MsgBox Testing Deployment.log failed! You probably need to check file permissions. I won't run without my log! Dying now.
 	ExitApp
@@ -66,10 +56,9 @@ Try {
 ;   ================================================================================
 ;	STARTUP
 ;   ================================================================================
-WinMinimizeAll
-WinRestore, Console Window
 Log("== Starting Up...")
-createOptionsWindow() ; Here is where we construct the GUI
+WinMinimizeAll
+createWindow() ; Here is where we construct the GUI 
 Return
 
 ;   ================================================================================
@@ -144,7 +133,7 @@ __main__:
 		AddAutoLogon()
 		
 		Progress, 60, Clearing Sierra shortcuts..., Please Wait, Runnning Configuration
-		Command("robocopy \Deployment\Resources\Empty C:\Sierra Desktop App")
+		Command("robocopy \Deployment\Resources\Empty /mir C:\Sierra Desktop App")
 		
 		Progress, 85, Installing Patron LPTOne printers..., Nearly There!, Running Configuration
 		Command(A_ScriptDir . "\Resources\lptone.exe -jqe.host="%vLPTServers%)
@@ -171,7 +160,7 @@ __main__:
 		;Command(Self-Check)
 	}
 
-	if(vTypeNumber == 6) ; Kiosk Computer
+	if(vTypeNumber == 6) ; Kisok Computer
 	{
 
 		;Command(Kiosk)
@@ -181,14 +170,14 @@ __main__:
 	if(vNumErrors != 0) ; Final Check for errors and closes program.
 	{
 		Progress, OFF
-		Log("== Configuration Incomplete! There were "%vNumErrors% . " errors with this program.")
+		Log("==Configuration Incomplete! There were "%vNumErrors% . " errors with this program.")
 		MsgBox, 16, Configuration Error,  There were %vNumErrors% errors during the configuration process!`nSomething may not have configured or installed propery.`nCheck the log for more details.
 		ExitApp
 	}
 	else
 	{
 		Progress, OFF
-		Log("== Configuration Complete! There were "%vNumErrors% . " errors with this program.")
+		Log("==Configuration Complete! There were "%vNumErrors% . " errors with this program.")
 		MsgBox, 64, Deployment Complete,  New computer deployment complete! Exiting application.
 		ExitApp
 	}
@@ -200,10 +189,10 @@ __main__:
 
 ButtonExit: ; Label for the Exit button.
 {
-	MsgBox, 52, Exiting Configure-Image, This will end Configure-Image.`nAre you sure you want to exit?
+	MsgBox, 52, Exiting Deployment, This will end deployment.`nAre you sure you want to exit?
     IfMsgBox, No
 		Return
-	Log("-- User is exiting Configure-Image`, dying now.")
+	Log("-- User is exiting Deployment`, dying now.")
 	ExitApp
 }
 
@@ -219,10 +208,10 @@ ButtonInstall: ; Label that takes user input and prepares to run installers, con
 
 GuiClose: ; Label for default close functions, prompts confirmation screen.
 {
-	MsgBox, 52, Exiting Configure-Image, This will end Configure-Image.`nAre you sure you want to exit?
+	MsgBox, 52, Exiting Deployment, This will end deployment.`nAre you sure you want to exit?
     IfMsgBox, No
 		Return
-	Log("-- User is exiting Configure-Image`, dying now.")
+	Log("-- User is exiting Deployment`, dying now.")
 	ExitApp
 }
 
@@ -357,7 +346,7 @@ CreateDistinguishedName() ; Creates a distiguished name for moving to OU.
 	vNumErrors += 1
 }
 
-createOptionsWindow() ; Create the main GUI. 
+CreateWindow() ; Create the main GUI. 
 {
 	Gui, New, , Computer Deployment
 ;----This Section contains the Computer Name label and field.----
@@ -422,35 +411,24 @@ ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closure
     ; Do not call ExitApp -- that would prevent other OnExit functions from being called.
 }
 
-Log(msg, Type="3") ; 1 logs to file, 2 logs to console, 3 does both, 10 is just a newline to file
+Log(Message, Type="1") ; Type=1 shows an info icon, Type=2 a warning one, and Type=3 an error one ; I'm not implementing this right now, since I already have custom markers everywhere.
 {
 	global ScriptBasename, AppTitle
-	If(Type == 1) {
-		FileAppend, %A_YYYY%-%A_MM%-%A_DD% %A_Hour%:%A_Min%:%A_Sec%.%A_MSec%%A_Tab%%msg%`n, %ScriptBasename%.log
-		}
-	If(Type == 2) {
-		Message(msg)
-		}
-	If(Type == 3) {
-		FileAppend, %A_YYYY%-%A_MM%-%A_DD% %A_Hour%:%A_Min%:%A_Sec%.%A_MSec%%A_Tab%%msg%`n, %ScriptBasename%.log
-		Message(msg)
-		}
-	If(Type == 10) {
+	IfEqual, Type, 2
+		Message = WW: %Message%
+	IfEqual, Type, 3
+		Message = EE: %Message%
+	IfEqual, Message, 
 		FileAppend, `n, %ScriptBasename%.log
-		}	
-
-	
+	Else
+		FileAppend, %A_YYYY%-%A_MM%-%A_DD% %A_Hour%:%A_Min%:%A_Sec%.%A_MSec%%A_Tab%%Message%`n, %ScriptBasename%.log
 	Sleep 50 ; Hopefully gives the filesystem time to write the file before logging again
-	;Type += 16
+	Type += 16
+	;TrayTip, %AppTitle%, %Message%, , %Type% ; Useful for testing, but in production this will confuse my users.
+	;SetTimer, HideTrayTip, 1000
+	Return
+	HideTrayTip:
+	SetTimer, HideTrayTip, Off
+	TrayTip
 	Return
 }
-
-Message(msg)
-{
-GuiControlGet, Console
-GuiControl,, Console, %Console%%msg%`r`n
-}
-
-
-
-
