@@ -82,10 +82,10 @@ __main__:
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
 		Progress, 5, Adding profile for wireless computer..., Please Wait, Running Configuration
-		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\Wireless\WirelessProfile.xml user=all") ; Install Profile
+		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\Files\WirelessProfile.xml user=all") ; Install Wireless Profile
 		Sleep 5000 ; Wait for profile to update.
 		Progress, 10, Installing Spiceworks mobile app..., Please Wait, Running Configuration
-		Command("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" ***REMOVED***"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworkds Mobile
+		Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" ***REMOVED***"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworkds Mobile
 	}
 	
 	Progress, 15, Activating Windows..., Please Wait, Running Configuration	
@@ -97,13 +97,13 @@ __main__:
 	
 	Progress, 30, Joining Domain and moving OU..., Please Wait, Running Configuration
 	CreateDistinguishedName() ; Creates distinguished name for OU move
-	;Command("powershell.exe -NoExit -Command $pass = cat C:\IT\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist "DomainJoin . ",$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
+	Command("powershell.exe -NoExit -Command $pass = cat "A_ScriptDir . "Resources\Files\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist ""DomainJoin . "",$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
 	
 	Progress, 35, Installing VIPRE anti-malware..., Please Wait, Running Configuration
-	Command("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
+	Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
 	
 	Progress, 45, Installing LogMeIn..., Please Wait, Running Configuration
-	Command("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
+	Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
 	
 	Progress, 50, Cleaning Up installations..., Please Wait, Running Configuration
 	RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
@@ -114,10 +114,10 @@ __main__:
 	{ 
 		Progress, 65, Copying staff shortcuts..., Nearly There!, Running Configuration
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		Command("robocopy \Deployment\Resources\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
+		Command("robocopy \Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
-		Progress, 75, Installing LPTOne staff..., Nearly There!, Running Configuration
-		;Command(A_ScriptDir . "\Resources\InstallLptOnePrt.exe /s") ; Install staff Print Release Terminal.
+		Progress, 70, Installing LPTOne staff..., Nearly There!, Running Configuration		
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe") ; Install staff Print Release Terminal.
 	}
 	
 	if(vTypeNumber == 2) ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
@@ -127,11 +127,14 @@ __main__:
 		
 		Progress, 65, Copying staff shortcuts..., Nearly There!, Running Configuration
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		Command("robocopy \Deployment\Resources\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
+		Command("robocopy \Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
 		
-		Progress, 75, Installing LPTOne staff..., Nearly There!, Running Configuration		
-		;Command(A_ScriptDir . "\Resources\InstallLptOnePrt.exe") ; Install staff Print Release Terminal.
+		Progress, 70, Installing LPTOne Staff Print Release..., Nearly There!, Running Configuration		
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe") ; Install staff Print Release Terminal.
+		
+		Progress, 75, Installing Envisonware Reservation Station..., Nearly There!, Running Configuration.
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe")
 
 		Progress, 80, Installing Offline circulation..., Nearly There!, Running Configuration
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Copy Offline Circ runner.
@@ -144,13 +147,13 @@ __main__:
 		AddAutoLogon()
 		
 		Progress, 60, Clearing Sierra shortcuts..., Please Wait, Runnning Configuration
-		Command("robocopy \Deployment\Resources\Empty C:\Sierra Desktop App")
+		Command("robocopy \Deployment\Resources\Empty /mir C:\Sierra Desktop App")
 		
 		Progress, 85, Installing Patron LPTOne printers..., Nearly There!, Running Configuration
-		Command(A_ScriptDir . "\Resources\lptone.exe -jqe.host="%vLPTServers%)
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe -jqe.host="%vLPTServers%)
 		
 		Progress, 90, Installing Envisionware client..., Nearly There!, Running Configuration
-		Command(A_ScriptDir . "\Resources\pcres.exe /s")
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /s")
 		;RemoveOffice("outlook", "skype")
 		;AutomateOfficeActivation()
 	}
