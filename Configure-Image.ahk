@@ -316,19 +316,19 @@ ConfirmationWindow() ; Checks that selections are correct before continuing.
 
 CreateDistinguishedName() ; Creates a distiguished name for moving to OU.
 {
-	If(vTypeNumber == 2 and vWireless == 1) ;Staff Laptop
-		{
-		vDistiguishedName := "CN=" . vComputerName . ",OU=Laptops,OU=Systems,OU=" . vLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"
-		return
-		}
-	If(vTypeNumber == 2 and vWireless != 1) ;Frontline PC
-		{
-		vDistiguishedName := "CN=" . vComputerName . ",OU=Frontline,OU=Systems,OU=" . vLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"
-		return
-		}
 	If(vTypeNumber == 1) ; Office
 		{
 		vDistiguishedName := "CN=" . vComputerName . ",OU=Offices,OU=Systems,OU=" . vLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"
+		return
+		}
+	If(vTypeNumber == 2) ;Frontline PC
+		{
+		vDistiguishedName := "CN=" . vComputerName . ",OU=Frontline,OU=Systems,OU=" . vLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"
+		return
+		}		
+	If(vTypeNumber == 2 and vWireless == 1) ;Staff Laptop
+		{
+		vDistiguishedName := "CN=" . vComputerName . ",OU=Laptops,OU=Systems,OU=" . vLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"
 		return
 		}
 	If(vTypeNumber == 3) ;Patron PC
@@ -336,11 +336,11 @@ CreateDistinguishedName() ; Creates a distiguished name for moving to OU.
 		vDistiguishedName := "CN=" . vComputerName . ",OU=" . vLocation . ",OU=Patron,OU=DCLS,DC=dcls,DC=org"
 		return
 		}
-	If(vTypeNumber == 6)	;Kiosk
+	If(vTypeNumber == 3 and vWireless == 1) ;Patron Laptop
 		{
-		vDistiguishedName := "CN=" . vComputerName . ",OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"
+		vDistiguishedName := "CN=" . vComputerName . ",OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"
 		return
-		}
+		}		
 	If(vTypeNumber == 4)	;Catalog
 		{
 		vDistiguishedName := "CN=" . vComputerName . ",OU=Catalog,OU=Patron,OU=DCLS,DC=dcls,DC=org"
@@ -351,11 +351,11 @@ CreateDistinguishedName() ; Creates a distiguished name for moving to OU.
 		vDistiguishedName := "CN=" . vComputerName . ",OU=Self Service,OU=Patron,OU=DCLS,DC=dcls,DC=org"
 		return
 		}
-	If(vTypeNumber == 4 and vWireless == 1) ;Patron Laptop
+	If(vTypeNumber == 6)	;Kiosk
 		{
-		vDistiguishedName := "CN=" . vComputerName . ",OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"
+		vDistiguishedName := "CN=" . vComputerName . ",OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"
 		return
-		}
+		}		
 	Log("Failure to create distinguished name!")
 	vNumErrors += 1
 }
