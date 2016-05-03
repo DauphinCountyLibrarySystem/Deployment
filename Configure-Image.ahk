@@ -164,7 +164,7 @@ __main__:
 		AddAutoLogon()
 		
 		Progress, 95, Loading Catalog Script..., Nearly There!, Running Configuration
-		;Command(Catalog)
+		Command(A_ScriptDir . "\Resources\EncoreAlways\EncoreAlways.ahk")
 	}
 	
 	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
