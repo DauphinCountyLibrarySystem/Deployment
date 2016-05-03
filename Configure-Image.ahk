@@ -81,60 +81,78 @@ __main__:
 	Progress, 0, Beginning Configuration, Please Wait, Running Configuration
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
+		Log("== Beginning wireless configuration...")
 		Progress, 5, Adding profile for wireless computer..., Please Wait, Running Configuration
 		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\Files\WirelessProfile.xml user=all") ; Install Wireless Profile
+		Log("...Added wireless profile")
 		Sleep 5000 ; Wait for profile to update.
+		
 		Progress, 10, Installing Spiceworks mobile app..., Please Wait, Running Configuration
-		Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" ***REMOVED***"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworkds Mobile
+		Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" ***REMOVED***"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
+		Log("...Installed Spiceworks mobile app")
 	}
 	
+	Log("== Beginning default configuration...")
 	Progress, 15, Activating Windows..., Please Wait, Running Configuration	
 	Command("c:\windows\system32\cscript.exe //b c:\windows\system32\slmgr.vbs /ipk ***REMOVED***, c:\windows\system32\") ; Activate Windows.
 	Command("c:\windows\system32\cscript.exe //b c:\windows\system32\slmgr.vbs /ato, c:\windows\system32\")
+	Log("...Windows activated")
 	
 	Progress, 25, Renaming Computer..., Please Wait, Running Configuration
 	Command("powershell.exe -Command Rename-Computer -NewName "vComputerName) ; Rename computer. (WORKS)
+	Log("...Computer renamed")
 	
 	Progress, 30, Joining Domain and moving OU..., Please Wait, Running Configuration
 	CreateDistinguishedName() ; Creates distinguished name for OU move
 	Command("powershell.exe -NoExit -Command $pass = cat "A_ScriptDir . "Resources\Files\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist ""DomainJoin . "",$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
+	Log("...Joined domain and moved OU")
 	
 	Progress, 35, Installing VIPRE anti-malware..., Please Wait, Running Configuration
 	Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
+	Log("...VIPRE installed")
 	
 	Progress, 45, Installing LogMeIn..., Please Wait, Running Configuration
 	Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
+	Log("...LogMeIn installed")
 	
 	Progress, 50, Cleaning Up installations..., Please Wait, Running Configuration
 	RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
 	FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"
 	FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"
+	Log("...Registries edited")
 	
 	if(vTypeNumber == 1) ; Office staff get LPTOne staff, staff printers, and Sierra.
 	{ 
+		Log("== Beginning office staff configuration...")
 		Progress, 65, Copying staff shortcuts..., Nearly There!, Running Configuration
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
 		Command("robocopy \Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
-		Progress, 70, Installing LPTOne staff..., Nearly There!, Running Configuration		
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe") ; Install staff Print Release Terminal.
+		Log("...shortcuts copied")
+		
+		Progress, 70, Installing LPTOne staff print release..., Nearly There!, Running Configuration		
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /s") ; Install staff Print Release Terminal.
+		Log("...Staff print release installed")
 	}
 	
 	if(vTypeNumber == 2) ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
 	{
-		Progress, 55, Configuring Auto-Login Registry..., Please Wait, Running Configuration
+		Log("== Beginning frontline staff configuration...")
 		AddAutoLogon()
 		
 		Progress, 65, Copying staff shortcuts..., Nearly There!, Running Configuration
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
 		Command("robocopy \Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
+		Log("...shortcuts copied")
 		
-		Progress, 70, Installing LPTOne Staff Print Release..., Nearly There!, Running Configuration		
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe") ; Install staff Print Release Terminal.
+		Progress, 70, Installing LPTOne staff print release..., Nearly There!, Running Configuration		
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /s") ; Install staff Print Release Terminal.
+		Log("...Staff print release installed")
 		
 		Progress, 75, Installing Envisonware Reservation Station..., Nearly There!, Running Configuration.
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe")
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /s")
+		Log("...Reservation station installed")
 
 		Progress, 80, Installing Offline circulation..., Nearly There!, Running Configuration
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Copy Offline Circ runner.
@@ -143,34 +161,37 @@ __main__:
 	
 	if(vTypeNumber == 3) ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
 	{
-		Progress, 55, Configuring Auto-Login Registry..., Please Wait, Running Configuration
+		Log("== Beginning patron terminal configuration...")
 		AddAutoLogon()
 		
 		Progress, 60, Clearing Sierra shortcuts..., Please Wait, Runnning Configuration
 		Command("robocopy \Deployment\Resources\Empty /mir C:\Sierra Desktop App")
+		Log("...Sierra cleared")
 		
 		Progress, 85, Installing Patron LPTOne printers..., Nearly There!, Running Configuration
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe -jqe.host="%vLPTServers%)
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /s -jqe.host="%vLPTServers%)
+		Log("...Patron printers installed")
 		
 		Progress, 90, Installing Envisionware client..., Nearly There!, Running Configuration
 		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /s")
+		Log("...Envisionware installed")
 		;RemoveOffice("outlook", "skype")
 		;AutomateOfficeActivation()
 	}
 	
 	if(vTypeNumber == 4) ; Catalog script is installed.
 	{
-		Progress, 55, Configuring Auto-Login Registry..., Please Wait, Running Configuration
 		AddAutoLogon()
 		
 		Progress, 95, Loading Catalog Script..., Nearly There!, Running Configuration
 		Command(A_ScriptDir . "\Resources\EncoreAlways\EncoreAlways.ahk")
+		Log("...Catalog script configured")
 	}
 	
 	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
 	{
-
-		;AddAutoLogon()
+	
+		AddAutoLogon()
 		;Command(Self-Check)
 	}
 
@@ -201,7 +222,7 @@ __main__:
 ;	FUNCTIONS AND LABELS
 ;   ================================================================================
 
-ButtonExit: ; Label for the Exit button.
+ButtonExit: ; Label for the Exit button. (WORKS)
 {
 	MsgBox, 52, Exiting Configure-Image, This will end Configure-Image.`nAre you sure you want to exit?
     IfMsgBox, No
@@ -210,7 +231,7 @@ ButtonExit: ; Label for the Exit button.
 	ExitApp
 }
 
-ButtonInstall: ; Label that takes user input and prepares to run installers, confirming first.
+ButtonInstall: ; Label that takes user input and prepares to run installers, confirming first. (WORKS)
 {
 	Gui, Submit, NoHide
 	vLocation := aLocation[vBranchNumber]
@@ -220,7 +241,7 @@ ButtonInstall: ; Label that takes user input and prepares to run installers, con
 	Return
 }	
 
-GuiClose: ; Label for default close functions, prompts confirmation screen.
+GuiClose: ; Label for default close functions, prompts confirmation screen. (WORKS)
 {
 	MsgBox, 52, Exiting Configure-Image, This will end Configure-Image.`nAre you sure you want to exit?
     IfMsgBox, No
@@ -229,12 +250,11 @@ GuiClose: ; Label for default close functions, prompts confirmation screen.
 	ExitApp
 }
 
-AddAutoLogon() ; Adds registry keys for computer types that automatically logon.
+AddAutoLogon() ; Adds registry keys for computer types that automatically logon. (WORKS)
 {
+	Progress, 55, Configuring Auto-Login Registry..., Please Wait, Running Configuration
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, AutoAdminLogon, 1
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultDomainName, dcls.org
-	RegDelete, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoLogonCount
-	RegDelete, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoLogonChecked
 	aAutoLogon := {1: "esalogon0", 2: "kllogon4", 3: "momlogon3", 4: "mrllogon1", 5: "afllogon2", 6:"johlogon6",7: "evlogon5", 8: "ndlogon8" }
 	vAutoLogon := aAutoLogon[vBranchNumber]
 	If(vTypeNumber == 2) ; Staff
@@ -267,6 +287,7 @@ AddAutoLogon() ; Adds registry keys for computer types that automatically logon.
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, ***REMOVED***
 		return
 	}
+	Log("...Auto logon registries updated")
 }	
 
 Command(vCommand, vHide := "") ; Runs a configuration command.
@@ -281,7 +302,7 @@ Command(vCommand, vHide := "") ; Runs a configuration command.
 	Return
 }
 
-ConfirmationWindow() ; Checks that selections are correct before continuing.
+ConfirmationWindow() ; Checks that selections are correct before continuing. (WORKS)
 {
 	Gui +OwnDialogs
 	if(vWireless = 1)
@@ -314,7 +335,7 @@ ConfirmationWindow() ; Checks that selections are correct before continuing.
 	Return
 }
 
-CreateDistinguishedName() ; Creates a distiguished name for moving to OU.
+CreateDistinguishedName() ; Creates a distiguished name for moving to OU. (WORKS)
 {
 	If(vTypeNumber == 1) ; Office
 		{
@@ -387,9 +408,9 @@ createOptionsWindow() ; Create the main GUI.
 	Gui, Add, Radio, altsubmit vvTypeNumber xp+10 yp+20, Office Staff
 	Gui, Add, Radio, altsubmit, Frontline Staff
 	Gui, Add, Radio, altsubmit, Patron Computer
-	Gui, Add, Radio, altsubmit, Catalog Computer			<-|
-	;Gui, Add, Radio, altsubmit, Self-Checkout Station		  |- To Be Implimented
-	;Gui, Add, Radio, altsubmit, Print Kiosk				<-|
+	Gui, Add, Radio, altsubmit, Catalog Computer			
+	;Gui, Add, Radio, altsubmit, Self-Checkout Station		<- To Be Implimented
+	;Gui, Add, Radio, altsubmit, Print Kiosk				<- To Be Implimented
 	Gui, Font, Bold s10
 	Gui, Add, Checkbox, xs vvWireless, This is a Wireless computer. ; Wireless check toggle.
 	Gui, Font, Norm
