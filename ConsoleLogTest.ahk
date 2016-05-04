@@ -29,31 +29,30 @@ Global vNumErrors := 0	; Tracks the number of errors, if any.
 ;   ================================================================================
 ;	BEGIN INITIALIZATION
 ;   ================================================================================
+
 Try {
 	Gui, New,, ConsoleWindow
 	Gui, Font,, Lucida Console
 	Gui, Add, Edit, Readonly x10 y10 w620 h460 vConsole ; I guess not everything has to be a function...
 	Gui, Show, x20 y20 w640 h480, Console Window
 	Log("   Console window up.")
-} Catch {
+	} Catch {
 	MsgBox failed to create console window! I can't run without console output! Dying now.
 	ExitApp
-}
+	}
 Try {
 	Log("")
 	Log("   Configure-Image v2.0 initializing for machine: " A_ComputerName)
-} Catch	{
+	} Catch	{
 	MsgBox Testing Deployment.log failed! You probably need to check file permissions. I won't run without my log! Dying now.
 	ExitApp
-}
-
+	}
 ;   ================================================================================
 ;	STARTUP
 ;   ================================================================================
 WinMinimizeAll
 WinRestore, Console Window
 Log("== Starting Up...")
-Command("Testing command")
 createOptionsWindow() ; Here is where we construct the GUI --- HERE IS WHERE THE LOG BREAKS
 
 Return
@@ -64,6 +63,7 @@ Return
 
 __main__:
 {
+
 	Command(vComputerName)
 	Command(vLocation)
 	Command(vComputerType)
@@ -158,7 +158,11 @@ ConfirmationWindow() ; Checks that selections are correct before continuing. (WO
 	}
 	MsgBox, 36, Confirm, This will rename the computer to %vComputerName%.`nThis is a %vComputerType% computer at %vLocation%.`n%vIsWireless% `nIs this correct?
 	IfMsgBox, Yes
+	{
+		WinHide, Computer Deployment
 		Gosub __main__
+		Return
+	}
 	Return
 }
 
@@ -252,6 +256,14 @@ Log(msg, Type="3") ; 1 logs to file, 2 logs to console, 3 does both, 10 is just 
 
 Message(msg)
 {
-GuiControlGet, Console
-GuiControl,, Console, %Console%%msg%`r`n
+Try {
+	GuiControlGet, Console
+	} catch {
+	MsgBox, Control Get Error!
+	}
+Try {
+	GuiControl,, Console, %Console%%msg%`r`n
+	} catch {
+	MsgBox, WriteMessage Error!
+	}
 }
