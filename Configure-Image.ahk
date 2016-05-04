@@ -1,13 +1,13 @@
 /* 	
 	Name: New Computer Deployment		
-	Version: 0.2.8
+	Version: 0.3.0
 	Author:	Christopher Roth
 
 	Changelog:
 		* Wireless Configuration testing
 		* Added Progress Bar
 */
-if not A_IsAdmin ; Check for elevation
+if not A_IsAdmin ; Check for elevation (WORKS)
 {
     if A_IsCompiled
 		Run *RunAs "%A_ScriptFullPath%"
@@ -83,7 +83,7 @@ __main__:
 	{
 		Log("== Beginning wireless configuration...")
 		Progress, 5, Adding profile for wireless computer..., Please Wait, Running Configuration
-		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\Files\WirelessProfile.xml user=all") ; Install Wireless Profile
+		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\Installers\WirelessProfile.xml user=all") ; Install Wireless Profile
 		Log("...Added wireless profile")
 		Sleep 5000 ; Wait for profile to update.
 		
@@ -104,7 +104,7 @@ __main__:
 	
 	Progress, 30, Joining Domain and moving OU..., Please Wait, Running Configuration
 	CreateDistinguishedName() ; Creates distinguished name for OU move
-	Command("powershell.exe -NoExit -Command $pass = cat "A_ScriptDir . "Resources\Files\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist ""DomainJoin . "",$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
+	Command("powershell.exe -NoExit -Command $pass = cat "A_ScriptDir . "Resources\Installers\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist ""DomainJoin . "",$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
 	Log("...Joined domain and moved OU")
 	
 	Progress, 35, Installing VIPRE anti-malware..., Please Wait, Running Configuration
@@ -446,7 +446,7 @@ ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closure
     ; Do not call ExitApp -- that would prevent other OnExit functions from being called.
 }
 
-Log(msg, Type="3") ; 1 logs to file, 2 logs to console, 3 does both, 10 is just a newline to file
+Log(msg, Type=3) ; 1 logs to file, 2 logs to console, 3 does both, 10 is just a newline to file
 {
 	global ScriptBasename, AppTitle
 	If(Type == 1) {
