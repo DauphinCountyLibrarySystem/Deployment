@@ -35,21 +35,22 @@ Global aComputerType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog",
 Global aLPTServers := {1: 192.168.100.221, 2: 10.14.20.14, 3: 10.13.20.14, 4: 10.11.20.5, 5: 192.168.102.221, 6: 192.168.106.221, 7: 192.168.105.221, 8:  10.18.40.200} ; Stores list of LPTOne server IPs (will need to be updated).
 Global vBranchNumber ; Stores the value of the Location array index.
 Global vTypeNumber ; Stores the value of the ComputerType array index.
-Global vWireless  ; Stores wireless toggle value.
+Global vIsWireless  ; Stores wireless toggle value.
+Global vIsVerbose ; Stores Verbose logging value.
 Global vComputerName ; Stores input computer name.
 Global vLocation  ; Stores the value extracted from Location array at vBranchNumber index.
 Global vComputerType  ; Stores the value extracted from ComputerType array at vTypeNumber index.
 Global vLPTServers ; Stores the value extracted from the LPTServers array ay vBranchNumber index.
-Global vDistiguishedName := "" ; Stores the Distuguished Name for transferring the OU
+Global vDistiguishedName := "" ; Stores the Distuguished Name for transferring the OU.
 Global vNumErrors := 0	; Tracks the number of errors, if any.
 
 ;   ================================================================================
 ;	BEGIN INITIALIZATION
 ;   ================================================================================
 Try {
-	Gui, Font,, Lucida Console
-	Gui, Add, Edit, Readonly x10 y10 w620 h460 vConsole ; I guess not everything has to be a function...
-	Gui, Show, x20 y20 w640 h480, Console Window
+	Gui 1: Font,, Lucida Console
+	Gui 1: Add, Edit, Readonly x10 y10 w620 h460 vConsole ; I guess not everything has to be a function...
+	Gui 1: Show, x20 y20 w640 h480, Console Window
 	Log("   Console window up.",2)
 } Catch {
 	MsgBox failed to create console window! I can't run without console output! Dying now.
@@ -78,114 +79,125 @@ Return
 __main__:
 {
 	Log("== Main Process...")
-	Progress, 0, Beginning Configuration, Please Wait, Running Configuration
+	Progress, 0, Beginning Configuration, Please Wait., Running Configuration
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
-		Log("== Beginning wireless configuration...")
-		Progress, 5, Adding profile for wireless computer..., Please Wait, Running Configuration
+		Log("== Beginning Wireless Configuration...")
+		Progress, 5, Adding profile for wireless computer..., Please Wait., Running Configuration
+		Log("-- adding wireless profile...")
 		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\Installers\WirelessProfile.xml user=all") ; Install Wireless Profile
-		Log("...Added wireless profile")
 		Sleep 5000 ; Wait for profile to update.
 		
-		Progress, 10, Installing Spiceworks mobile app..., Please Wait, Running Configuration
+		Progress, 10, Installing Spiceworks mobile app..., Please Wait., Running Configuration
+		Log("-- installing Spiceworks mobile app...")
 		Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" eb7e922f71BB336280238a02c02c64ac35941be2b"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
-		Log("...Installed Spiceworks mobile app")
 	}
 	
-	Log("== Beginning default configuration...")
-	Progress, 15, Activating Windows..., Please Wait, Running Configuration	
+	Log("== Beginning Default Configuration...")
+	Progress, 15, Activating Windows..., Please Wait., Running Configuration
+	Log("-- activating Windows...")
 	Command("c:\windows\system32\cscript.exe //b c:\windows\system32\slmgr.vbs /ipk HRRBN-GYBYT-44FP9-3TDPY-B4G6B, c:\windows\system32\") ; Activate Windows.
 	Command("c:\windows\system32\cscript.exe //b c:\windows\system32\slmgr.vbs /ato, c:\windows\system32\")
-	Log("...Windows activated")
 	
-	Progress, 25, Renaming Computer..., Please Wait, Running Configuration
+	Progress, 25, Renaming Computer..., Please Wait., Running Configuration
+	Log("-- renaming computer...")
 	Command("powershell.exe -Command Rename-Computer -NewName "vComputerName) ; Rename computer. (WORKS)
-	Log("...Computer renamed")
 	
-	Progress, 30, Joining Domain and moving OU..., Please Wait, Running Configuration
+	Progress, 30, Joining Domain and moving OU..., Please Wait., Running Configuration
+	Log("-- joining domain...")
 	CreateDistinguishedName() ; Creates distinguished name for OU move
-	Command("powershell.exe -NoExit -Command $pass = cat "A_ScriptDir . "Resources\Installers\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist ""DomainJoin . "",$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
-	Log("...Joined domain and moved OU")
+	Command("powershell.exe -NoExit -Command $pass = cat "A_ScriptDir . "Resources\Installers\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist "DomainJoin . ",$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
 	
-	Progress, 35, Installing VIPRE anti-malware..., Please Wait, Running Configuration
+	Progress, 35, Installing VIPRE anti-malware..., Please Wait.., Running Configuration
+	Log("-- installing VIPRE antivirus...")
 	Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
-	Log("...VIPRE installed")
 	
-	Progress, 45, Installing LogMeIn..., Please Wait, Running Configuration
+	Progress, 45, Installing LogMeIn..., Please Wait.., Running Configuration
+	Log("-- installing LogMeIn...")
 	Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
-	Log("...LogMeIn installed")
+
 	
-	Progress, 50, Cleaning Up installations..., Please Wait, Running Configuration
+	Progress, 50, Cleaning Up installations..., Please Wait.., Running Configuration
+	Log("-- editing registries and clearing files...")
 	RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
 	FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"
 	FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"
-	Log("...Registries edited")
 	
 	if(vTypeNumber == 1) ; Office staff get LPTOne staff, staff printers, and Sierra.
 	{ 
-		Log("== Beginning office staff configuration...")
-		Progress, 65, Copying staff shortcuts..., Nearly There!, Running Configuration
+		Log("== Beginning Office Staff Configuration...")
+		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
+		Log("-- copying staff shortcuts...")
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
 		Command("robocopy \Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
-		Log("...shortcuts copied")
 		
-		Progress, 70, Installing LPTOne staff print release..., Nearly There!, Running Configuration		
+		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
+		Log("-- installing staff LPTOne print release...")
 		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /s") ; Install staff Print Release Terminal.
-		Log("...Staff print release installed")
 	}
 	
 	if(vTypeNumber == 2) ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
 	{
-		Log("== Beginning frontline staff configuration...")
+		Log("== Beginning Frontline Staff Configuration...")
+		Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
+		Log("-- configuring autologin registries...")
 		AddAutoLogon()
 		
-		Progress, 65, Copying staff shortcuts..., Nearly There!, Running Configuration
+		Log("== Beginning Office Staff Configuration...")
+		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
+		Log("-- copying staff shortcuts...")
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
 		Command("robocopy \Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
-		Log("...shortcuts copied")
-		
-		Progress, 70, Installing LPTOne staff print release..., Nearly There!, Running Configuration		
+				
+		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
+		Log("-- installing staff LPTOne print release...")
 		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /s") ; Install staff Print Release Terminal.
-		Log("...Staff print release installed")
 		
-		Progress, 75, Installing Envisonware Reservation Station..., Nearly There!, Running Configuration.
+		Progress, 75, Installing Envisonware Reservation Station..., Mostly Done., Running Configuration.
+		Log("-- installing staff Envisionware Reservation Station...")
 		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /s")
-		Log("...Reservation station installed")
 
-		Progress, 80, Installing Offline circulation..., Nearly There!, Running Configuration
+
+		Progress, 80, Installing Offline circulation..., Almost There!, Running Configuration
+		Log("-- installing offline circulation...")
 		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Copy Offline Circ runner.
 		;RemoveOffice("all")
 	}
 	
 	if(vTypeNumber == 3) ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
 	{
-		Log("== Beginning patron terminal configuration...")
+		Log("== Beginning Patron Terminal Configuration...")
+		Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
+		Log("-- configuring autologin registries...")
 		AddAutoLogon()
 		
-		Progress, 60, Clearing Sierra shortcuts..., Please Wait, Runnning Configuration
+		Progress, 60, Clearing Sierra shortcuts..., Mostly Done., Runnning Configuration
+		Log("-- clearing Sierra...")
 		Command("robocopy \Deployment\Resources\Empty /mir C:\Sierra Desktop App")
-		Log("...Sierra cleared")
 		
-		Progress, 85, Installing Patron LPTOne printers..., Nearly There!, Running Configuration
+		Progress, 85, Installing Patron LPTOne printers..., Almost There!, Running Configuration
+		Log("-- installing patron LPTOne printers...")
 		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /s -jqe.host="%vLPTServers%)
-		Log("...Patron printers installed")
 		
-		Progress, 90, Installing Envisionware client..., Nearly There!, Running Configuration
+		Progress, 90, Installing Envisionware client..., Almost There!, Running Configuration
+		Log("-- installing patron Envisionware client...")
 		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /s")
-		Log("...Envisionware installed")
 		;RemoveOffice("outlook", "skype")
 		;AutomateOfficeActivation()
 	}
 	
 	if(vTypeNumber == 4) ; Catalog script is installed.
 	{
+		Log("== Beginning Catalog Computer Configuration...")
+		Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
+		Log("-- configuring autologin registries...")
 		AddAutoLogon()
 		
-		Progress, 95, Loading Catalog Script..., Nearly There!, Running Configuration
+		Progress, 95, Loading Catalog Script..., Almost There!, Running Configuration
+		Log("-- running catalog script...")
 		Command(A_ScriptDir . "\Resources\EncoreAlways\EncoreAlways.ahk")
-		Log("...Catalog script configured")
 	}
 	
 	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
@@ -205,7 +217,7 @@ __main__:
 	if(vNumErrors != 0) ; Final Check for errors and closes program.
 	{
 		Progress, OFF
-		Log("== Configuration Incomplete! There were "%vNumErrors% . " errors with this program.")
+		Log("!! Configuration Incomplete! There were "%vNumErrors% . " errors with this program.")
 		MsgBox, 16, Configuration Error,  There were %vNumErrors% errors during the configuration process!`nSomething may not have configured or installed propery.`nCheck the log for more details.
 		ExitApp
 	}
@@ -252,7 +264,7 @@ GuiClose: ; Label for default close functions, prompts confirmation screen. (WOR
 
 AddAutoLogon() ; Adds registry keys for computer types that automatically logon. (WORKS)
 {
-	Progress, 55, Configuring Auto-Login Registry..., Please Wait, Running Configuration
+	Progress, 55, Configuring Auto-Login Registry..., Please Wait., Running Configuration
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, AutoAdminLogon, 1
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultDomainName, dcls.org
 	aAutoLogon := {1: "esalogon0", 2: "kllogon4", 3: "momlogon3", 4: "mrllogon1", 5: "afllogon2", 6:"johlogon6",7: "evlogon5", 8: "ndlogon8" }
@@ -292,13 +304,26 @@ AddAutoLogon() ; Adds registry keys for computer types that automatically logon.
 
 Command(vCommand, vHide := "") ; Runs a configuration command.
 {
-	Try {
-		Log("Executing: "vCommand)
+	If(vIsVerbose == 1)
+	{
+		Try {
+		Log("-- Executing: "vCommand)
 		RunWait %vCommand%%vHide%
 		} Catch {
 		vNumErrors += 1
-		Log("Error executing "vCommand . "!")
+		Log("!! Error executing "vCommand . "!")
 		}
+	}
+	else
+	{
+		Try {
+		Log("-- Executing: "vCommand, 1)
+		RunWait %vCommand%%vHide%
+		} Catch {
+		vNumErrors += 1
+		Log("!! Error executing "vCommand . "!")
+		}
+	}
 	Return
 }
 
@@ -383,41 +408,43 @@ CreateDistinguishedName() ; Creates a distiguished name for moving to OU. (WORKS
 
 createOptionsWindow() ; Create the main GUI. 
 {
-	Gui, New, , Computer Deployment
+	Gui 2: New, , Computer Deployment
 ;----This Section contains the Computer Name label and field.----
-	Gui, Font, Bold s10
-	Gui, Add, Text,, Type in new computer name:
-	Gui, Font, Norm
-	Gui, Add, Edit, Uppercase vvComputerName,
+	Gui 2: Font, Bold s10
+	Gui 2: Add, Text,, Type in new computer name:
+	Gui 2: Font, Norm
+	Gui 2: Add, Edit, Uppercase vvComputerName,
 ;----This section contains a Radio toggle for Library locations.----
-	Gui, Font, Bold s10
-	Gui, Add, GroupBox, Section r8, Select Branch:
-	Gui, Font, Norm
-	Gui, Add, Radio, altsubmit vvBranchNumber xp+10 yp+20, East Shore
-	Gui, Add, Radio, altsubmit, Kline Library
-	Gui, Add, Radio, altsubmit, Madeline Olewine
-	Gui, Add, Radio, altsubmit, McCormick Riverfront
-	Gui, Add, Radio, altsubmit, Alexander Family
-	Gui, Add, Radio, altsubmit, Johnson Memorial
-	Gui, Add, Radio, altsubmit, Elizabethville
-	Gui, Add, Radio, altsubmit, Northern Dauphin
+	Gui 2: Font, Bold s10
+	Gui 2: Add, GroupBox, Section r8, Select Branch:
+	Gui 2: Font, Norm
+	Gui 2: Add, Radio, altsubmit vvBranchNumber xp+10 yp+20, East Shore
+	Gui 2: Add, Radio, altsubmit, Kline Library
+	Gui 2: Add, Radio, altsubmit, Madeline Olewine
+	Gui 2: Add, Radio, altsubmit, McCormick Riverfront
+	Gui 2: Add, Radio, altsubmit, Alexander Family
+	Gui 2: Add, Radio, altsubmit, Johnson Memorial
+	Gui 2: Add, Radio, altsubmit, Elizabethville
+	Gui 2: Add, Radio, altsubmit, Northern Dauphin
 ;----This Section contains a Radio toggle for computer type.----
-	Gui, Font, Bold s10
-	Gui, Add, GroupBox, Section r4 ys, Select computer type:
-	Gui, Font, Norm
-	Gui, Add, Radio, altsubmit vvTypeNumber xp+10 yp+20, Office Staff
-	Gui, Add, Radio, altsubmit, Frontline Staff
-	Gui, Add, Radio, altsubmit, Patron Computer
-	Gui, Add, Radio, altsubmit, Catalog Computer			
-	;Gui, Add, Radio, altsubmit, Self-Checkout Station		<- To Be Implimented
-	;Gui, Add, Radio, altsubmit, Print Kiosk				<- To Be Implimented
-	Gui, Font, Bold s10
-	Gui, Add, Checkbox, xs vvWireless, This is a Wireless computer. ; Wireless check toggle.
-	Gui, Font, Norm
+	Gui 2: Font, Bold s10
+	Gui 2: Add, GroupBox, Section r4 ys, Select computer type:
+	Gui 2: Font, Norm
+	Gui 2: Add, Radio, altsubmit vvTypeNumber xp+10 yp+20, Office Staff
+	Gui 2: Add, Radio, altsubmit, Frontline Staff
+	Gui 2: Add, Radio, altsubmit, Patron Computer
+	Gui 2: Add, Radio, altsubmit, Catalog Computer			
+	;Gui 2: Add, Radio, altsubmit, Self-Checkout Station		<- To Be Implimented
+	;Gui 2: Add, Radio, altsubmit, Print Kiosk				<- To Be Implimented
+;----This section contains Checkbox toggles.----
+	Gui 2: Font, Bold s10
+	Gui 2: Add, Checkbox, Section xs vvWireless, This is a Wireless computer. ; Wireless check toggle.
+	Gui 2: Add, Checkbox, vvIsVerbose, Use Verbose logging. ; Verbose logging toggle.
+	Gui 2: Font, Norm
 ;----This Section contains Submit and Exit Buttons.----
-	Gui, Add, Button, Section gButtonInstall w100, Install
-	Gui, Add, Button, yp xp+110 gButtonExit w100, Exit
-	Gui, Show
+	Gui 2: Add, Button, Section gButtonInstall w100, Install
+	Gui 2: Add, Button, yp xp+110 gButtonExit w100, Exit
+	Gui 2: Show
 	Return
 }
 
@@ -471,6 +498,6 @@ Log(msg, Type=3) ; 1 logs to file, 2 logs to console, 3 does both, 10 is just a 
 
 Message(msg)
 {
-GuiControlGet, Console
-GuiControl,, Console, %Console%%msg%`r`n
+GuiControlGet, Console, 1:
+GuiControl, 1:, Console, %Console%%msg%`r`n
 }
