@@ -116,7 +116,6 @@ __main__:
 	Log("-- installing LogMeIn...")
 	Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
 
-	
 	Progress, 50, Cleaning Up installations..., Please Wait.., Running Configuration
 	Log("-- editing registries and clearing files...")
 	RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
@@ -179,11 +178,11 @@ __main__:
 		
 		Progress, 85, Installing Patron LPTOne printers..., Almost There!, Running Configuration
 		Log("-- installing patron LPTOne printers...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /s -jqe.host="%vLPTServers%)
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe""/s -jqe.host="%vLPTServers%)
 		
 		Progress, 90, Installing Envisionware client..., Almost There!, Running Configuration
 		Log("-- installing patron Envisionware client...")
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /s")
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe""/s")
 		;RemoveOffice("outlook", "skype")
 		;AutomateOfficeActivation()
 	}
