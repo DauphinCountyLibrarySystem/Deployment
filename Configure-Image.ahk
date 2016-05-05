@@ -127,9 +127,9 @@ __main__:
 		Log("== Beginning Office Staff Configuration...")
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		Command("robocopy IT\Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
+		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
+		Command("robocopy C:\IT\Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
+		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
 		
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
@@ -146,22 +146,22 @@ __main__:
 		Log("== Beginning Office Staff Configuration...")
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		Command("robocopy IT\Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
+		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
+		Command("robocopy C:\IT\Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
+		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
 				
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe""/s") ; Install staff Print Release Terminal.
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe""/S") ; Install staff Print Release Terminal.
 		
 		Progress, 75, Installing Envisonware Reservation Station..., Mostly Done., Running Configuration.
 		Log("-- installing staff Envisionware Reservation Station...")
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe""/s")
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe""/S")
 
 
 		Progress, 80, Installing Offline circulation..., Almost There!, Running Configuration
 		Log("-- installing offline circulation...")
-		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Copy Offline Circ runner.
+		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Copy Offline Circ runner.
 		;RemoveOffice("all")
 	}
 	
@@ -174,15 +174,15 @@ __main__:
 		
 		Progress, 60, Clearing Sierra shortcuts..., Mostly Done., Runnning Configuration
 		Log("-- clearing Sierra...")
-		Command("robocopy \Deployment\Resources\Empty /mir C:\Sierra Desktop App")
+		Command("robocopy C:\IT\Deployment\Resources\Empty /mir C:\Sierra Desktop App")
 		
 		Progress, 85, Installing Patron LPTOne printers..., Almost There!, Running Configuration
 		Log("-- installing patron LPTOne printers...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe""/s -jqe.host="%vLPTServers%)
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe""/S -jqe.host="%vLPTServers%)
 		
 		Progress, 90, Installing Envisionware client..., Almost There!, Running Configuration
 		Log("-- installing patron Envisionware client...")
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe""/s")
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe""/S -ip="%vLPTServers% . " -tcpport=9432")
 		;RemoveOffice("outlook", "skype")
 		;AutomateOfficeActivation()
 	}
@@ -194,10 +194,9 @@ __main__:
 		Log("-- configuring autologin registries...")
 		AddAutoLogon()
 		
-		Progress, 95, Loading Catalog Script..., Almost There!, Running Configuration
-		Log("-- running catalog script...")
-		Command("robocopy \IT\Deployment\Resources\EncoreAlways\EncoreAlways.ahk")
-		;RegWrite HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run     valuename valuedata    description-string=commandline
+		Progress, 95, Confiuring Catalog Registries..., Almost There!, Running Configuration
+		Log("-- configuring catalog registries...")
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, "C:\IT\Deployment\Resources\EncoreAlways\EncoreAlways.exe"
 	}
 	
 	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
