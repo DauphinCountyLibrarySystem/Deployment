@@ -35,7 +35,7 @@ Global aComputerType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog",
 Global aLPTServers := {1: 192.168.100.221, 2: 10.14.20.14, 3: 10.13.20.14, 4: 10.11.20.5, 5: 192.168.102.221, 6: 192.168.106.221, 7: 192.168.105.221, 8:  10.18.40.200} ; Stores list of LPTOne server IPs (will need to be updated).
 Global vBranchNumber ; Stores the value of the Location array index.
 Global vTypeNumber ; Stores the value of the ComputerType array index.
-Global vIsWireless  ; Stores wireless toggle value.
+Global vWireless  ; Stores wireless toggle value.
 Global vIsVerbose ; Stores Verbose logging value.
 Global vComputerName ; Stores input computer name.
 Global vLocation  ; Stores the value extracted from Location array at vBranchNumber index.
@@ -127,9 +127,9 @@ __main__:
 		Log("== Beginning Office Staff Configuration...")
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		Command("robocopy \Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
+		Command("robocopy IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
+		Command("robocopy IT\Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
+		Command("robocopy IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
 		
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
@@ -146,17 +146,17 @@ __main__:
 		Log("== Beginning Office Staff Configuration...")
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		Command("robocopy \Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy \Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
+		Command("robocopy IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
+		Command("robocopy IT\Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
+		Command("robocopy IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
 				
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /s") ; Install staff Print Release Terminal.
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe""/s") ; Install staff Print Release Terminal.
 		
 		Progress, 75, Installing Envisonware Reservation Station..., Mostly Done., Running Configuration.
 		Log("-- installing staff Envisionware Reservation Station...")
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /s")
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe""/s")
 
 
 		Progress, 80, Installing Offline circulation..., Almost There!, Running Configuration
@@ -196,7 +196,8 @@ __main__:
 		
 		Progress, 95, Loading Catalog Script..., Almost There!, Running Configuration
 		Log("-- running catalog script...")
-		Command(A_ScriptDir . "\Resources\EncoreAlways\EncoreAlways.ahk")
+		Command("robocopy \IT\Deployment\Resources\EncoreAlways\EncoreAlways.ahk")
+		;RegWrite HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run     valuename valuedata    description-string=commandline
 	}
 	
 	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
