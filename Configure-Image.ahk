@@ -80,10 +80,10 @@ Return
 __main__:
 {
 	Log("== Main Process...")
-	Progress, 0, Beginning Configuration, Please Wait., Running Configuration
+	Progress, 0, Configuration, Please Wait., Running Configuration
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
-		Log("== Beginning Wireless Configuration...")
+		Log("== Wireless Configuration...")
 		Progress, 5, Adding profile for wireless computer..., Please Wait., Running Configuration
 		Log("-- adding wireless profile...")
 		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\Installers\WirelessProfile.xml user=all") ; Install Wireless Profile
@@ -94,11 +94,11 @@ __main__:
 		Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" ***REMOVED***"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
 	}
 	
-	Log("== Beginning Default Configuration...")
+	Log("== Default Configuration...")
 	Progress, 15, Activating Windows..., Please Wait., Running Configuration
 	Log("-- activating Windows...")
-	Command("c:\windows\system32\cscript.exe //b c:\windows\system32\slmgr.vbs /ipk ***REMOVED***, c:\windows\system32\") ; Activate Windows.
-	Command("c:\windows\system32\cscript.exe //b c:\windows\system32\slmgr.vbs /ato, c:\windows\system32\")
+	Command("cmd.exe /c c:\windows\system32\cscript.exe //b c:\windows\system32\slmgr.vbs /ipk ***REMOVED***, c:\windows\system32\") ; Activate Windows.
+	Command("cmd.exe /c c:\windows\system32\cscript.exe //b c:\windows\system32\slmgr.vbs /ato, c:\windows\system32\")
 	
 	Progress, 25, Renaming Computer..., Please Wait., Running Configuration
 	Log("-- renaming computer...")
@@ -125,7 +125,7 @@ __main__:
 	
 	if(vTypeNumber == 1) ; Office staff get LPTOne staff, staff printers, and Sierra.
 	{ 
-		Log("== Beginning Office Staff Configuration...")
+		Log("== Office Staff Configuration...")
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
 		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
@@ -139,12 +139,12 @@ __main__:
 	
 	if(vTypeNumber == 2) ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
 	{
-		Log("== Beginning Frontline Staff Configuration...")
+		Log("== Frontline Staff Configuration...")
 		Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
 		Log("-- configuring autologin registries...")
 		AddAutoLogon()
 		
-		Log("== Beginning Office Staff Configuration...")
+		Log("== Office Staff Configuration...")
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
 		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
@@ -168,7 +168,7 @@ __main__:
 	
 	if(vTypeNumber == 3) ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
 	{
-		Log("== Beginning Patron Terminal Configuration...")
+		Log("== Patron Terminal Configuration...")
 		Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
 		Log("-- configuring autologin registries...")
 		AddAutoLogon()
@@ -190,7 +190,7 @@ __main__:
 	
 	if(vTypeNumber == 4) ; Catalog script is installed.
 	{
-		Log("== Beginning Catalog Computer Configuration...")
+		Log("== Catalog Computer Configuration...")
 		Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
 		Log("-- configuring autologin registries...")
 		AddAutoLogon()
