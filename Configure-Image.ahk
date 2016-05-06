@@ -134,17 +134,14 @@ __main__:
 		
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /s") ; Install staff Print Release Terminal.
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe""/S") ; Install staff Print Release Terminal.
 	}
 	
 	if(vTypeNumber == 2) ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
 	{
 		Log("== Frontline Staff Configuration...")
-		Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
-		Log("-- configuring autologin registries...")
 		AddAutoLogon()
 		
-		Log("== Office Staff Configuration...")
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
 		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
@@ -169,8 +166,6 @@ __main__:
 	if(vTypeNumber == 3) ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
 	{
 		Log("== Patron Terminal Configuration...")
-		Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
-		Log("-- configuring autologin registries...")
 		AddAutoLogon()
 		
 		Progress, 60, Clearing Sierra shortcuts..., Mostly Done., Runnning Configuration
@@ -191,8 +186,6 @@ __main__:
 	if(vTypeNumber == 4) ; Catalog script is installed.
 	{
 		Log("== Catalog Computer Configuration...")
-		Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
-		Log("-- configuring autologin registries...")
 		AddAutoLogon()
 		
 		Progress, 95, Confiuring Catalog Registries..., Almost There!, Running Configuration
@@ -202,14 +195,12 @@ __main__:
 	
 	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
 	{
-	
 		AddAutoLogon()
 		;Command(Self-Check)
 	}
 
 	if(vTypeNumber == 6) ; Kiosk Computer
 	{
-
 		;Command(Kiosk)
 	}
 	Progress, 100, Finalizing Configuration., Last Thing!, Running Configuration
@@ -218,6 +209,7 @@ __main__:
 	{
 		Progress, OFF
 		Log("!! Configuration Incomplete! There were "%vNumErrors% . " errors with this program.")
+		SoundPlay *16
 		MsgBox, 16, Configuration Error,  There were %vNumErrors% errors during the configuration process!`nSomething may not have configured or installed propery.`nCheck the log for more details.
 		ExitApp
 	}
@@ -225,6 +217,7 @@ __main__:
 	{
 		Progress, OFF
 		Log("== Configuration Complete! There were "%vNumErrors% . " errors with this program.")
+		SoundPlay *64
 		MsgBox, 64, Deployment Complete,  New computer deployment complete! Exiting application.
 		ExitApp
 	}
