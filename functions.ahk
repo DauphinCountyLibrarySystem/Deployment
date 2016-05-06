@@ -1,6 +1,7 @@
 AddAutoLogon() ; Adds registry keys for computer types that automatically logon. (WORKS)
 {
-	Progress, 55, Configuring Auto-Login Registry..., Please Wait., Running Configuration
+	Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
+	Log("-- configuring autologin registries...")
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, AutoAdminLogon, 1
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultDomainName, dcls.org
 	aAutoLogon := {1: "esalogon0", 2: "kllogon4", 3: "momlogon3", 4: "mrllogon1", 5: "afllogon2", 6:"johlogon6",7: "evlogon5", 8: "ndlogon8" }
@@ -35,7 +36,6 @@ AddAutoLogon() ; Adds registry keys for computer types that automatically logon.
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, DC4p@tron15
 		return
 	}
-	Log("...Auto logon registries updated")
 }	
 
 Command(vCommand, vHide := "") ; Runs a configuration command.
@@ -43,7 +43,7 @@ Command(vCommand, vHide := "") ; Runs a configuration command.
 	If(vIsVerbose == 1)
 	{
 		Try {
-		Log("-- Executing: "vCommand)
+		Log("** Executing: "vCommand)
 		RunWait %vCommand%%vHide%
 		} Catch {
 		vNumErrors += 1
@@ -53,7 +53,7 @@ Command(vCommand, vHide := "") ; Runs a configuration command.
 	else
 	{
 		Try {
-		Log("-- Executing: "vCommand, 1)
+		Log("** Executing: "vCommand, 1)
 		RunWait %vCommand%%vHide%
 		} Catch {
 		vNumErrors += 1
@@ -72,24 +72,29 @@ ConfirmationWindow() ; Checks that selections are correct before continuing. (WO
 		vIsWireless := "This is an Ethernet computer."
 	if(vComputerName == "")
 	{
+	SoundPlay *48
 	MsgBox, 48, Not Named, Please type in a name for the computer.
 	Return
 	}
 	if(StrLen(vComputerName) > 15)
 	{
-	MsgBox, 48, Large Name, The computer name is too long.`nPlease input a name that fifteen characters or less.
+	SoundPlay *48
+	MsgBox, 48, Large Name, The computer name is too long.`nPlease input a name that is fifteen characters or less.
 	Return
 	}
 	if(vLocation == "")
 	{
+	SoundPlay *48
 	MsgBox, 48, No Library, Please select a library branch.
 	Return
 	}
 	if(vComputerType == "")
 	{
+	SoundPlay *48	
 	MsgBox, 48, No Computer, Please select a computer type.
 	Return
 	}
+	SoundPlay *32
 	MsgBox, 36, Confirm, This will rename the computer to %vComputerName%.`nThis is a %vComputerType% computer at %vLocation%.`n%vIsWireless% `nIs this correct?
 	IfMsgBox, Yes
 		Gosub __main__
@@ -189,6 +194,7 @@ ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closure
 	Gui +OwnDialogs
 	if ExitReason in Menu,
     {
+		SoundPlay *48
         MsgBox, 52, Exiting Deployment, This will end deployment.`nAre you sure you want to exit?
         IfMsgBox, No
             return 1  ; OnExit functions must return non-zero to prevent exit.
@@ -225,8 +231,6 @@ Log(msg, Type=3) ; 1 logs to file, 2 logs to console, 3 does both, 10 is just a 
 	If(Type == 10) {
 		FileAppend, `n, %ScriptBasename%.log
 		}	
-
-	
 	Sleep 50 ; Hopefully gives the filesystem time to write the file before logging again
 	;Type += 16
 	Return
