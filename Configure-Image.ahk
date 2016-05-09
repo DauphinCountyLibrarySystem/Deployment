@@ -80,6 +80,7 @@ Return
 __main__:
 {
 	Log("== Main Process...")
+	Progress, M, Configuration, Please Wait., Running Configuration
 	Progress, 0, Configuration, Please Wait., Running Configuration
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
@@ -128,9 +129,9 @@ __main__:
 		Log("== Office Staff Configuration...")
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		Command("robocopy C:\IT\Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
 		
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
@@ -144,9 +145,9 @@ __main__:
 		
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		Command("robocopy C:\IT\Deployment\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
 				
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
@@ -159,7 +160,7 @@ __main__:
 
 		Progress, 80, Installing Offline circulation..., Almost There!, Running Configuration
 		Log("-- installing offline circulation...")
-		Command("robocopy C:\IT\Deployment\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Copy Offline Circ runner.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Copy Offline Circ runner.
 		;RemoveOffice("all")
 	}
 	
@@ -170,7 +171,7 @@ __main__:
 		
 		Progress, 60, Clearing Sierra shortcuts..., Mostly Done., Runnning Configuration
 		Log("-- clearing Sierra...")
-		Command("robocopy C:\IT\Deployment\Resources\Empty /mir C:\Sierra Desktop App")
+		Command("robocopy "A_ScriptDir . "\Resources\Empty /mir C:\Sierra Desktop App")
 		
 		Progress, 85, Installing Patron LPTOne printers..., Almost There!, Running Configuration
 		Log("-- installing patron LPTOne printers...")
