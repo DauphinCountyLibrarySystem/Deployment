@@ -101,7 +101,7 @@ __main__:
 	Command("cscript //b c:\windows\system32\slmgr.vbs ""/ipk ***REMOVED***"", c:\windows\system32\") ; Activate Windows.
 	Command("cscript //b c:\windows\system32\slmgr.vbs ""/ato"", c:\windows\system32\")
 	
-	Progress, 25, Renaming Computer..., Please Wait., Running Configuration
+	Progress, 25, Renaming computer..., Please Wait., Running Configuration
 	Log("-- renaming computer...")
 	Command("powershell.exe -Command Rename-Computer -NewName "vComputerName) ; Rename computer. (WORKS)
 	
@@ -118,7 +118,7 @@ __main__:
 	Log("-- installing LogMeIn...")
 	Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
 
-	Progress, 50, Cleaning Up installations..., Please Wait.., Running Configuration
+	Progress, 50, Cleaning up installations..., Please Wait.., Running Configuration
 	Log("-- editing registries and clearing files...")
 	RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
 	FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"
@@ -127,11 +127,16 @@ __main__:
 	if(vTypeNumber == 1) ; Office staff get LPTOne staff, staff printers, and Sierra.
 	{ 
 		Log("== Office Staff Configuration...")
+		
+		Progress, 60, Copying files..., Mostly Done., Running Configuration
+		Log("-- copying files to root...")
+		Command("robocopy "A_ScriptDir . "\Resources\Sierra Desktop App C:\Sierra Desktop App /s") ; Sierra files.
+		
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Sierra shortcut.
 		
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
@@ -143,11 +148,17 @@ __main__:
 		Log("== Frontline Staff Configuration...")
 		AddAutoLogon()
 		
+		Progress, 60, Copying files..., Mostly Done., Running Configuration
+		Log("-- copying files to root...")
+		Command("robocopy "A_ScriptDir . "\Resources\Sierra Desktop App C:\Sierra Desktop App /s") ; Sierra files.
+		Command("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s") ;  Offline circ files.
+		
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Copy Offline Circ runner.
 				
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
@@ -155,12 +166,7 @@ __main__:
 		
 		Progress, 75, Installing Envisonware Reservation Station..., Mostly Done., Running Configuration.
 		Log("-- installing staff Envisionware Reservation Station...")
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe""/S")
-
-
-		Progress, 80, Installing Offline circulation..., Almost There!, Running Configuration
-		Log("-- installing offline circulation...")
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Copy Offline Circ runner.
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe""/S") ; Install Reservation Station
 		;RemoveOffice("all")
 	}
 	
@@ -169,19 +175,24 @@ __main__:
 		Log("== Patron Terminal Configuration...")
 		AddAutoLogon()
 		
-		Progress, 60, Clearing Sierra shortcuts..., Mostly Done., Runnning Configuration
-		Log("-- clearing Sierra...")
-		Command("robocopy "A_ScriptDir . "\Resources\Empty /mir C:\Sierra Desktop App")
+		Progress, 60, Copying files..., Mostly Done., Runnning Configuration
+		Log("-- copying files to root...")
+		Command("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s") ; PatronAdminPanel script files.
+		;Command("robocopy "A_ScriptDir . "\Resources\Empty /mir C:\Sierra Desktop App") <-Redundant if never copied to root?
 		
-		Progress, 85, Installing Patron LPTOne printers..., Almost There!, Running Configuration
+		Progress, 85, Installing patron LPTOne printers..., Almost There!, Running Configuration
 		Log("-- installing patron LPTOne printers...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe""/S -jqe.host="%vLPTServers%)
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe""/S -jqe.host="%vLPTServers%) ; Patron printers.
 		
 		Progress, 90, Installing Envisionware client..., Almost There!, Running Configuration
 		Log("-- installing patron Envisionware client...")
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe""/S -ip="%vLPTServers% . " -tcpport=9432")
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe""/S -ip="%vLPTServers% . " -tcpport=9432") ; Envisionware Client.
 		;RemoveOffice("outlook", "skype")
 		;AutomateOfficeActivation()
+		
+		Progress, 95, Confiuring Registries..., Almost There!, Running Configuration
+		Log("-- configuring catalog registries...")
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, PatronAdminPanel, "C:\PatronAdminPanel\PatronAdminPanel.exe" ; Set PatronAdminPanel auto-start.
 	}
 	
 	if(vTypeNumber == 4) ; Catalog script is installed.
@@ -189,9 +200,13 @@ __main__:
 		Log("== Catalog Computer Configuration...")
 		AddAutoLogon()
 		
-		Progress, 95, Confiuring Catalog Registries..., Almost There!, Running Configuration
+		Progress, 60, copying files..., Mostly Done., Runnning Configuration
+		Log("-- copying files to root...")
+		Command("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")	; EncoreAlways script files.
+		
+		Progress, 95, Confiuring Registries..., Almost There!, Running Configuration
 		Log("-- configuring catalog registries...")
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, "C:\IT\Deployment\Resources\EncoreAlways\EncoreAlways.exe"
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, "C:\EncoreAlways\EncoreAlways.exe" ; Set EncoreAlways auto-start.
 	}
 	
 	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
