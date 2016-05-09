@@ -134,9 +134,9 @@ __main__:
 		
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP") ; ADP shortcut.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Sierra shortcut.
+		Command("robocopy C:\Sierra Desktop App C:\Users\Public\Desktop ""Sierra Desktop App""" ) ; Sierra shortcut.
 		
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
@@ -155,10 +155,10 @@ __main__:
 		
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP") ; ADP shortcut
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Copy Sierra runner.
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Copy Offline Circ runner.
+		Command("robocopy C:\Sierra Desktop App C:\Users\Public\Desktop ""Sierra Desktop App""" ) ; Sierra shortcut.
+		Command("robocopy C:\Millennium\Offline C:\Users\Public\Desktop ""Offline Circulation""") ; Offline Circ shortcut.
 				
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
