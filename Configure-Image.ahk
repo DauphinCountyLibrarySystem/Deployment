@@ -81,6 +81,7 @@ __main__:
 {
 	Log("== Main Process...")
 	Progress, M2 Y%A_ScreenHeight%
+	Progress, SHOW
 	Progress, 0, Configuration, Please Wait., Running Configuration
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
@@ -98,8 +99,8 @@ __main__:
 	Log("== Default Configuration...")
 	Progress, 15, Activating Windows..., Please Wait., Running Configuration
 	Log("-- activating Windows...")
-	Command("cscript //B ""c:\windows\system32\slmgr.vbs"" /ipk HRRBN-GYBYT-44FP9-3TDPY-B4G6B") ; Copy activation key.
-	Command("cscript //B ""c:\windows\system32\slmgr.vbs"" /ato") ; Activate Windows.
+	;Command("cscript //B ""c:\windows\system32\slmgr.vbs"" /ipk HRRBN-GYBYT-44FP9-3TDPY-B4G6B") ; Copy activation key.
+	;Command("cscript //B ""c:\windows\system32\slmgr.vbs"" /ato") ; Activate Windows.
 	
 	Progress, 25, Renaming computer..., Please Wait., Running Configuration
 	Log("-- renaming computer...")
@@ -108,7 +109,7 @@ __main__:
 	Progress, 30, Joining Domain and moving OU..., Please Wait., Running Configuration
 	Log("-- joining domain...")
 	CreateDistinguishedName() ; Creates distinguished name for OU move
-	Command("powershell.exe -NoExit -Command $pass = cat "A_ScriptDir . "Resources\Installers\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath """vDistiguishedName"") ; Join domain, Move OU.
+	Command("powershell.exe -NoExit -Command $pass = cat "A_ScriptDir . "Resources\Installers\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
 	
 	Progress, 35, Installing VIPRE anti-malware..., Please Wait.., Running Configuration
 	Log("-- installing VIPRE antivirus...")
@@ -150,7 +151,7 @@ __main__:
 		
 		Progress, 60, Copying files..., Mostly Done., Running Configuration
 		Log("-- copying files to root...")
-		Command("robocopy "A_ScriptDir . "\Resources\Sierra Desktop App C:\Sierra Desktop App /s") ; Sierra files.
+		Command("robocopy "A_ScriptDir . "\Resources\Sierra Desktop App ""C:\Sierra Desktop App"" /s") ; Sierra files.
 		Command("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s") ;  Offline circ files.
 		
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
