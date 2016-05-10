@@ -80,7 +80,7 @@ Return
 __main__:
 {
 	Log("== Main Process...")
-	Progress, M2 Y%A_ScreenHeight%
+	Progress, M y-100
 	Progress, SHOW
 	Progress, 0, Configuration, Please Wait., Running Configuration
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
@@ -99,8 +99,8 @@ __main__:
 	Log("== Default Configuration...")
 	Progress, 15, Activating Windows..., Please Wait., Running Configuration
 	Log("-- activating Windows...")
-	;Command("cscript //B ""c:\windows\system32\slmgr.vbs"" /ipk ***REMOVED***") ; Copy activation key.
-	;Command("cscript //B ""c:\windows\system32\slmgr.vbs"" /ato") ; Activate Windows.
+	;Command("cscript //B c:\windows\system32\slmgr.vbs /ipk ***REMOVED***") ; Copy activation key.
+	;Command("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
 	
 	Progress, 25, Renaming computer..., Please Wait., Running Configuration
 	Log("-- renaming computer...")
