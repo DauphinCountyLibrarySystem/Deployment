@@ -72,32 +72,35 @@ ConfirmationWindow() ; Checks that selections are correct before continuing. (WO
 		vIsWireless := "This is an Ethernet computer."
 	if(vComputerName == "")
 	{
-	SoundPlay *48
-	MsgBox, 48, Not Named, Please type in a name for the computer.
-	Return
+		SoundPlay *48
+		MsgBox, 48, Not Named, Please type in a name for the computer.
+		Return
 	}
 	if(StrLen(vComputerName) > 15)
 	{
-	SoundPlay *48
-	MsgBox, 48, Large Name, The computer name is too long.`nPlease input a name that is fifteen characters or less.
-	Return
+		SoundPlay *48
+		MsgBox, 48, Large Name, The computer name is too long.`nPlease input a name that is fifteen characters or less.
+		Return
 	}
 	if(vLocation == "")
 	{
-	SoundPlay *48
-	MsgBox, 48, No Library, Please select a library branch.
-	Return
+		SoundPlay *48
+		MsgBox, 48, No Library, Please select a library branch.
+		Return
 	}
 	if(vComputerType == "")
 	{
-	SoundPlay *48	
-	MsgBox, 48, No Computer, Please select a computer type.
-	Return
+		SoundPlay *48	
+		MsgBox, 48, No Computer, Please select a computer type.
+		Return
 	}
 	SoundPlay *32
 	MsgBox, 36, Confirm, This will rename the computer to %vComputerName%.`nThis is a %vComputerType% computer at %vLocation%.`n%vIsWireless% `nIs this correct?
 	IfMsgBox, Yes
+	{
+		Log("-- " vIsWireless "It is at " vLocation "and named " vComputerName ".")
 		Gosub __main__
+	}
 	Return
 }
 
