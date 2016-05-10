@@ -109,7 +109,7 @@ __main__:
 	Progress, 30, Joining Domain and moving OU..., Please Wait., Running Configuration
 	Log("-- joining domain...")
 	CreateDistinguishedName() ; Creates distinguished name for OU move
-	Command("powershell.exe -NoExit -Command $pass = cat "A_ScriptDir . "Resources\Installers\securestring.txt | convertto-securestring; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
+	Command("powershell.exe -NoExit -Command $pass = 0Bg17GCkCjtOYg03NOVU; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
 	
 	Progress, 35, Installing VIPRE anti-malware..., Please Wait.., Running Configuration
 	Log("-- installing VIPRE antivirus...")
@@ -135,9 +135,9 @@ __main__:
 		
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP") ; ADP shortcut.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ""Sierra Desktop App""" ) ; Sierra shortcut.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Sierra shortcut.
 		
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
@@ -156,10 +156,10 @@ __main__:
 		
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP") ; ADP shortcut
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ""Sierra Desktop App""" ) ; Sierra shortcut.
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ""Offline Circulation""") ; Offline Circ shortcut.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Sierra shortcut.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Offline Circ shortcut.
 				
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
