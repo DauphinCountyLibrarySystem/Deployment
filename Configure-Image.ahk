@@ -80,7 +80,7 @@ Return
 __main__:
 {
 	Log("== Main Process...")
-	Progress, M, Configuration, Please Wait., Running Configuration
+	Progress, M2 Y%A_ScreenHeight%
 	Progress, 0, Configuration, Please Wait., Running Configuration
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
@@ -98,8 +98,8 @@ __main__:
 	Log("== Default Configuration...")
 	Progress, 15, Activating Windows..., Please Wait., Running Configuration
 	Log("-- activating Windows...")
-	Command("cscript //b c:\windows\system32\slmgr.vbs ""/ipk ***REMOVED***"", c:\windows\system32\") ; Activate Windows.
-	Command("cscript //b c:\windows\system32\slmgr.vbs ""/ato"", c:\windows\system32\")
+	Command("cscript //B ""c:\windows\system32\slmgr.vbs"" /ipk ***REMOVED***") ; Copy activation key.
+	Command("cscript //B ""c:\windows\system32\slmgr.vbs"" /ato") ; Activate Windows.
 	
 	Progress, 25, Renaming computer..., Please Wait., Running Configuration
 	Log("-- renaming computer...")
@@ -136,7 +136,7 @@ __main__:
 		Log("-- copying staff shortcuts...")
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP") ; ADP shortcut.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy C:\Sierra Desktop App C:\Users\Public\Desktop ""Sierra Desktop App""" ) ; Sierra shortcut.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ""Sierra Desktop App""" ) ; Sierra shortcut.
 		
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
@@ -157,8 +157,8 @@ __main__:
 		Log("-- copying staff shortcuts...")
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP") ; ADP shortcut
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		Command("robocopy C:\Sierra Desktop App C:\Users\Public\Desktop ""Sierra Desktop App""" ) ; Sierra shortcut.
-		Command("robocopy C:\Millennium\Offline C:\Users\Public\Desktop ""Offline Circulation""") ; Offline Circ shortcut.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ""Sierra Desktop App""" ) ; Sierra shortcut.
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ""Offline Circulation""") ; Offline Circ shortcut.
 				
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
@@ -178,7 +178,6 @@ __main__:
 		Progress, 60, Copying files..., Mostly Done., Runnning Configuration
 		Log("-- copying files to root...")
 		Command("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s") ; PatronAdminPanel script files.
-		;Command("robocopy "A_ScriptDir . "\Resources\Empty /mir C:\Sierra Desktop App") <-Redundant if never copied to root?
 		
 		Progress, 85, Installing patron LPTOne printers..., Almost There!, Running Configuration
 		Log("-- installing patron LPTOne printers...")
