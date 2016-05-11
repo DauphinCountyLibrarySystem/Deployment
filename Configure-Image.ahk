@@ -109,7 +109,7 @@ __main__:
 	Progress, 30, Joining Domain and moving OU..., Please Wait., Running Configuration
 	Log("-- joining domain...")
 	CreateDistinguishedName() ; Creates distinguished name for OU move
-	Command("powershell.exe -NoExit -Command $pass = 0Bg17GCkCjtOYg03NOVU; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath "vDistiguishedName) ; Join domain, Move OU.
+	Command("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""0Bg17GCkCjtOYg03NOVU\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath \""" vDistiguishedName "\""") ; Join domain, Move OU.
 	
 	Progress, 35, Installing VIPRE anti-malware..., Please Wait.., Running Configuration
 	Log("-- installing VIPRE antivirus...")
@@ -131,7 +131,7 @@ __main__:
 		
 		Progress, 60, Copying files..., Mostly Done., Running Configuration
 		Log("-- copying files to root...")
-		Command("robocopy "A_ScriptDir . "\Resources\Sierra Desktop App C:\Sierra Desktop App /s") ; Sierra files.
+		Command("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
 		
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
@@ -151,7 +151,7 @@ __main__:
 		
 		Progress, 60, Copying files..., Mostly Done., Running Configuration
 		Log("-- copying files to root...")
-		Command("robocopy "A_ScriptDir . "\Resources\Sierra Desktop App ""C:\Sierra Desktop App"" /s") ; Sierra files.
+		Command("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
 		Command("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s") ;  Offline circ files.
 		
 		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
