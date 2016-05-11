@@ -42,7 +42,7 @@ Global vComputerName ; Stores input computer name.
 Global vLocation  ; Stores the value extracted from Location array at vBranchNumber index.
 Global vComputerType  ; Stores the value extracted from ComputerType array at vTypeNumber index.
 Global vLPTServers ; Stores the value extracted from the LPTServers array ay vBranchNumber index.
-Global vDistiguishedName := "" ; Stores the Distuguished Name for transferring the OU.
+Global vOUPath := "" ; Stores the Distinguished Name for transferring the OU.
 Global vNumErrors := 0	; Tracks the number of errors, if any.
 
 ;   ================================================================================
@@ -80,9 +80,8 @@ Return
 __main__:
 {
 	Log("== Main Process...")
-	Progress, M y-100
-	Progress, SHOW
-	Progress, 0, Configuration, Please Wait., Running Configuration
+
+	Progress, M Y0 0, Configuration, Please Wait., Running Configuration
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
 		Log("== Wireless Configuration...")
@@ -102,14 +101,14 @@ __main__:
 	;Command("cscript //B c:\windows\system32\slmgr.vbs /ipk ***REMOVED***") ; Copy activation key.
 	;Command("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
 	
-	Progress, 25, Renaming computer..., Please Wait., Running Configuration
-	Log("-- renaming computer...")
-	Command("powershell.exe -Command Rename-Computer -NewName "vComputerName) ; Rename computer. (WORKS)
+	;Progress, 25, Renaming computer..., Please Wait., Running Configuration
+	;Log("-- renaming computer...")
+	;Command("powershell.exe -Command Rename-Computer -NewName "vComputerName) ; Rename computer. (WORKS)
 	
 	Progress, 30, Joining Domain and moving OU..., Please Wait., Running Configuration
-	Log("-- joining domain...")
-	CreateDistinguishedName() ; Creates distinguished name for OU move
-	Command("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""***REMOVED***\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath \""" vDistiguishedName "\""") ; Join domain, Move OU.
+	Log("-- joining domain with new name...")
+	CreateOUPath() ; Creates distinguished name for OU move
+	;Command("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""***REMOVED***\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
 	
 	Progress, 35, Installing VIPRE anti-malware..., Please Wait.., Running Configuration
 	Log("-- installing VIPRE antivirus...")
