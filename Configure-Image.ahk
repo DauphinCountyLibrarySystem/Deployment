@@ -101,10 +101,6 @@ __main__:
 	;Command("cscript //B c:\windows\system32\slmgr.vbs /ipk HRRBN-GYBYT-44FP9-3TDPY-B4G6B") ; Copy activation key.
 	;Command("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
 	
-	;Progress, 25, Renaming computer..., Please Wait., Running Configuration
-	;Log("-- renaming computer...")
-	;Command("powershell.exe -Command Rename-Computer -NewName "vComputerName) ; Rename computer. (WORKS)
-	
 	Progress, 30, Joining Domain and moving OU..., Please Wait., Running Configuration
 	Log("-- joining domain with new name...")
 	CreateOUPath() ; Creates distinguished name for OU move
@@ -187,11 +183,14 @@ __main__:
 		Log("-- installing patron Envisionware client...")
 		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S -ip="%vLPTServers% . " -tcpport=9432") ; Envisionware Client.
 		;RemoveOffice("outlook", "skype")
-		;AutomateOfficeActivation()
 		
-		Progress, 95, Confiuring Registries..., Almost There!, Running Configuration
+		Progress, 95, Configuring Registries..., Almost There!, Running Configuration
 		Log("-- configuring catalog registries...")
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, PatronAdminPanel, "C:\PatronAdminPanel\PatronAdminPanel.exe" ; Set PatronAdminPanel auto-start.
+		
+		Progress, 99, Updating Start Menu..., Almost There!, Running Configuration
+		Log("-- updating Start menu")
+		Command("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s")
 	}
 	
 	if(vTypeNumber == 4) ; Catalog script is installed.
@@ -218,8 +217,10 @@ __main__:
 	{
 		;Command(Kiosk)
 	}
+	
 	Progress, 100, Finalizing Configuration., Last Thing!, Running Configuration
 	Sleep 2000
+	
 	if(vNumErrors != 0) ; Final Check for errors and closes program.
 	{
 		Progress, OFF
