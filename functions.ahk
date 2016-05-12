@@ -40,25 +40,17 @@ AddAutoLogon() ; Adds registry keys for computer types that automatically logon.
 
 Command(vCommand, vHide := "") ; Runs a configuration command.
 {
+	Try {
 	If(vIsVerbose == 1)
 	{
-		Try {
 		Log("** Executing: "vCommand)
-		RunWait %vCommand%%vHide%
-		} Catch {
-		vNumErrors += 1
-		Log("!! Error executing "vCommand . "!")
-		}
-	}
-	else
-	{
-		Try {
+	} else {
 		Log("** Executing: "vCommand, 1)
-		RunWait %vCommand%%vHide%
-		} Catch {
-		vNumErrors += 1
-		Log("!! Error executing "vCommand . "!")
-		}
+	}
+	RunWait %vCommand%%vHide%
+	} Catch {
+	vNumErrors += 1
+	Log("!! Error executing "vCommand . "!")
 	}
 	Return
 }
