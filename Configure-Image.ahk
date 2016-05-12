@@ -140,7 +140,7 @@ __main__:
 		
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe""/S") ; Install staff Print Release Terminal.
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
 	}
 	
 	if(vTypeNumber == 2) ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
@@ -162,11 +162,11 @@ __main__:
 				
 		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe""/S") ; Install staff Print Release Terminal.
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
 		
 		Progress, 75, Installing Envisonware Reservation Station..., Mostly Done., Running Configuration.
 		Log("-- installing staff Envisionware Reservation Station...")
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe""/S") ; Install Reservation Station
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") ; Install Reservation Station
 		;RemoveOffice("all")
 	}
 	
@@ -181,11 +181,11 @@ __main__:
 		
 		Progress, 85, Installing patron LPTOne printers..., Almost There!, Running Configuration
 		Log("-- installing patron LPTOne printers...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe""/S -jqe.host="%vLPTServers%) ; Patron printers.
+		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /S -jqe.host="%vLPTServers%) ; Patron printers.
 		
 		Progress, 90, Installing Envisionware client..., Almost There!, Running Configuration
 		Log("-- installing patron Envisionware client...")
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe""/S -ip="%vLPTServers% . " -tcpport=9432") ; Envisionware Client.
+		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S -ip="%vLPTServers% . " -tcpport=9432") ; Envisionware Client.
 		;RemoveOffice("outlook", "skype")
 		;AutomateOfficeActivation()
 		
