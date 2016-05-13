@@ -1,11 +1,14 @@
 /* 	
 	Name: New Computer Deployment		
-	Version: 0.3.0
+	Version: 0.1.0
 	Author:	Christopher Roth
 
 	Changelog:
-		* Wireless Configuration testing
-		* Added Progress Bar
+		* Removed progress bar
+		* Moved functions to seperate file
+		* Resolved issues with OU move
+		* Cleaned up file paths
+		* Added Eware closing function
 */
 if not A_IsAdmin ; Check for elevation (WORKS)
 {
@@ -41,7 +44,7 @@ Global vIsVerbose ; Stores Verbose logging value.
 Global vComputerName ; Stores input computer name.
 Global vLocation  ; Stores the value extracted from Location array at vBranchNumber index.
 Global vComputerType  ; Stores the value extracted from ComputerType array at vTypeNumber index.
-Global vLPTServers ; Stores the value extracted from the LPTServers array ay vBranchNumber index.
+Global vEwareServers ; Stores the value extracted from the LPTServers array ay vBranchNumber index.
 Global vOUPath := "" ; Stores the Distinguished Name for transferring the OU.
 Global vNumErrors := 0	; Tracks the number of errors, if any.
 
@@ -80,41 +83,32 @@ Return
 __main__:
 {
 	Log("== Main Process...")
-
-	Progress, M Y0 0, Configuration, Please Wait., Running Configuration
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
 		Log("== Wireless Configuration...")
-		Progress, 5, Adding profile for wireless computer..., Please Wait., Running Configuration
 		Log("-- adding wireless profile...")
-		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\Installers\WirelessProfile.xml user=all") ; Install Wireless Profile
+		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all") ; Install Wireless Profile
 		Sleep 5000 ; Wait for profile to update.
 		
-		Progress, 10, Installing Spiceworks mobile app..., Please Wait., Running Configuration
 		Log("-- installing Spiceworks mobile app...")
-		Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" ***REMOVED***"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
+		Command("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" ***REMOVED***"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
 	}
 	
 	Log("== Default Configuration...")
-	Progress, 15, Activating Windows..., Please Wait., Running Configuration
 	Log("-- activating Windows...")
-	;Command("cscript //B c:\windows\system32\slmgr.vbs /ipk ***REMOVED***") ; Copy activation key.
-	;Command("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
+	Command("cscript //B c:\windows\system32\slmgr.vbs /ipk ***REMOVED***") ; Copy activation key.
+	Command("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
 	
-	Progress, 30, Joining Domain and moving OU..., Please Wait., Running Configuration
 	Log("-- joining domain with new name...")
 	CreateOUPath() ; Creates distinguished name for OU move
-	;Command("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""***REMOVED***\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
+	Command("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""***REMOVED***\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
 	
-	Progress, 35, Installing VIPRE anti-malware..., Please Wait.., Running Configuration
 	Log("-- installing VIPRE antivirus...")
-	Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
+	Command("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
 	
-	Progress, 45, Installing LogMeIn..., Please Wait.., Running Configuration
 	Log("-- installing LogMeIn...")
-	Command("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
+	Command("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
 
-	Progress, 50, Cleaning up installations..., Please Wait.., Running Configuration
 	Log("-- editing registries and clearing files...")
 	RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
 	FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"
@@ -122,21 +116,17 @@ __main__:
 	
 	if(vTypeNumber == 1) ; Office staff get LPTOne staff, staff printers, and Sierra.
 	{ 
-		Log("== Office Staff Configuration...")
-		
-		Progress, 60, Copying files..., Mostly Done., Running Configuration
-		Log("-- copying files to root...")
+		Log("== Office Staff Configuration...")	
+		Log("-- installing Sierra files...")
 		Command("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
 		
-		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Sierra shortcut.
-		
-		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
+
 		Log("-- installing staff LPTOne print release...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
+		Command(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
 	}
 	
 	if(vTypeNumber == 2) ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
@@ -144,25 +134,21 @@ __main__:
 		Log("== Frontline Staff Configuration...")
 		AddAutoLogon()
 		
-		Progress, 60, Copying files..., Mostly Done., Running Configuration
-		Log("-- copying files to root...")
+		Log("-- installing Sierra files...")
 		Command("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
 		Command("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s") ;  Offline circ files.
 		
-		Progress, 65, Copying staff shortcuts..., Mostly Done., Running Configuration
 		Log("-- copying staff shortcuts...")
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Sierra shortcut.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Offline Circ shortcut.
 				
-		Progress, 70, Installing LPTOne staff print release..., Mostly Done., Running Configuration
 		Log("-- installing staff LPTOne print release...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
+		Command(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
 		
-		Progress, 75, Installing Envisonware Reservation Station..., Mostly Done., Running Configuration.
 		Log("-- installing staff Envisionware Reservation Station...")
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") ; Install Reservation Station
+		Command(A_ScriptDir . "\Resources\Envisionware\_PCReservationStation.exe /S") ; Install Reservation Station
 		;RemoveOffice("all")
 	}
 	
@@ -171,26 +157,23 @@ __main__:
 		Log("== Patron Terminal Configuration...")
 		AddAutoLogon()
 		
-		Progress, 60, Copying files..., Mostly Done., Runnning Configuration
-		Log("-- copying files to root...")
+		Log("-- installing PatronAdminPanel...")
 		Command("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s") ; PatronAdminPanel script files.
-		
-		Progress, 85, Installing patron LPTOne printers..., Almost There!, Running Configuration
-		Log("-- installing patron LPTOne printers...")
-		Command(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /S -jqe.host="%vLPTServers%) ; Patron printers.
-		
-		Progress, 90, Installing Envisionware client..., Almost There!, Running Configuration
-		Log("-- installing patron Envisionware client...")
-		Command(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S -ip="%vLPTServers% . " -tcpport=9432") ; Envisionware Client.
-		;RemoveOffice("outlook", "skype")
-		
-		Progress, 95, Configuring Registries..., Almost There!, Running Configuration
-		Log("-- configuring catalog registries...")
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, PatronAdminPanel, "C:\PatronAdminPanel\PatronAdminPanel.exe" ; Set PatronAdminPanel auto-start.
 		
-		Progress, 99, Updating Start Menu..., Almost There!, Running Configuration
+		Log("-- configuring Office for patrons...")
+		Command("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure customconfiguration_patron.xml")
+		
 		Log("-- updating Start menu")
 		Command("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s")
+
+		Log("-- installing patron LPTOne printers...")
+		Command(A_ScriptDir . "\Resources\Envisionware\_LPTOneClient.exe /S -jqe.host="%vEwareServers%) ; Patron printers.
+
+		Log("-- installing patron Envisionware client...")
+		Command(A_ScriptDir . "\Resources\Envisionware\_PCReservationClient.exe /S -ip="%vEwareServers% . " -tcpport=9432") ; Envisionware Client.
+		Sleep 30000
+		ClosePCReservation()
 	}
 	
 	if(vTypeNumber == 4) ; Catalog script is installed.
@@ -198,11 +181,9 @@ __main__:
 		Log("== Catalog Computer Configuration...")
 		AddAutoLogon()
 		
-		Progress, 60, copying files..., Mostly Done., Runnning Configuration
 		Log("-- copying files to root...")
 		Command("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")	; EncoreAlways script files.
 		
-		Progress, 95, Confiuring Registries..., Almost There!, Running Configuration
 		Log("-- configuring catalog registries...")
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, "C:\EncoreAlways\EncoreAlways.exe" ; Set EncoreAlways auto-start.
 	}
@@ -218,12 +199,8 @@ __main__:
 		;Command(Kiosk)
 	}
 	
-	Progress, 100, Finalizing Configuration., Last Thing!, Running Configuration
-	Sleep 2000
-	
 	if(vNumErrors != 0) ; Final Check for errors and closes program.
 	{
-		Progress, OFF
 		Log("!! Configuration Incomplete! There were "%vNumErrors% . " errors with this program.")
 		SoundPlay *16
 		MsgBox, 16, Configuration Error,  There were %vNumErrors% errors during the configuration process!`nSomething may not have configured or installed propery.`nCheck the log for more details.
@@ -231,7 +208,6 @@ __main__:
 	}
 	else
 	{
-		Progress, OFF
 		Log("== Configuration Complete! There were "%vNumErrors% . " errors with this program.")
 		SoundPlay *64
 		MsgBox, 64, Deployment Complete,  New computer deployment complete! Exiting application.
