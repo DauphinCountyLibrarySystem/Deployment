@@ -87,43 +87,51 @@ __main__:
 	{
 		Log("== Wireless Configuration...")
 		Log("-- adding wireless profile...")
-		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all") ; Install Wireless Profile
+		;Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all") ; Install Wireless Profile
 		Sleep 5000 ; Wait for profile to update.
 		
 		Log("-- installing Spiceworks mobile app...")
-		Command("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" ***REMOVED***"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
+		;Command("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" ***REMOVED***"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
 	}
 	
 	Log("== Default Configuration...")
 	Log("-- activating Windows...")
-	Command("cscript //B c:\windows\system32\slmgr.vbs /ipk ***REMOVED***") ; Copy activation key.
-	Command("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
+	;Command("cscript //B c:\windows\system32\slmgr.vbs /ipk ***REMOVED***") ; Copy activation key.
+	;Command("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
 	
 	Log("-- joining domain with new name...")
-	CreateOUPath() ; Creates distinguished name for OU move
-	Command("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""***REMOVED***\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
+	;CreateOUPath() ; Creates distinguished name for OU move
+	;Command("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""***REMOVED***\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
 	
 	Log("-- installing VIPRE antivirus...")
-	Command("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
+	;Command("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
 	
 	Log("-- installing LogMeIn...")
-	Command("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
+	;Command("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
 
 	Log("-- editing registries and clearing files...")
-	RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
-	FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"
-	FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"
+	;RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
+	;FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"
+	;FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"
 	
-	if(vTypeNumber == 1) ; Office staff get LPTOne staff, staff printers, and Sierra.
+	if(vTypeNumber == 1) ; Office staff get Office365, staff printers, and Sierra.
 	{ 
 		Log("== Office Staff Configuration...")	
 		Log("-- installing Sierra files...")
 		Command("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
 		
-		Log("-- copying staff shortcuts...")
+		Log("-- configuring Office for patrons...")
+		Command("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_staff.xml")
+		
+		Log("-- updating Desktop shortcuts...")
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Sierra shortcut.
+		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")
+		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")
+		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")
+		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")
+		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Outlook*")
 
 		Log("-- installing staff LPTOne print release...")
 		Command(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
@@ -132,7 +140,7 @@ __main__:
 	if(vTypeNumber == 2) ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
 	{
 		Log("== Frontline Staff Configuration...")
-		AddAutoLogon()
+		;AddAutoLogon()
 		
 		Log("-- installing Sierra files...")
 		Command("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
@@ -155,14 +163,20 @@ __main__:
 	if(vTypeNumber == 3) ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
 	{
 		Log("== Patron Terminal Configuration...")
-		AddAutoLogon()
+		;AddAutoLogon()
 		
 		Log("-- installing PatronAdminPanel...")
 		Command("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s") ; PatronAdminPanel script files.
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, PatronAdminPanel, "C:\PatronAdminPanel\PatronAdminPanel.exe" ; Set PatronAdminPanel auto-start.
 		
 		Log("-- configuring Office for patrons...")
-		Command("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure customconfiguration_patron.xml")
+		Command("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml")
+		
+		Log("-- updating Desktop shortcuts")
+		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")
+		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")
+		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")
+		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")
 		
 		Log("-- updating Start menu")
 		Command("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s")
@@ -172,14 +186,14 @@ __main__:
 
 		Log("-- installing patron Envisionware client...")
 		Command(A_ScriptDir . "\Resources\Envisionware\_PCReservationClient.exe /S -ip="%vEwareServers% . " -tcpport=9432") ; Envisionware Client.
-		Sleep 30000
+		Sleep 15000
 		ClosePCReservation()
 	}
 	
 	if(vTypeNumber == 4) ; Catalog script is installed.
 	{
 		Log("== Catalog Computer Configuration...")
-		AddAutoLogon()
+		;AddAutoLogon()
 		
 		Log("-- copying files to root...")
 		Command("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")	; EncoreAlways script files.
@@ -190,7 +204,7 @@ __main__:
 	
 	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
 	{
-		AddAutoLogon()
+		;AddAutoLogon()
 		;Command(Self-Check)
 	}
 
@@ -210,7 +224,8 @@ __main__:
 	{
 		Log("== Configuration Complete! There were "%vNumErrors% . " errors with this program.")
 		SoundPlay *64
-		MsgBox, 64, Deployment Complete,  New computer deployment complete! Exiting application.
+		MsgBox, 64, Deployment Complete,  New computer deployment complete! Rebooting in 10 seconds.
+		RunWait cmd.exe shutdown -t 10 -r -f
 		ExitApp
 	}
 	Return

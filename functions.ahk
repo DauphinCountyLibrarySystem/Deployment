@@ -101,7 +101,7 @@ ConfirmationWindow() ; Checks that selections are correct before continuing. (WO
 	MsgBox, 36, Confirm, This will rename the computer to %vComputerName%.`nThis is a %vComputerType% computer at %vLocation%.`n%vIsWireless% `nIs this correct?
 	IfMsgBox, Yes
 	{
-		Log("-- " vIsWireless "It is at " vLocation "and named " vComputerName ".")
+		Log("-- " vIsWireless " It is at " vLocation " and named " vComputerName ".")
 		Gosub __main__
 	}
 	Return
