@@ -38,6 +38,17 @@ AddAutoLogon() ; Adds registry keys for computer types that automatically logon.
 	}
 }	
 
+ClosePCReservation()
+{
+	CoordMode, Mouse, Screen
+	MouseMove, (20), (A_ScreenHeight - 20)
+	Sleep, 250
+	Send, {Ctrl Down}{Click}{Ctrl up}
+	Sleep, 250
+	Send envisionware{enter}{enter}
+	Return
+}
+
 Command(vCommand, vHide := "") ; Runs a configuration command.
 {
 	Try {
