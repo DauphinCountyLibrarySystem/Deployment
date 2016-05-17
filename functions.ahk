@@ -69,10 +69,22 @@ Command(vCommand, vHide := "") ; Runs a configuration command.
 ConfirmationWindow() ; Checks that selections are correct before continuing. (WORKS)
 {
 	Gui +OwnDialogs
-	if(vWireless = 1)
+	vTypeParam := "" ; Stores parameters of the particular computer type.
+	
+	if(vWireless == 1)
 		vIsWireless := "This is a Wireless computer."
 	else
 		vIsWireless := "This is an Ethernet computer."
+		
+	if (vTypeNumber == 1)
+		vTypeParam := "This will install Office, Sierra, and staff printers."
+	if (vTypeNumber == 2)
+		vTypeParam := "This will install Sierra, Offline Circulation, staff printers, PC Reservation, staff LPTOne print, and configure Auto Logon."
+	if (vTypeNumber == 3)
+		vTypeParam := "This will install patron Office, Envisionware client, patron LPTOne print, Patron Admin Panel, and configure Auto Logon."
+	if (vTypeNumber == 4)
+		vTypeParam := "This will install Encore Always and configure Auto Logon."
+		
 	if(vComputerName == "")
 	{
 		SoundPlay *48
@@ -98,7 +110,7 @@ ConfirmationWindow() ; Checks that selections are correct before continuing. (WO
 		Return
 	}
 	SoundPlay *32
-	MsgBox, 36, Confirm, This will rename the computer to %vComputerName%.`nThis is a %vComputerType% computer at %vLocation%.`n%vIsWireless% `nIs this correct?
+	MsgBox, 36, Confirm, This will rename the computer to %vComputerName%.`nThis is a %vComputerType% computer at %vLocation%.`n%vIsWireless% `n%vTypeParam% `nIs this correct?
 	IfMsgBox, Yes
 	{
 		Log("-- " vIsWireless " It is at " vLocation " and named " vComputerName ".")
