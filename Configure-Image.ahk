@@ -223,7 +223,7 @@ __main__:
 	else
 	{
 		Log("== Configuration Complete! There were "%vNumErrors% . " errors with this program.")
-		RegWrite, REG_SZ,HKEY_LOCAL_MACHINE,SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce, Application, %comspec% /c /s /q del "C:\IT\Deployment" ; Deletes configuration package on reboot
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce, SelfDelete, %comspec% /c RD /S /Q C:\IT\Deployment ; Deletes configuration package on reboot
 		SoundPlay *64
 		MsgBox, 64, Deployment Complete,  New computer deployment complete! Rebooting in 10 seconds., 10 ; MsgBox times out after 10 seconds.
 		Shutdown, 2 ; Reboots computer.
