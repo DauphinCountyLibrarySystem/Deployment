@@ -1,7 +1,7 @@
 /* 	
 	Name: New Computer Deployment		
 	Version: 0.1.0
-	Author:	Christopher Roth
+	Authors: Christopher Roth, Lucas Bodnyk
 
 	Changelog:
 		* Removed progress bar
@@ -82,25 +82,23 @@ Return
 ;   ================================================================================
 __main__:
 {
-	Log("== Main Process...")
 	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
 		Log("== Wireless Configuration...")
 		Log("-- adding wireless profile...")
 		;Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all") ; Install Wireless Profile
-		Sleep 5000 ; Wait for profile to update.
-		
+		Sleep 5000 ; Wait for profile to update.	
 		Log("-- installing Spiceworks mobile app...")
 		;Command("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" ***REMOVED***"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
-	}
+	}	
 	
-	Log("== Default Configuration...")
+	Log("== Default Configuration...")	
 	Log("-- activating Windows...")
 	;Command("cscript //B c:\windows\system32\slmgr.vbs /ipk ***REMOVED***") ; Copy activation key.
 	;Command("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
 	
 	Log("-- joining domain with new name...")
-	;CreateOUPath() ; Creates distinguished name for OU move
+	CreateOUPath() ; Creates distinguished name for OU move
 	;Command("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""***REMOVED***\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
 	
 	Log("-- installing VIPRE antivirus...")
@@ -108,7 +106,7 @@ __main__:
 	
 	Log("-- installing LogMeIn...")
 	;Command("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
-
+	
 	Log("-- editing registries and clearing files...")
 	;RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
 	;FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"
@@ -118,9 +116,9 @@ __main__:
 	{ 
 		Log("== Office Staff Configuration...")	
 		Log("-- installing Sierra files...")
-		Command("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
+		Command("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.	
 		
-		Log("-- configuring Office for patrons...")
+		Log("-- configuring Office for staff...")
 		Command("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_staff.xml")
 		
 		Log("-- updating Desktop shortcuts...")
@@ -132,7 +130,7 @@ __main__:
 		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")
 		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")
 		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Outlook*")
-
+		
 		Log("-- installing staff LPTOne print release...")
 		Command(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
 	}
@@ -140,6 +138,7 @@ __main__:
 	if(vTypeNumber == 2) ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
 	{
 		Log("== Frontline Staff Configuration...")
+		Log("-- configuring automatic logon...")
 		;AddAutoLogon()
 		
 		Log("-- installing Sierra files...")
@@ -150,19 +149,19 @@ __main__:
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*" ) ; Sierra shortcut.
-		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Offline Circ shortcut.
-				
+		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Offline Circ shortcut.		
+		
 		Log("-- installing staff LPTOne print release...")
-		Command(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
+		;Command(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
 		
 		Log("-- installing staff Envisionware Reservation Station...")
-		Command(A_ScriptDir . "\Resources\Envisionware\_PCReservationStation.exe /S") ; Install Reservation Station
-		;RemoveOffice("all")
+		;Command(A_ScriptDir . "\Resources\Envisionware\_PCReservationStation.exe /S") ; Install Reservation Station
 	}
 	
 	if(vTypeNumber == 3) ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
 	{
 		Log("== Patron Terminal Configuration...")
+		Log("-- configuring automatic logon...")
 		;AddAutoLogon()
 		
 		Log("-- installing PatronAdminPanel...")
@@ -172,18 +171,18 @@ __main__:
 		Log("-- configuring Office for patrons...")
 		Command("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml")
 		
-		Log("-- updating Desktop shortcuts")
+		Log("-- updating Desktop shortcuts...")
 		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")
 		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")
 		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")
 		Command("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")
 		
-		Log("-- updating Start menu")
+		Log("-- updating Start menu...")
 		Command("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s")
-
+		
 		Log("-- installing patron LPTOne printers...")
 		Command(A_ScriptDir . "\Resources\Envisionware\_LPTOneClient.exe /S -jqe.host="%vEwareServers%) ; Patron printers.
-
+		
 		Log("-- installing patron Envisionware client...")
 		Command(A_ScriptDir . "\Resources\Envisionware\_PCReservationClient.exe /S -ip="%vEwareServers% . " -tcpport=9432") ; Envisionware Client.
 		Sleep 15000
@@ -193,9 +192,10 @@ __main__:
 	if(vTypeNumber == 4) ; Catalog script is installed.
 	{
 		Log("== Catalog Computer Configuration...")
-		;AddAutoLogon()
+		Log("-- configuring automatic logon...")
+		AddAutoLogon()		
 		
-		Log("-- copying files to root...")
+		Log("-- installing EncoreAlways script...")
 		Command("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")	; EncoreAlways script files.
 		
 		Log("-- configuring catalog registries...")
@@ -207,7 +207,7 @@ __main__:
 		;AddAutoLogon()
 		;Command(Self-Check)
 	}
-
+	
 	if(vTypeNumber == 6) ; Kiosk Computer
 	{
 		;Command(Kiosk)
@@ -223,9 +223,10 @@ __main__:
 	else
 	{
 		Log("== Configuration Complete! There were "%vNumErrors% . " errors with this program.")
+		RegWrite, REG_SZ,HKEY_LOCAL_MACHINE,SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce, Application, %comspec% /c /s /q del "C:\IT\Deployment" ; Deletes configuration package on reboot
 		SoundPlay *64
-		MsgBox, 64, Deployment Complete,  New computer deployment complete! Rebooting in 10 seconds.
-		RunWait cmd.exe shutdown -t 10 -r -f
+		MsgBox, 64, Deployment Complete,  New computer deployment complete! Rebooting in 10 seconds., 10 ; MsgBox times out after 10 seconds.
+		Shutdown, 2 ; Reboots computer.
 		ExitApp
 	}
 	Return
