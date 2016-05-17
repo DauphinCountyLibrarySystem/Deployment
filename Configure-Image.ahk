@@ -225,7 +225,7 @@ __main__:
 		Log("== Configuration Complete! There were "%vNumErrors% . " errors with this program.")
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce, SelfDelete, %comspec% /c RD /S /Q C:\IT\Deployment ; Deletes configuration package on reboot
 		SoundPlay *64
-		MsgBox, 64, Deployment Complete,  New computer deployment complete! Rebooting in 10 seconds., 10 ; MsgBox times out after 10 seconds.
+		MsgBox, 64, Deployment Complete,  New computer deployment complete! The computer will now reboot., 10 ; MsgBox times out after 10 seconds.
 		Shutdown, 2 ; Reboots computer.
 		ExitApp
 	}
