@@ -1,6 +1,5 @@
 AddAutoLogon() ; Adds registry keys for computer types that automatically logon. (WORKS)
 {
-	Progress, 55, Configuring Automatic Logon..., Mostly Done., Running Configuration
 	Log("-- configuring autologin registries...")
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, AutoAdminLogon, 1
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultDomainName, dcls.org
