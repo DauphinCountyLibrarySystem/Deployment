@@ -27,6 +27,7 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #Persistent ; Keeps a script permanently running (that is, until the user closes it or ExitApp is encountered).
 #SingleInstance FORCE ; automatically replaces an old version of the script - useful when auto-elevating.
+
 ;   ================================================================================
 ;   INCLUDES, GLOBAL VARIABLES, ONEXIT, ETC...
 ;   ================================================================================
@@ -36,17 +37,22 @@ StringReplace, AppTitle, ScriptBasename, _, %A_SPACE%, All
 OnExit("ExitFunc") ; Register a function to be called on exit
 Global aLocation := {1: "ESA", 2: "KL", 3: "MOM", 4: "MRL", 5: "AFL", 6: "JOH", 7: "EV", 8: "ND"} ; Stores list of library locations.
 Global aComputerType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog", 5: "Selfcheck", 6: "Kiosk"} ; Stores list of computer types to deploy.
-Global aLPTServers := {1: 192.168.100.221, 2: 10.14.20.14, 3: 10.13.20.14, 4: 10.11.20.5, 5: 192.168.102.221, 6: 192.168.106.221, 7: 192.168.105.221, 8:  10.18.40.200} ; Stores list of LPTOne server IPs (will need to be updated).
-Global vBranchNumber ; Stores the value of the Location array index.
-Global vTypeNumber ; Stores the value of the ComputerType array index.
-Global vWireless  ; Stores wireless toggle value.
-Global vIsVerbose ; Stores Verbose logging value.
+Global vBranchNumber ; Stores the value of the Location radio button.
+Global vTypeNumber ; Stores the value of the ComputerType radio button.
+Global vIsWireless  ; Stores wireless checkbox value.
+Global vIsVerbose ; Stores Verbose logging checkbox value.
 Global vComputerName ; Stores input computer name.
 Global vLocation  ; Stores the value extracted from Location array at vBranchNumber index.
 Global vComputerType  ; Stores the value extracted from ComputerType array at vTypeNumber index.
-Global vEwareServers ; Stores the value extracted from the LPTServers array ay vBranchNumber index.
-Global vOUPath := "" ; Stores the Distinguished Name for transferring the OU.
+Global vEwareServer ; Stores the value extracted from the LPTServers array ay vBranchNumber index.
 Global vNumErrors := 0	; Tracks the number of errors, if any.
+
+;   ================================================================================
+;	UPDATEABLE VARIABLES
+;   ================================================================================
+Global aLPTServers := {1: 192.168.100.221, 2: 10.14.20.14, 3: 10.13.20.14, 4: 10.11.20.5, 5: 192.168.102.221, 6: 192.168.106.221, 7: 192.168.105.221, 8:  10.18.40.200} ; Stores list of LPTOne server IPs.
+Global vActivationKey := HRRBN-GYBYT-44FP9-3TDPY-B4G6B ; Windows activation key.
+Global vSpiceworksKey := eb7e922f71BB336280238a02c02c64ac35941be2b ; Spiceworks authentication key.
 
 ;   ================================================================================
 ;	BEGIN INITIALIZATION
@@ -74,7 +80,7 @@ Try {
 WinMinimizeAll
 WinRestore, Console Window
 Log("== Starting Up...")
-createOptionsWindow() ; Here is where we construct the GUI
+Gosub CreateOptionsWindow ; Here is where we construct the GUI
 Return
 
 ;   ================================================================================
@@ -82,35 +88,35 @@ Return
 ;   ================================================================================
 __main__:
 {
-	if(vWireless == 1) ; If wireless, install wireless profile and Spiceworks.
+	if(vIsWireless == 1) ; If wireless, install wireless profile and Spiceworks.
 	{
 		Log("== Wireless Configuration...")
 		Log("-- adding wireless profile...")
-		;Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all") ; Install Wireless Profile
+		Command("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all", 1) ; Install Wireless Profile
 		Sleep 5000 ; Wait for profile to update.	
 		Log("-- installing Spiceworks mobile app...")
-		;Command("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY="" eb7e922f71BB336280238a02c02c64ac35941be2b"" SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
+		Command("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY=""" %vSpiceworksKey% """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log", 1) ; Install Spiceworks Mobile
 	}	
 	
 	Log("== Default Configuration...")	
 	Log("-- activating Windows...")
-	;Command("cscript //B c:\windows\system32\slmgr.vbs /ipk HRRBN-GYBYT-44FP9-3TDPY-B4G6B") ; Copy activation key.
-	;Command("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
+	Command("cscript //B c:\windows\system32\slmgr.vbs /ipk " %vActivationKey%, 1) ; Copy activation key.
+	Command("cscript //B c:\windows\system32\slmgr.vbs /ato", 1) ; Activate Windows.
 	
 	Log("-- joining domain with new name...")
-	CreateOUPath() ; Creates distinguished name for OU move
-	;Command("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""0Bg17GCkCjtOYg03NOVU\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
+	vOUPath := CreateOUPath(vTypeNumber, vLocation, vIsWireless) ; Creates distinguished name for OU move
+	Command("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""0Bg17GCkCjtOYg03NOVU\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'", 1) ; Join domain, Move OU.
 	
 	Log("-- installing VIPRE antivirus...")
-	;Command("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
+	Command("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log", 1) ; Install VIPRE antivirus. (WORKS) 
 	
 	Log("-- installing LogMeIn...")
-	;Command("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
+	Command("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log", 1) ; Install LogMeIn. (WORKS)
 	
 	Log("-- editing registries and clearing files...")
-	;RegWrite, Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0
-	;FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"
-	;FileDelete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"
+	Command("Reg_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui /f /v EnableSystray /t REG_DWORD /d 0", 2)
+	Command("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk", 3)
+	Command("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk", 3)
 	
 	if(vTypeNumber == 1) ; Office staff get Office365, staff printers, and Sierra.
 	{ 
@@ -139,7 +145,7 @@ __main__:
 	{
 		Log("== Frontline Staff Configuration...")
 		Log("-- configuring automatic logon...")
-		;AddAutoLogon()
+		AddAutoLogon(vBranchNumber, vTypeNumber)
 		
 		Log("-- installing Sierra files...")
 		Command("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
@@ -152,21 +158,21 @@ __main__:
 		Command("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Offline Circ shortcut.		
 		
 		Log("-- installing staff LPTOne print release...")
-		;Command(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
+		Command(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
 		
 		Log("-- installing staff Envisionware Reservation Station...")
-		;Command(A_ScriptDir . "\Resources\Envisionware\_PCReservationStation.exe /S") ; Install Reservation Station
+		Command(A_ScriptDir . "\Resources\Envisionware\_PCReservationStation.exe /S") ; Install Reservation Station
 	}
 	
 	if(vTypeNumber == 3) ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
 	{
 		Log("== Patron Terminal Configuration...")
 		Log("-- configuring automatic logon...")
-		;AddAutoLogon()
+		AddAutoLogon(vBranchNumber, vTypeNumber)
 		
 		Log("-- installing PatronAdminPanel...")
 		Command("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s") ; PatronAdminPanel script files.
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, PatronAdminPanel, "C:\PatronAdminPanel\PatronAdminPanel.exe" ; Set PatronAdminPanel auto-start.
+		Command("REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, PatronAdminPanel, ""C:\PatronAdminPanel\PatronAdminPanel.exe""", 2) ; Set PatronAdminPanel auto-start.
 		
 		Log("-- configuring Office for patrons...")
 		Command("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml")
@@ -181,25 +187,25 @@ __main__:
 		Command("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s")
 		
 		Log("-- installing patron LPTOne printers...")
-		Command(A_ScriptDir . "\Resources\Envisionware\_LPTOneClient.exe /S -jqe.host="%vEwareServers%) ; Patron printers.
+		Command(A_ScriptDir . "\Resources\Envisionware\_LPTOneClient.exe /S -jqe.host="%vEwareServer%) ; Patron printers.
 		
 		Log("-- installing patron Envisionware client...")
-		Command(A_ScriptDir . "\Resources\Envisionware\_PCReservationClient.exe /S -ip="%vEwareServers% . " -tcpport=9432") ; Envisionware Client.
+		Command(A_ScriptDir . "\Resources\Envisionware\_PCReservationClient.exe /S -ip="%vEwareServer% . " -tcpport=9432") ; Envisionware Client.
 		Sleep 15000
-		ClosePCReservation()
+		Gosub ClosePCReservation
 	}
 	
 	if(vTypeNumber == 4) ; Catalog script is installed.
 	{
 		Log("== Catalog Computer Configuration...")
 		Log("-- configuring automatic logon...")
-		AddAutoLogon()		
+		AddAutoLogon(vBranchNumber, vTypeNumber)		
 		
 		Log("-- installing EncoreAlways script...")
 		Command("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")	; EncoreAlways script files.
 		
 		Log("-- configuring catalog registries...")
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, "C:\EncoreAlways\EncoreAlways.exe" ; Set EncoreAlways auto-start.
+		Command("REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, ""C:\EncoreAlways\EncoreAlways.exe""", 2) ; Set EncoreAlways auto-start.
 	}
 	
 	if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
