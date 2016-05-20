@@ -40,7 +40,7 @@ AddAutoLogon(BranchNumber, TypeNumber) ; Adds registry keys for computer types t
 	Return
 }	
 
-Command(Command, CommandType, Hide := "") ; Runs a configuration command. 1= RunWait, 2= RegWrite, 3 = FileDelete
+RunLog(Command, Hide := "") ; Runs a configuration command. 1= RunWait, 2= RegWrite, 3 = FileDelete
 {
 	Try {
 	If(vIsVerbose == 1)
@@ -49,12 +49,7 @@ Command(Command, CommandType, Hide := "") ; Runs a configuration command. 1= Run
 	} else {
 		Log("** Executing: "Command, 1)
 	}
-	If(CommandType == 1)
-		RunWait %vCommand%%vHide%
-	If(CommandType == 2)
-		RegWrite, %vCommand%%vHide%
-	If(CommandType == 3)
-		FileDelete %vCommand%%vHide%
+	RunWait %Command%%Hide%
 	} Catch {
 	vNumErrors += 1
 	Log("!! Error attempting "Command . "!")
@@ -62,24 +57,22 @@ Command(Command, CommandType, Hide := "") ; Runs a configuration command. 1= Run
 	Return
 }
 
-ConfirmationWindow(IsWireless, TypeNumber, ComputerType, ComputerName) ; Checks that selections are correct before continuing. (WORKS)
+ConfirmationWindow(Wireless, Location, ComputerType, ComputerName) ; Checks that selections are correct before continuing. (WORKS)
 {
 	Gui +OwnDialogs
-	TypeText := "" ; Stores message text based on computer type.
-	
-	if(IsWireless == 1)
+	if(Wireless == 1)
 		WirelessText := "This is a Wireless computer."
 	else
 		WirelessText := "This is an Ethernet computer."
 		
-	if (TypeNumber == 1)
-		TypeText := "This will install Office, Sierra, and staff printers."
-	if (TypeNumber == 2)
-		TypeText := "This will install Sierra, Offline Circulation, staff printers, PC Reservation, staff LPTOne print, and configure Auto Logon."
-	if (TypeNumber == 3)
-		TypeText := "This will install patron Office, Envisionware client, patron LPTOne print, Patron Admin Panel, and configure Auto Logon."
-	if (TypeNumber == 4)
-		TypeText := "This will install Encore Always and configure Auto Logon."
+	if (ComputerType == "Office")
+		TypeText := "This will install:`n- Sierra`n- Office for staff computer`n- Staff printers"
+	if (ComputerType == "Frontline")
+		TypeText := "This will install:`n- Sierra`n- Offline Circulation`n- Staff printers`n- PC Reservation Reservation Station`n- Envisionware Print Release station`n- Auto Logon configuration for staff"
+	if (ComputerType == "Patron")
+		TypeText := "This will install:`n- Office for patron computer`n- Envisionware PC Reservation client`n- Envisionware LPTOne printer client`n- PatronAdminPanel`n- Auto Logon configuration for patrons"	
+	if (ComputerType == "Catalog")
+		TypeText := "This will install:`n- EncoreAlways`n- Auto Logon configuration for catalogs"
 		
 	if(ComputerName == "")
 	{
@@ -118,29 +111,21 @@ ConfirmationWindow(IsWireless, TypeNumber, ComputerType, ComputerName) ; Checks 
 CreateOUPath(TypeNumber, Location, IsWireless) ; Creates a distiguished name for moving to OU. (WORKS)
 {
 	If(TypeNumber == 1) ; Office
-		Return "OU=Offices,OU=Systems,OU=" . Location . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"
-		
+		Return "OU=Offices,OU=Systems,OU=" . Location . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"	
 	If(TypeNumber == 2) ;Frontline PC
-		Return "OU=Frontline,OU=Systems,OU=" . Location . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"
-		
+		Return "OU=Frontline,OU=Systems,OU=" . Location . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"	
 	If(TypeNumber == 2 and IsWireless == 1) ;Staff Laptop
-		Return "OU=Laptops,OU=Systems,OU=" . Location . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"
-		
+		Return "OU=Laptops,OU=Systems,OU=" . Location . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"	
 	If(TypeNumber == 3) ;Patron PC
-		Return "OU=" . Location . ",OU=Patron,OU=DCLS,DC=dcls,DC=org"
-		
+		Return "OU=" . Location . ",OU=Patron,OU=DCLS,DC=dcls,DC=org"	
 	If(TypeNumber == 3 and IsWireless == 1) ;Patron Laptop
-		Return "OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"
-		
+		Return "OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"		
 	If(TypeNumber == 4)	;Catalog
 		Return "OU=Catalog,OU=Patron,OU=DCLS,DC=dcls,DC=org"
-
 	If(TypeNumber == 5) ;Self Check
-		Return "OU=Self Service,OU=Patron,OU=DCLS,DC=dcls,DC=org"
-		
+		Return "OU=Self Service,OU=Patron,OU=DCLS,DC=dcls,DC=org"		
 	If(TypeNumber == 6)	;Kiosk
-		Return "OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"
-		
+		Return "OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"		
 	Log("!! Failure to create distinguished name!")
 	vNumErrors += 1
 	Return
