@@ -11,10 +11,9 @@ ButtonExit: ; Label for the Exit button. (WORKS)
 ButtonInstall: ; Label that takes user input and prepares to run installers, confirming first. (WORKS)
 {
 	Gui, Submit, NoHide
-	vLocation := aLocation[vBranchNumber]
+	vLocation := aLocation[vLocationNumber]
 	vComputerType := aComputerType[vTypeNumber]
-	vLPTServers := aLPTServers[vBranchNumber]
-	ConfirmationWindow()
+	ConfirmationWindow(vIsWireless, vLocation, vComputerType, vComputerName)
 	Return
 }	
 
@@ -41,13 +40,13 @@ CreateOptionsWindow: ; Create the main GUI.
 	Gui 2: Font, Bold s10
 	Gui 2: Add, GroupBox, Section r8, Select Branch:
 	Gui 2: Font, Norm
-	Gui 2: Add, Radio, altsubmit vvBranchNumber xp+10 yp+20, East Shore
-	Gui 2: Add, Radio, altsubmit, Kline Library
-	Gui 2: Add, Radio, altsubmit, Madeline Olewine
+	Gui 2: Add, Radio, altsubmit vvLocationNumber xp+10 yp+20, East Shore
 	Gui 2: Add, Radio, altsubmit, McCormick Riverfront
+	Gui 2: Add, Radio, altsubmit, Madeline Olewine
+	Gui 2: Add, Radio, altsubmit, Kline Library
 	Gui 2: Add, Radio, altsubmit, Alexander Family
-	Gui 2: Add, Radio, altsubmit, Johnson Memorial
 	Gui 2: Add, Radio, altsubmit, Elizabethville
+	Gui 2: Add, Radio, altsubmit, Johnson Family
 	Gui 2: Add, Radio, altsubmit, Northern Dauphin
 ;----This Section contains a Radio toggle for computer type.----
 	Gui 2: Font, Bold s10
@@ -61,7 +60,7 @@ CreateOptionsWindow: ; Create the main GUI.
 	;Gui 2: Add, Radio, altsubmit, Print Kiosk				<- To Be Implimented
 ;----This section contains Checkbox toggles.----
 	Gui 2: Font, Bold s10
-	Gui 2: Add, Checkbox, Section xs vvWireless, This is a Wireless computer. ; Wireless check toggle.
+	Gui 2: Add, Checkbox, Section xs vvIsWireless, This is a Wireless computer. ; Wireless check toggle.
 	Gui 2: Add, Checkbox, vvIsVerbose, Use Verbose logging. ; Verbose logging toggle.
 	Gui 2: Font, Norm
 ;----This Section contains Submit and Exit Buttons.----
