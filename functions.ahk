@@ -40,7 +40,7 @@ AddAutoLogon(BranchNumber, TypeNumber) ; Adds registry keys for computer types t
 	Return
 }	
 
-RunLog(Command, Hide := "") ; Runs a configuration command. 1= RunWait, 2= RegWrite, 3 = FileDelete
+RunLog(Command) ; Runs a configuration command.
 {
 	Try {
 	If(vIsVerbose == 1)
@@ -49,7 +49,7 @@ RunLog(Command, Hide := "") ; Runs a configuration command. 1= RunWait, 2= RegWr
 	} else {
 		Log("** Executing: "Command, 1)
 	}
-	RunWait %Command%%Hide%
+	RunWait %Command%
 	} Catch {
 	vNumErrors += 1
 	Log("!! Error attempting "Command . "!")

@@ -48,7 +48,7 @@ SplitPath, A_ScriptName, , , , ScriptBasename
 StringReplace, AppTitle, ScriptBasename, _, %A_SPACE%, All
 OnExit("ExitFunc") ; Register a function to be called on exit
 Global aLocation := {1: "ESA", 2: "MRL", 3: "MOM", 4: "KL", 5: "AFL", 6: "EV", 7: "JOH", 8: "ND"} ; Stores list of library locations.
-Global aComputerType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog"};, 5: "Selfcheck", 6: "Kiosk"} ; Stores list of computer types to deploy.
+Global aComputerType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog"} ;, 5: "Selfcheck", 6: "Kiosk"} ; Stores list of computer types to deploy.
 Global vLocationNumber ; Stores the value of the Location radio button.
 Global vTypeNumber ; Stores the value of the ComputerType radio button.
 Global vIsWireless  ; Stores wireless checkbox value.
