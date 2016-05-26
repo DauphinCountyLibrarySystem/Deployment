@@ -2,60 +2,44 @@ AddAutoLogon(BranchNumber, TypeNumber) ; Adds registry keys for computer types t
 {
 	LogonArray := {1: "esalogon0", 2: "kllogon4", 3: "momlogon3", 4: "mrllogon1", 5: "afllogon2", 6:"johlogon6",7: "evlogon5", 8: "ndlogon8" }
 	AutoLogon := LogonArray[BranchNumber]
+	LogonPass := "" ; Auto logon password (Pull from external .ini file)
 	Log("-- configuring autologon registries...")
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, AutoAdminLogon, 1
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultDomainName, dcls.org
 	If(TypeNumber == 2) ; Staff
 	{
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\%AutoLogon%
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, ***REMOVED***
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %LogonPass%
 		Return
 	}
 	If(TypeNumber == 3) ; Patron
 	{	
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\%vLocation%-PATRON
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, ***REMOVED***
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %LogonPass%
 		Return
 	}
 	If(TypeNumber == 4) ; Catalog
 	{
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\esacatalog
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, ***REMOVED***
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %LogonPass%
 		Return
 	}
 	If(TypeNumber == 5) ; Self-Checkout
 	{
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\%vLocation%-SELFCHECK
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, ***REMOVED***
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %LogonPass%
 		Return
 	}
 	If(TypeNumber == 6) ; Kiosk
 	{
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\envkiosk
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, ***REMOVED***
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %LogonPass%
 		Return
 	}
 	Log("!! Failure to create auto logon profile!")
 	vNumErrors += 1
 	Return
 }	
-
-RunLog(Command) ; Runs a configuration command.
-{
-	Try {
-	If(vIsVerbose == 1)
-	{
-		Log("** Executing: "Command)
-	} else {
-		Log("** Executing: "Command, 1)
-	}
-	RunWait %Command%
-	} Catch {
-	vNumErrors += 1
-	Log("!! Error attempting "Command . "!")
-	}
-	Return
-}
 
 ConfirmationWindow(Wireless, Location, ComputerType, ComputerName) ; Checks that selections are correct before continuing. (WORKS)
 {
@@ -129,6 +113,87 @@ CreateOUPath(TypeNumber, Location, IsWireless) ; Creates a distiguished name for
 	Log("!! Failure to create distinguished name!")
 	vNumErrors += 1
 	Return
+}
+
+CreateTaskList(Computer)
+{
+	TaskList := Array
+	if(Computer == "Office")
+	{
+		TaskList.append("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s",",,Hide")
+		TaskList.append("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_staff.xml")
+		TaskList.append("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut.
+		TaskList.append("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
+		TaskList.append("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*") ; Sierra shortcut.
+		TaskList.append("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")
+		TaskList.append("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")
+		TaskList.append("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")
+		TaskList.append("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")
+		TaskList.append("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Outlook*")
+		TaskList.append(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S")
+	}
+	if(Computer == "Frontline")
+	{
+		TaskList.append("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
+		TaskList.append("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s") ;  Offline circ files.
+		TaskList.append("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
+		TaskList.append("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
+		TaskList.append("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*") ; Sierra shortcut.
+		TaskList.append("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Offline Circ shortcut.	
+		TaskList.append(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
+		TaskList.append(A_ScriptDir . "\Resources\Envisionware\_PCReservationStation.exe /S") ; Install Reservation Station
+	}
+	if(Computer == "Patron")
+	{
+		TaskList.append("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s")
+		TaskList.append("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml")
+		TaskList.append("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")
+		TaskList.append("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")
+		TaskList.append("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")
+		TaskList.append("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")
+		TaskList.append("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s")
+		TaskList.append(A_ScriptDir . "\Resources\Envisionware\_LPTOneClient.exe /S -jqe.host="%vEwareServer%) ; Patron printers.
+		TaskList.append(A_ScriptDir . "\Resources\Envisionware\_PCReservationClient.exe /S -ip="%vEwareServer% . " -tcpport=9432") ; Envisionware Client.
+	}
+	if(Computer == "Catalog")
+	{
+		TaskList.append("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")	
+	}
+	Return TaskList
+}
+
+DefaultTasks(Wireless)
+{
+	DefaultList := Array
+	If(Wireless == 1)
+	{
+		DefaultList.append("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all") ; Install Wireless Profile
+		Sleep 5000 ; Wait for profile to update.
+		DefaultList.append("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY=""" %vSpiceworksKey% """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
+	}
+	DefaultList.append("cscript //B c:\windows\system32\slmgr.vbs /ipk " %vActivationKey%) ; Copy activation key.
+	DefaultList.append("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
+	DefaultList.append("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""***REMOVED***\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
+	DefaultList.append("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
+	DefaultList.append("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
+	Return DefaultList
+}
+
+DoTasks(TaskList)
+{
+	Loop % TaskList.len()
+	Task := TaskList[A_Index]
+	Try {
+		If(vIsVerbose == 1)
+		{
+			Log("** Executing: " Task)
+		} else {
+			Log("** Executing: " Task, 1)
+		}
+	RunWait, Task
+	} Catch {
+	vNumErrors += 1
+	Log("!! Error attempting "Task . "!")
 }
 
 ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closures.
