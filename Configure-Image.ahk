@@ -15,8 +15,8 @@
 ;	CONFIGURATION
 ;   ================================================================================
 Global aLPTServers := {"ESA": 192.168.100.221, "MRL": 10.11.20.5, "MOM": 10.13.20.14, "KL": 10.14.20.14, "AFL": 192.168.102.221, "JOH": 192.168.106.221, "EV": 192.168.105.221, "ND":  10.18.40.200} ; Stores list of LPTOne server IPs.
-Global vActivationKey := HRRBN-GYBYT-44FP9-3TDPY-B4G6B ; Windows activation key.
-Global vSpiceworksKey := eb7e922f71BB336280238a02c02c64ac35941be2b ; Spiceworks authentication key.
+Global vActivationKey := ""  ; Windows activation key. (Pull from external .ini file)
+Global vSpiceworksKey := "" ; Spiceworks authentication key. (Pull from external .ini file)
 
 ;   ================================================================================
 ;	AUTO-ELEVATE
@@ -93,58 +93,14 @@ Return
 ;   ================================================================================
 __main__:
 {
-	if(vIsWireless == 1) ; If wireless, install wireless profile and Spiceworks.
-	{
-		Log("== Wireless Configuration...")
-		Log("-- adding wireless profile...")
-		RunLog("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all") ; Install Wireless Profile
-		Sleep 5000 ; Wait for profile to update.	
-		Log("-- installing Spiceworks mobile app...")
-		RunLog("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY=""" %vSpiceworksKey% """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
-	}	
-	
-	Log("== Default Configuration...")	
-	Log("-- activating Windows...")
-	RunLog("cscript //B c:\windows\system32\slmgr.vbs /ipk " %vActivationKey%) ; Copy activation key.
-	RunLog("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
-	
-	Log("-- joining domain with new name...")
 	vOUPath := CreateOUPath(vTypeNumber, vLocation, vIsWireless) ; Creates distinguished name for OU move
-	RunLog("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \""0Bg17GCkCjtOYg03NOVU\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
-	
-	Log("-- installing VIPRE antivirus...")
-	RunLog("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
-	
-	Log("-- installing LogMeIn...")
-	RunLog("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
-	
-	Log("-- editing registries and clearing files...")
+	aDefaultList := DefaultTasks(vIsWireless)
+	aTypeList := CreateTaskList(vComputerType)
+	DoTasks(aDefaultList)
 	RegWrite, REG_DWORD, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui, EnableSystray, 0
 	FileDelete C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk
 	FileDelete C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk
-	
-	if(vComputerType == "Office") ; Office staff get Office365, staff printers, and Sierra.
-	{ 
-		Log("== Office Staff Configuration...")	
-		Log("-- installing Sierra files...")
-		RunLog("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s",",,Hide") ; Sierra files.	
-		
-		Log("-- configuring Office for staff...")
-		RunLog("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_staff.xml")
-		
-		Log("-- updating Desktop shortcuts...")
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut.
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*") ; Sierra shortcut.
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Outlook*")
-		
-		Log("-- installing staff LPTOne print release...")
-		RunLog(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
-	}
+	DoTasks(aTypeList)
 	
 	if(vComputerType == "Frontline") ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
 	{
