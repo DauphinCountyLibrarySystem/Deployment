@@ -1,14 +1,13 @@
 /* 	
 	Name: New Computer Deployment		
-	Version: 0.1.0
+	Version: 0.2.0
 	Authors: Christopher Roth, Lucas Bodnyk
 
 	Changelog:
-		* Removed progress bar
-		* Moved functions to seperate file
-		* Resolved issues with OU move
-		* Cleaned up file paths
-		* Added Eware closing function
+		* Refactoring 5.31.16
+		* Moved comfiguration tasks to external function
+		* Main function now calls task list based on computer type
+		* For Security: moved passwords and keys to variables, to be declared via external .ini
 */
 
 ;   ================================================================================
@@ -93,94 +92,32 @@ Return
 ;   ================================================================================
 __main__:
 {
+	Log("== Starting Configuration")
 	vOUPath := CreateOUPath(vTypeNumber, vLocation, vIsWireless) ; Creates distinguished name for OU move
-	aDefaultList := DefaultTasks(vIsWireless)
-	aTypeList := CreateTaskList(vComputerType)
+	aDefaultList := DefaultTasks(vIsWireless) ; Creates default task list, with wireless tasks if needed.
+	aTypeList := CreateTaskList(vComputerType) ; Creates list of tasks specific to computer type.
+	Log("-- Default Configuration")
 	DoTasks(aDefaultList)
+	Log("-- "%vComputerType% . " Computer Configuration")
+	DoTasks(aTypeList)
+	
+	if(vComputerType != "Office")
+		AddAutoLogon(vLocation, vTypeNumber)
+	
+	Log("-- Editing Registy and Clearing Files")
 	RegWrite, REG_DWORD, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui, EnableSystray, 0
 	FileDelete C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk
 	FileDelete C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk
-	DoTasks(aTypeList)
 	
-	if(vComputerType == "Frontline") ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
+	if(vComputerType == "Patron")
 	{
-		Log("== Frontline Staff Configuration...")
-		Log("-- configuring automatic logon...")
-		AddAutoLogon(vLocation, vTypeNumber)
-		
-		Log("-- installing Sierra files...")
-		RunLog("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
-		RunLog("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s") ;  Offline circ files.
-		
-		Log("-- copying staff shortcuts...")
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*") ; Sierra shortcut.
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Offline Circ shortcut.		
-		
-		Log("-- installing staff LPTOne print release...")
-		RunLog(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
-		
-		Log("-- installing staff Envisionware Reservation Station...")
-		RunLog(A_ScriptDir . "\Resources\Envisionware\_PCReservationStation.exe /S") ; Install Reservation Station
-	}
-	
-	if(vComputerType == "Patron") ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
-	{
-		Log("== Patron Terminal Configuration...")
-		vEwareServer := aLPTServers[vLocation]
-			
-		Log("-- configuring automatic logon...")
-		AddAutoLogon(vLocation, vTypeNumber)
-		
-		Log("-- installing PatronAdminPanel...")
-		RunLog("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s") ; PatronAdminPanel script files.
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, PatronAdminPanel, ""C:\PatronAdminPanel\PatronAdminPanel.exe"" ; Set PatronAdminPanel auto-start.
-		
-		Log("-- configuring Office for patrons...")
-		RunLog("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml")
-		
-		Log("-- updating Desktop shortcuts...")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")
-		
-		Log("-- updating Start menu...")
-		RunLog("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s")
-		
-		Log("-- installing patron LPTOne printers...")
-		RunLog(A_ScriptDir . "\Resources\Envisionware\_LPTOneClient.exe /S -jqe.host="%vEwareServer%) ; Patron printers.
-		
-		Log("-- installing patron Envisionware client...")
-		RunLog(A_ScriptDir . "\Resources\Envisionware\_PCReservationClient.exe /S -ip="%vEwareServer% . " -tcpport=9432") ; Envisionware Client.
 		Sleep 15000
 		Gosub ClosePCReservation
 	}
 	
-	if(vComputerType == "Catalog") ; Catalog script is installed.
-	{
-		Log("== Catalog Computer Configuration...")
-		Log("-- configuring automatic logon...")
-		AddAutoLogon(vLocation, vTypeNumber)		
-		
-		Log("-- installing EncoreAlways script...")
-		RunLog("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")	; EncoreAlways script files.
-		
-		Log("-- configuring catalog registries...")
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, ""C:\EncoreAlways\EncoreAlways.exe""
-	}
-	
-	;if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
-	;{
-		;AddAutoLogon()
-		;RunLog(Self-Check)
-	;}
-	
-	;if(vTypeNumber == 6) ; Kiosk Computer
-	;{
-		;RunLog(Kiosk)
-	;}
+	if(vComputerType == "Catalog")
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, ""C:\EncoreAlways\EncoreAlways.exe"" ; Set EncoreAways auto-start
 	
 	if(vNumErrors != 0) ; Final Check for errors and closes program.
 	{

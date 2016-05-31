@@ -56,8 +56,6 @@ CreateOptionsWindow: ; Create the main GUI.
 	Gui 2: Add, Radio, altsubmit, Frontline Staff
 	Gui 2: Add, Radio, altsubmit, Patron Computer
 	Gui 2: Add, Radio, altsubmit, Catalog Computer			
-	;Gui 2: Add, Radio, altsubmit, Self-Checkout Station		<- To Be Implimented
-	;Gui 2: Add, Radio, altsubmit, Print Kiosk				<- To Be Implimented
 ;----This section contains Checkbox toggles.----
 	Gui 2: Font, Bold s10
 	Gui 2: Add, Checkbox, Section xs vvIsWireless, This is a Wireless computer. ; Wireless check toggle.
