@@ -1,8 +1,7 @@
-AddAutoLogon(BranchNumber, TypeNumber) ; Adds registry keys for computer types that automatically logon. (WORKS)
+AddAutoLogon(BranchNumber, TypeNumber, LogonPass) ; Adds registry keys for computer types that automatically logon. (WORKS)
 {
 	LogonArray := {1: "esalogon0", 2: "kllogon4", 3: "momlogon3", 4: "mrllogon1", 5: "afllogon2", 6:"johlogon6",7: "evlogon5", 8: "ndlogon8" }
 	AutoLogon := LogonArray[BranchNumber]
-	LogonPass := "" ; Auto logon password (Pull from external .ini file)
 	Log("-- configuring autologon registries...")
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, AutoAdminLogon, 1
 	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultDomainName, dcls.org
@@ -163,10 +162,9 @@ CreateTaskList(Computer)
 	Return TaskList
 }
 
-DefaultTasks(Wireless)
+DefaultTasks(OUPassword, Wireless)
 {
 	DefaultList := Array
-	OUPassword := "" ; Read from .ini
 	If(Wireless == 1)
 	{
 		DefaultList.append("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all") ; Install Wireless Profile

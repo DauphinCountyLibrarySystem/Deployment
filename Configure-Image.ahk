@@ -1,22 +1,21 @@
 /* 	
 	Name: New Computer Deployment		
-	Version: 0.2.0
+	Version: 0.2.1
 	Authors: Christopher Roth, Lucas Bodnyk
 
 	Changelog:
-		* Refactoring 5.31.16
-		* Moved comfiguration tasks to external function
-		* Main function now calls task list based on computer type
-		* For Security: moved passwords and keys to variables, to be declared via external .ini
+		* Added .ini file.
+		* Added .ini reads to pull passwords from file.
 */
 
 ;   ================================================================================
 ;	CONFIGURATION
 ;   ================================================================================
 Global aLPTServers := {"ESA": 192.168.100.221, "MRL": 10.11.20.5, "MOM": 10.13.20.14, "KL": 10.14.20.14, "AFL": 192.168.102.221, "JOH": 192.168.106.221, "EV": 192.168.105.221, "ND":  10.18.40.200} ; Stores list of LPTOne server IPs.
-Global vActivationKey := ""  ; Windows activation key. (Pull from external .ini file)
-Global vSpiceworksKey := "" ; Spiceworks authentication key. (Pull from external .ini file)
-
+IniRead, vActivationKey, KeysAndPasswords.ini, Keys, Windows10  ; Windows activation key (pulled from external file).
+IniRead, vSpiceworksKey, KeysAndPasswords.ini, Keys, Spiceworks ; Spiceworks authentication key (pulled from external file).
+IniRead, vAutoLogon, KeysAndPasswords.ini, Passwords, AutoLogon ; Password for AutoLogon function (pulled from external file).
+IniRead, vOUPassword, KeysAndPasswords.ini, Passwords, OUPassword ;Password for OU move (pulled from external file).
 ;   ================================================================================
 ;	AUTO-ELEVATE
 ;   ================================================================================
@@ -94,7 +93,7 @@ __main__:
 {
 	Log("== Starting Configuration")
 	vOUPath := CreateOUPath(vTypeNumber, vLocation, vIsWireless) ; Creates distinguished name for OU move
-	aDefaultList := DefaultTasks(vIsWireless) ; Creates default task list, with wireless tasks if needed.
+	aDefaultList := DefaultTasks(vOUPassword, vIsWireless) ; Creates default task list, with wireless tasks if needed.
 	aTypeList := CreateTaskList(vComputerType) ; Creates list of tasks specific to computer type.
 	Log("-- Default Configuration")
 	DoTasks(aDefaultList)
@@ -102,7 +101,7 @@ __main__:
 	DoTasks(aTypeList)
 	
 	if(vComputerType != "Office")
-		AddAutoLogon(vLocation, vTypeNumber)
+		AddAutoLogon(vLocation, vTypeNumber, vAutoLogon)
 	
 	Log("-- Editing Registy and Clearing Files")
 	RegWrite, REG_DWORD, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui, EnableSystray, 0
