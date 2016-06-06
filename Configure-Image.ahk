@@ -14,7 +14,6 @@
 Global aLPTServers := {"ESA": 192.168.100.221, "MRL": 10.11.20.5, "MOM": 10.13.20.14, "KL": 10.14.20.14, "AFL": 192.168.102.221, "JOH": 192.168.106.221, "EV": 192.168.105.221, "ND":  10.18.40.200} ; Stores list of LPTOne server IPs.
 IniRead, vActivationKey, KeysAndPasswords.ini, Keys, Windows10  ; Windows activation key (pulled from external file).
 IniRead, vSpiceworksKey, KeysAndPasswords.ini, Keys, Spiceworks ; Spiceworks authentication key (pulled from external file).
-IniRead, vAutoLogon, KeysAndPasswords.ini, Passwords, AutoLogon ; Password for AutoLogon function (pulled from external file).
 IniRead, vOUPassword, KeysAndPasswords.ini, Passwords, OUPassword ;Password for OU move (pulled from external file).
 ;   ================================================================================
 ;	AUTO-ELEVATE
@@ -101,8 +100,11 @@ __main__:
 	DoTasks(aTypeList)
 	
 	if(vComputerType != "Office")
-		AddAutoLogon(vLocation, vTypeNumber, vAutoLogon)
-	
+	{	
+		Log("-- Configuring Auto-Logon")
+		IniRead, vAutoLogon, KeysAndPasswords.ini, Passwords, %vComputerType% ; Password for AutoLogon function (pulled from external file).
+		AddAutoLogon(vLocationNumber, vTypeNumber, vAutoLogon)
+	}
 	Log("-- Editing Registy and Clearing Files")
 	RegWrite, REG_DWORD, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui, EnableSystray, 0
 	FileDelete C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk
