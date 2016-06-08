@@ -44,17 +44,13 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 SplitPath, A_ScriptName, , , , ScriptBasename
 StringReplace, AppTitle, ScriptBasename, _, %A_SPACE%, All
 OnExit("ExitFunc") ; Register a function to be called on exit
-Global aLocation := {1: "ESA", 2: "MRL", 3: "MOM", 4: "KL", 5: "AFL", 6: "EV", 7: "JOH", 8: "ND"} ; Stores list of library locations.
-Global aComputerType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog"} ;, 5: "Selfcheck", 6: "Kiosk"} ; Stores list of computer types to deploy.
-Global vLocationNumber ; Stores the value of the Location radio button.
-Global vTypeNumber ; Stores the value of the ComputerType radio button.
 Global vIsWireless  ; Stores wireless checkbox value.
-Global vIsVerbose ; Stores Verbose logging checkbox value.
+;Global vIsVerbose ; Stores Verbose logging checkbox value.
 Global vComputerName ; Stores input computer name.
-Global vLocation  ; Stores the value extracted from Location array at vLocationNumber index.
-Global vComputerType  ; Stores the value extracted from ComputerType array at vTypeNumber index.
+Global vLocation  ; Stores the value extracted from location Drop Down List
+Global vComputerType  ; Stores the value extracted from ComputerType Drop Down List
 Global vEwareServer ; Stores the value extracted from the LPTServers array ay vLocationNumber index.
-Global vNumErrors := 0	; Tracks the number of errors, if any.
+;Global vNumErrors := 0	; Tracks the number of errors, if any.
 
 ;   ================================================================================
 ;	BEGIN INITIALIZATION
@@ -91,7 +87,7 @@ Return
 __main__:
 {
 	Log("== Starting Configuration")
-	vOUPath := CreateOUPath(vTypeNumber, vLocation, vIsWireless) ; Creates distinguished name for OU move
+	vOUPath := CreateOUPath(vLocation, vComputerType, vIsWireless) ; Creates distinguished name for OU move
 	aDefaultList := DefaultTasks(vOUPassword, vIsWireless) ; Creates default task list, with wireless tasks if needed.
 	aTypeList := CreateTaskList(vComputerType) ; Creates list of tasks specific to computer type.
 	Log("-- Default Configuration")
@@ -102,8 +98,8 @@ __main__:
 	if(vComputerType != "Office")
 	{	
 		Log("-- Configuring Auto-Logon")
-		IniRead, vAutoLogon, KeysAndPasswords.ini, Passwords, %vComputerType% ; Password for AutoLogon function (pulled from external file).
-		AddAutoLogon(vLocationNumber, vTypeNumber, vAutoLogon)
+		IniRead, vLogonPassword, KeysAndPasswords.ini, Passwords, %vComputerType% ; Password for AutoLogon function (pulled from external file).
+		AddAutoLogon(vLocation, vComputerType, vLogonPassword)
 	}
 	Log("-- Editing Registy and Clearing Files")
 	RegWrite, REG_DWORD, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui, EnableSystray, 0

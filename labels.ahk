@@ -1,4 +1,4 @@
-ButtonExit: ; Label for the Exit button. (WORKS)
+ButtonExit: ; Label for Exit button. (WORKS)
 {
 	SoundPlay *48
 	MsgBox, 52, Exiting Configure-Image, This will end Configure-Image.`nAre you sure you want to exit?
@@ -8,16 +8,14 @@ ButtonExit: ; Label for the Exit button. (WORKS)
 	ExitApp
 }
 
-ButtonInstall: ; Label that takes user input and prepares to run installers, confirming first. (WORKS)
+ButtonStart: ; Label for Install button. Takes user input and prepares to run installers, confirming first. (WORKS)
 {
 	Gui, Submit, NoHide
-	vLocation := aLocation[vLocationNumber]
-	vComputerType := aComputerType[vTypeNumber]
 	ConfirmationWindow(vIsWireless, vLocation, vComputerType, vComputerName)
 	Return
 }	
 
-ClosePCReservation:
+ClosePCReservation: ; Label that closes Envisionware window after its installation.
 {
 	CoordMode, Mouse, Screen
 	MouseMove, (20), (A_ScreenHeight - 20)
@@ -28,7 +26,7 @@ ClosePCReservation:
 	Return
 }
 
-CreateOptionsWindow: ; Create the main GUI. 
+CreateOptionsWindow: ; Label which creates the main GUI.
 {
 	Gui 2: New, , Computer Deployment
 ;----This Section contains the Computer Name label and field.----
@@ -36,33 +34,22 @@ CreateOptionsWindow: ; Create the main GUI.
 	Gui 2: Add, Text,, Type in new computer name:
 	Gui 2: Font, Norm
 	Gui 2: Add, Edit, Uppercase vvComputerName,
-;----This section contains a Radio toggle for Library locations.----
+;----This section contains a Drop Down Lists for Library locations and computer types.----
 	Gui 2: Font, Bold s10
-	Gui 2: Add, GroupBox, Section r8, Select Branch:
+	Gui 2: Add, Text, Section, Select Branch:
 	Gui 2: Font, Norm
-	Gui 2: Add, Radio, altsubmit vvLocationNumber xp+10 yp+20, East Shore
-	Gui 2: Add, Radio, altsubmit, McCormick Riverfront
-	Gui 2: Add, Radio, altsubmit, Madeline Olewine
-	Gui 2: Add, Radio, altsubmit, Kline Library
-	Gui 2: Add, Radio, altsubmit, Alexander Family
-	Gui 2: Add, Radio, altsubmit, Elizabethville
-	Gui 2: Add, Radio, altsubmit, Johnson Family
-	Gui 2: Add, Radio, altsubmit, Northern Dauphin
-;----This Section contains a Radio toggle for computer type.----
+	Gui 2: Add, DDL, vvLocation, Branch...||ESA|MRL|MOM|KL|AFL|EV|JOH|ND
 	Gui 2: Font, Bold s10
-	Gui 2: Add, GroupBox, Section r4 ys, Select computer type:
+	Gui 2: Add, Text,, Select computer type:
 	Gui 2: Font, Norm
-	Gui 2: Add, Radio, altsubmit vvTypeNumber xp+10 yp+20, Office Staff
-	Gui 2: Add, Radio, altsubmit, Frontline Staff
-	Gui 2: Add, Radio, altsubmit, Patron Computer
-	Gui 2: Add, Radio, altsubmit, Catalog Computer			
+	Gui 2: Add, DDL, vvComputerType, Computer...||Office|Frontline|Patron|Catalog
 ;----This section contains Checkbox toggles.----
 	Gui 2: Font, Bold s10
-	Gui 2: Add, Checkbox, Section xs vvIsWireless, This is a Wireless computer. ; Wireless check toggle.
+	Gui 2: Add, Checkbox, Section vvIsWireless, This is a Wireless computer. ; Wireless check toggle.
 	Gui 2: Add, Checkbox, vvIsVerbose, Use Verbose logging. ; Verbose logging toggle.
 	Gui 2: Font, Norm
 ;----This Section contains Submit and Exit Buttons.----
-	Gui 2: Add, Button, Section gButtonInstall w100, Install
+	Gui 2: Add, Button, Section gButtonStart w100, Start
 	Gui 2: Add, Button, yp xp+110 gButtonExit w100, Exit
 	Gui 2: Show
 	Return
