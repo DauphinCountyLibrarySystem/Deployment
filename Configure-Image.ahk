@@ -1,23 +1,20 @@
 /* 	
 	Name: New Computer Deployment		
-	Version: 0.1.0
+	Version: 0.2.1
 	Authors: Christopher Roth, Lucas Bodnyk
 
 	Changelog:
-		* Removed progress bar
-		* Moved functions to seperate file
-		* Resolved issues with OU move
-		* Cleaned up file paths
-		* Added Eware closing function
+		* Added .ini file.
+		* Added .ini reads to pull passwords from file.
 */
 
 ;   ================================================================================
 ;	CONFIGURATION
 ;   ================================================================================
 Global aLPTServers := {"ESA": 192.168.100.221, "MRL": 10.11.20.5, "MOM": 10.13.20.14, "KL": 10.14.20.14, "AFL": 192.168.102.221, "JOH": 192.168.106.221, "EV": 192.168.105.221, "ND":  10.18.40.200} ; Stores list of LPTOne server IPs.
-Global vActivationKey := ""  ; Windows activation key. (Pull from external .ini file)
-Global vSpiceworksKey := "" ; Spiceworks authentication key. (Pull from external .ini file)
-
+IniRead, vActivationKey, KeysAndPasswords.ini, Keys, Windows10  ; Windows activation key (pulled from external file).
+IniRead, vSpiceworksKey, KeysAndPasswords.ini, Keys, Spiceworks ; Spiceworks authentication key (pulled from external file).
+IniRead, vOUPassword, KeysAndPasswords.ini, Passwords, OUPassword ;Password for OU move (pulled from external file).
 ;   ================================================================================
 ;	AUTO-ELEVATE
 ;   ================================================================================
@@ -47,15 +44,11 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 SplitPath, A_ScriptName, , , , ScriptBasename
 StringReplace, AppTitle, ScriptBasename, _, %A_SPACE%, All
 OnExit("ExitFunc") ; Register a function to be called on exit
-Global aLocation := {1: "ESA", 2: "MRL", 3: "MOM", 4: "KL", 5: "AFL", 6: "EV", 7: "JOH", 8: "ND"} ; Stores list of library locations.
-Global aComputerType := {1: "Office", 2: "Frontline", 3: "Patron", 4: "Catalog"} ;, 5: "Selfcheck", 6: "Kiosk"} ; Stores list of computer types to deploy.
-Global vLocationNumber ; Stores the value of the Location radio button.
-Global vTypeNumber ; Stores the value of the ComputerType radio button.
 Global vIsWireless  ; Stores wireless checkbox value.
 Global vIsVerbose ; Stores Verbose logging checkbox value.
 Global vComputerName ; Stores input computer name.
-Global vLocation  ; Stores the value extracted from Location array at vLocationNumber index.
-Global vComputerType  ; Stores the value extracted from ComputerType array at vTypeNumber index.
+Global vLocation  ; Stores the value extracted from location Drop Down List
+Global vComputerType  ; Stores the value extracted from ComputerType Drop Down List
 Global vEwareServer ; Stores the value extracted from the LPTServers array ay vLocationNumber index.
 Global vNumErrors := 0	; Tracks the number of errors, if any.
 
@@ -93,94 +86,35 @@ Return
 ;   ================================================================================
 __main__:
 {
-	vOUPath := CreateOUPath(vTypeNumber, vLocation, vIsWireless) ; Creates distinguished name for OU move
-	aDefaultList := DefaultTasks(vIsWireless)
-	aTypeList := CreateTaskList(vComputerType)
+	Log("== Starting Configuration")
+	vOUPath := CreateOUPath(vLocation, vComputerType, vIsWireless) ; Creates distinguished name for OU move
+	aDefaultList := DefaultTasks(vOUPassword, vIsWireless) ; Creates default task list, with wireless tasks if needed.
+	aTypeList := CreateTaskList(vComputerType) ; Creates list of tasks specific to computer type.
+	Log("-- Default Configuration")
 	DoTasks(aDefaultList)
+	Log("-- "%vComputerType% . " Computer Configuration")
+	DoTasks(aTypeList)
+	
+	if(vComputerType != "Office")
+	{	
+		Log("-- Configuring Auto-Logon")
+		IniRead, vLogonPassword, KeysAndPasswords.ini, Passwords, %vComputerType% ; Password for AutoLogon function (pulled from external file).
+		AddAutoLogon(vLocation, vComputerType, vLogonPassword)
+	}
+	Log("-- Editing Registy and Clearing Files")
 	RegWrite, REG_DWORD, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui, EnableSystray, 0
 	FileDelete C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk
 	FileDelete C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk
-	DoTasks(aTypeList)
 	
-	if(vComputerType == "Frontline") ; Frontline computers get LPTOne staff, staff printers, Sierra, Offline Circ and remove Office.
+	if(vComputerType == "Patron")
 	{
-		Log("== Frontline Staff Configuration...")
-		Log("-- configuring automatic logon...")
-		AddAutoLogon(vLocation, vTypeNumber)
-		
-		Log("-- installing Sierra files...")
-		RunLog("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
-		RunLog("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s") ;  Offline circ files.
-		
-		Log("-- copying staff shortcuts...")
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*") ; Sierra shortcut.
-		RunLog("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Offline Circ shortcut.		
-		
-		Log("-- installing staff LPTOne print release...")
-		RunLog(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
-		
-		Log("-- installing staff Envisionware Reservation Station...")
-		RunLog(A_ScriptDir . "\Resources\Envisionware\_PCReservationStation.exe /S") ; Install Reservation Station
-	}
-	
-	if(vComputerType == "Patron") ; Patron computers get PC reservation Client, Office without Outlook, and LPTone printers.
-	{
-		Log("== Patron Terminal Configuration...")
-		vEwareServer := aLPTServers[vLocation]
-			
-		Log("-- configuring automatic logon...")
-		AddAutoLogon(vLocation, vTypeNumber)
-		
-		Log("-- installing PatronAdminPanel...")
-		RunLog("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s") ; PatronAdminPanel script files.
 		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, PatronAdminPanel, ""C:\PatronAdminPanel\PatronAdminPanel.exe"" ; Set PatronAdminPanel auto-start.
-		
-		Log("-- configuring Office for patrons...")
-		RunLog("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml")
-		
-		Log("-- updating Desktop shortcuts...")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")
-		RunLog("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")
-		
-		Log("-- updating Start menu...")
-		RunLog("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s")
-		
-		Log("-- installing patron LPTOne printers...")
-		RunLog(A_ScriptDir . "\Resources\Envisionware\_LPTOneClient.exe /S -jqe.host="%vEwareServer%) ; Patron printers.
-		
-		Log("-- installing patron Envisionware client...")
-		RunLog(A_ScriptDir . "\Resources\Envisionware\_PCReservationClient.exe /S -ip="%vEwareServer% . " -tcpport=9432") ; Envisionware Client.
 		Sleep 15000
 		Gosub ClosePCReservation
 	}
 	
-	if(vComputerType == "Catalog") ; Catalog script is installed.
-	{
-		Log("== Catalog Computer Configuration...")
-		Log("-- configuring automatic logon...")
-		AddAutoLogon(vLocation, vTypeNumber)		
-		
-		Log("-- installing EncoreAlways script...")
-		RunLog("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")	; EncoreAlways script files.
-		
-		Log("-- configuring catalog registries...")
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, ""C:\EncoreAlways\EncoreAlways.exe""
-	}
-	
-	;if(vTypeNumber == 5) ; Self-Checkout terminal software is installed.
-	;{
-		;AddAutoLogon()
-		;RunLog(Self-Check)
-	;}
-	
-	;if(vTypeNumber == 6) ; Kiosk Computer
-	;{
-		;RunLog(Kiosk)
-	;}
+	if(vComputerType == "Catalog")
+		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, ""C:\EncoreAlways\EncoreAlways.exe"" ; Set EncoreAways auto-start
 	
 	if(vNumErrors != 0) ; Final Check for errors and closes program.
 	{
