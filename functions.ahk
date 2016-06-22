@@ -57,13 +57,13 @@ ConfirmationWindow(Wireless, Location, Computer, Name) ; Checks that selections 
 		MsgBox, 48, Large Name, The computer name is too long.`nPlease input a name that is fifteen characters or less.
 		Return
 	}
-	if(Location == "")
+	if(Location == "Branch...")
 	{
 		SoundPlay *48
 		MsgBox, 48, No Library, Please select a library branch.
 		Return
 	}
-	if(Computer == "")
+	if(Computer == "Computer...")
 	{
 		SoundPlay *48	
 		MsgBox, 48, No Computer, Please select a computer type.

@@ -45,12 +45,12 @@ SplitPath, A_ScriptName, , , , ScriptBasename
 StringReplace, AppTitle, ScriptBasename, _, %A_SPACE%, All
 OnExit("ExitFunc") ; Register a function to be called on exit
 Global vIsWireless  ; Stores wireless checkbox value.
-;Global vIsVerbose ; Stores Verbose logging checkbox value.
+Global vIsVerbose ; Stores Verbose logging checkbox value.
 Global vComputerName ; Stores input computer name.
 Global vLocation  ; Stores the value extracted from location Drop Down List
 Global vComputerType  ; Stores the value extracted from ComputerType Drop Down List
 Global vEwareServer ; Stores the value extracted from the LPTServers array ay vLocationNumber index.
-;Global vNumErrors := 0	; Tracks the number of errors, if any.
+Global vNumErrors := 0	; Tracks the number of errors, if any.
 
 ;   ================================================================================
 ;	BEGIN INITIALIZATION

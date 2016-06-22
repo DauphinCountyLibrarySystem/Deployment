@@ -28,10 +28,10 @@ ClosePCReservation: ; Label that closes Envisionware window after its installati
 
 CreateOptionsWindow: ; Label which creates the main GUI.
 {
-	Gui 2: New, , Computer Deployment
+	Gui 2: New, ,Computer Deployment
 ;----This Section contains the Computer Name label and field.----
 	Gui 2: Font, Bold s10
-	Gui 2: Add, Text,, Type in new computer name:
+	Gui 2: Add, Text,, Type in Computer Name:
 	Gui 2: Font, Norm
 	Gui 2: Add, Edit, Uppercase vvComputerName,
 ;----This section contains a Drop Down Lists for Library locations and computer types.----
@@ -40,16 +40,16 @@ CreateOptionsWindow: ; Label which creates the main GUI.
 	Gui 2: Font, Norm
 	Gui 2: Add, DDL, vvLocation, Branch...||ESA|MRL|MOM|KL|AFL|EV|JOH|ND
 	Gui 2: Font, Bold s10
-	Gui 2: Add, Text,, Select computer type:
+	Gui 2: Add, Text, ys, Select computer type:
 	Gui 2: Font, Norm
 	Gui 2: Add, DDL, vvComputerType, Computer...||Office|Frontline|Patron|Catalog
 ;----This section contains Checkbox toggles.----
 	Gui 2: Font, Bold s10
-	Gui 2: Add, Checkbox, Section vvIsWireless, This is a Wireless computer. ; Wireless check toggle.
+	Gui 2: Add, Checkbox, Section xm vvIsWireless, This is a Wireless computer. ; Wireless check toggle.
 	Gui 2: Add, Checkbox, vvIsVerbose, Use Verbose logging. ; Verbose logging toggle.
 	Gui 2: Font, Norm
 ;----This Section contains Submit and Exit Buttons.----
-	Gui 2: Add, Button, Section gButtonStart w100, Start
+	Gui 2: Add, Button, Section xm+50 gButtonStart w100 Default, Start
 	Gui 2: Add, Button, yp xp+110 gButtonExit w100, Exit
 	Gui 2: Show
 	Return
