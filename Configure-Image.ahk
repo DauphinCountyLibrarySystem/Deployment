@@ -1,11 +1,11 @@
 /* 	
 	Name: New Computer Deployment		
-	Version: 0.2.1
+	Version: 0.2.2
 	Authors: Christopher Roth, Lucas Bodnyk
 
 	Changelog:
-		* Added .ini file.
-		* Added .ini reads to pull passwords from file.
+		* Moved Default configuration tasks from separate function
+		* Corrected issuse with DoTasks function arrays
 */
 
 ;   ================================================================================
@@ -87,12 +87,25 @@ Return
 __main__:
 {
 	Log("== Starting Configuration")
-	vOUPath := CreateOUPath(vLocation, vComputerType, vIsWireless) ; Creates distinguished name for OU move
-	aDefaultList := DefaultTasks(vOUPassword, vIsWireless) ; Creates default task list, with wireless tasks if needed.
-	aTypeList := CreateTaskList(vComputerType) ; Creates list of tasks specific to computer type.
+	vOUPath := CreateOUPath(vIsWireless, vLocation, vComputerType,) ; Creates distinguished name for OU move
+	
 	Log("-- Default Configuration")
-	DoTasks(aDefaultList)
+	DefaultList := Object()
+	If(Wireless == 1)
+	{
+		DefaultList.insert("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all") ; Install Wireless Profile
+		Sleep 5000 ; Wait for profile to update.
+		DefaultList.insert("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY=""" %vSpiceworksKey% """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
+	}
+	DefaultList.insert("cscript //B c:\windows\system32\slmgr.vbs /ipk " %vActivationKey%) ; Copy activation key.
+	DefaultList.insert("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
+	DefaultList.insert("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \"""OUPassword . "\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ vComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
+	DefaultList.insert("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
+	DefaultList.insert("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
+	DoTasks(DefaultList)
+	
 	Log("-- "%vComputerType% . " Computer Configuration")
+	aTypeList := CreateTaskList(vComputerType) ; Creates list of tasks specific to computer type.
 	DoTasks(aTypeList)
 	
 	if(vComputerType != "Office")
