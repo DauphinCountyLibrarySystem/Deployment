@@ -1,0 +1,2 @@
+do := "MsgBox hi"
+#(do)

@@ -1,32 +1,3 @@
-AddAutoLogon(Location, Computer, LogonPassword) ; Adds registry keys for computer types that automatically logon.
-{
-	LogonArray := {"ESA": "esalogon0", "KL": "kllogon4", "MOM": "momlogon3", "MRL": "mrllogon1", "AFL": "afllogon2", "JOH":"johlogon6", "EV": "evlogon5", "ND": "ndlogon8" }
-	AutoLogon := LogonArray[Location]
-	Log("-- configuring autologon registries...")
-	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, AutoAdminLogon, 1
-	RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultDomainName, dcls.org
-	If(Computer == "Frontline")
-	{
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\%AutoLogon%
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %LogonPassword%
-		Return
-	}
-	If(Computer == "Patron")
-	{	
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\%vLocation%-PATRON
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %LogonPassword%
-		Return
-	}
-	If(Computer == "Catalog") 
-	{
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\esacatalog
-		RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %LogonPassword%
-		Return
-	}
-	Log("!! Failure to create auto logon profile!")
-	vNumErrors += 1
-	Return
-}	
 
 ConfirmationWindow(Wireless, Location, Computer, Name) ; Checks that selections are correct before continuing.
 {
@@ -70,102 +41,48 @@ ConfirmationWindow(Wireless, Location, Computer, Name) ; Checks that selections 
 		Return
 	}
 	SoundPlay *32
-	MsgBox, 36, Confirm, This will rename the computer to %Name%.`nThis is a %Computer% computer at %Location%.`n%WirelessText% `n%TypeText% `nIs this correct?
+	MsgBox, 36, Confirm, Please confirm the following:`nName: %Name%`nLocation: %Location%`nRole: %Computer%`n%WirelessText% `n%TypeText% `nIs this correct?
 	IfMsgBox, Yes
 	{
-		Log("-- " WirelessText " It is at " Location " and named " Name "." TypeText)
+		Log("-- Selections complete:")
+    ;Log("-- " WirelessText " It is at " Location " and it will be named " Name ". " TypeText)
+    Log("--                Name: " Name)
+    Log("--            Location: " Location)
+    Log("--             Network: " WirelessText)
 		Gosub __main__
+    MsgBox Cthuhlu!
 	}
 	Return
 }
 
-CreateOUPath(Wireless, Location, Computer) ; Creates a distiguished name for moving to OU.
-{
-	If(Computer == "Office")
-		Return "OU=Offices,OU=Systems,OU=" . Location . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"	
-	If(Computer == "Frontline")
-		Return "OU=Frontline,OU=Systems,OU=" . Location . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"	
-	If(Computer == "Frontline" and Wireless == 1) ;Staff Laptop
-		Return "OU=Laptops,OU=Systems,OU=" . Location . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"	
-	If(Computer == "Patron")
-		Return "OU=" . Location . ",OU=Patron,OU=DCLS,DC=dcls,DC=org"	
-	If(Computer == "Patron" and Wireless == 1) ;Patron Laptop
-		Return "OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"		
-	If(Computer == "Catalog")
-		Return "OU=Catalog,OU=Patron,OU=DCLS,DC=dcls,DC=org"
-	If(Computer == "Self Checkout")
-		Return "OU=Self Service,OU=Patron,OU=DCLS,DC=dcls,DC=org"		
-	If(Computer == "LPT Kiosk")
-		Return "OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"		
-	Log("!! Failure to create distinguished name!")
-	vNumErrors += 1
-	Return
-}
 
-CreateTaskList(Computer) ; Returns an array of tasks, based on the type of computer being deployed.
-{
-	TaskList := Object()
-	if(Computer == "Office")
-	{
-		TaskList.insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
-		TaskList.insert("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_staff.xml") ; Office 365 for staff.
-		TaskList.insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut.
-		TaskList.insert("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		TaskList.insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*") ; Sierra shortcut.
-		TaskList.insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")		; <-|
-		TaskList.insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")		;   | 
-		TaskList.insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*") ;   |- Copy Office shortcuts to Start
-		TaskList.insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")	;   |
-		TaskList.insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Outlook*")	; <-|
-		TaskList.insert(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
-	}
-	if(Computer == "Frontline")
-	{
-		TaskList.insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
-		TaskList.insert("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s") ;  Offline circ files.
-		TaskList.insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-		TaskList.insert("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-		TaskList.insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*") ; Sierra shortcut.
-		TaskList.insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Offline Circ shortcut.	
-		TaskList.insert(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
-		TaskList.insert(A_ScriptDir . "\Resources\Envisionware\_PCReservationStation.exe /S") ; Install Reservation Station
-	}
-	if(Computer == "Patron")
-	{
-		vEwareServer := aLPTServers[vLocation]
-		TaskList.insert("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s") ; Copy PatronAdminPanel.
-		TaskList.insert("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml") ; Office 365 for patrons.
-		TaskList.insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")		; <-|
-		TaskList.insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")		;   |- Copy Office shortcuts to Start
-		TaskList.insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")	;   |
-		TaskList.insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")	; <-|
-		TaskList.insert("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s") ; Update Start menu.
-		TaskList.insert(A_ScriptDir . "\Resources\Envisionware\_LPTOneClient.exe /S -jqe.host="%vEwareServer%) ; Patron printers.
-		TaskList.insert(A_ScriptDir . "\Resources\Envisionware\_PCReservationClient.exe /S -ip="%vEwareServer% . " -tcpport=9432") ; Envisionware Client.
-	}
-	if(Computer == "Catalog")
-	{
-		TaskList.insert("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")	; EncoreAlways script.
-	}
-	Return TaskList
-}
 
-DoTasks(TaskList) ; Loops through an array of task commands, trying and logging each one.
+
+; everything below this should remain a function
+
+
+DoTasks(arrTasks) ; Loops through an array of task commands, trying and logging each one.
 {
-	Loop % TaskList.MaxIndex()
-	Task := TaskList[A_Index]
-	Try {
-		If(vIsVerbose == 1)
-		{
-			Log("** Executing: " Task)
-		} else {
-			Log("** Executing: " Task, 1)
-		}
-	RunWait, Task
-	} Catch {
-	vNumErrors += 1
-	Log("!! Error attempting "Task . "!")
-	}
+	
+	;MsgBox % "DoTasks():`n" . "arrTasks.MaxIndex() " . arrTasks.MaxIndex()
+	Loop % arrTasks.MaxIndex()
+	{
+    Task := arrTasks[A_Index]
+    Try {
+      If(vIsVerbose == 1)
+      {
+        Log("** Executing: " Task)
+      } else {
+        Log("** Executing: " Task, 1)
+      }
+    ;RunWait, Task
+   ;MsgBox % "Task Number: " . A_Index . "`n" . "Task: `n" . Task
+    } Catch {
+    iTaskErrors += 1
+    Log("!! Error attempting "Task . "!")
+    }
+  }
+  Return iTaskErrors
 }
 
 ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closures.
