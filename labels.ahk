@@ -1,6 +1,7 @@
-__subMainWindow__: ; Label which creates the main GUI.
+MsgBox Cthuhlu! ; This should never run!
+__subMainGUI__: ; Label which creates the main GUI.
 {
-  Note("-- Creating GUI...")
+  DoLogging("-- Creating GUI...")
   Gui 2: New, ,Computer Deployment
  ;----This Section contains the Computer Name label and field.----
   Gui 2: Font, Bold s10
@@ -19,7 +20,7 @@ __subMainWindow__: ; Label which creates the main GUI.
  ;----This section contains Checkbox toggles.----
   Gui 2: Font, Bold s10
   Gui 2: Add, Checkbox, Section xm vbIsWireless, This is a Wireless computer. ; Wireless check toggle.
-  Gui 2: Add, Checkbox, vvIsVerbose, Use Verbose logging. ; Verbose logging toggle.
+  Gui 2: Add, Checkbox, vbIsVerbose, Use Verbose logging. ; Verbose logging toggle.
   Gui 2: Font, Norm
  ;----This Section contains Submit and Exit Buttons.----
   Gui 2: Add, Button, Section xm+50 gButtonStart w100 Default, Start
@@ -27,11 +28,105 @@ __subMainWindow__: ; Label which creates the main GUI.
   Gui 2: Show
   Return
 }
-
+MsgBox Cthuhlu! ; This should never run!
+ButtonStart: ; Label for Install button. Takes user input and prepares to run installers, confirming first. (WORKS)
+{
+  Gui, Submit, NoHide
+  Gosub __subConfirmGUI__
+  Return
+}
+MsgBox Cthuhlu! ; This should never run!
+__subConfirmGUI__: ; confirms that selections are correct before continuing. 
+{
+  Gui +OwnDialogs
+  If (bIsWireless == 1)
+    WirelessText := "This is a Wireless computer."
+  else
+    WirelessText := "This is an Ethernet computer."
+    
+  If (strComputerRole == "Office")
+    TypeText := "This will install:`n- Sierra`n- Office for staff computer`n- Staff printers"
+  If (strComputerRole == "Frontline")
+    TypeText := "This will install:`n- Sierra`n- Offline Circulation`n- Staff printers`n- PC Reservation Reservation Station`n- Envisionware Print Release station`n- Auto Logon configuration for staff"
+  If (strComputerRole == "Patron")
+    TypeText := "This will install:`n- Office for patron computer`n- Envisionware PC Reservation client`n- Envisionware LPTOne printer client`n- PatronAdminPanel`n- Auto Logon configuration for patrons"  
+  If (strComputerRole == "Catalog")
+    TypeText := "This will install:`n- EncoreAlways`n- Auto Logon configuration for catalogs"
+    
+  If (strComputerName == "")
+  {
+    SoundPlay *48
+    MsgBox, 48, No Named, Please type in a name for this computer.
+    Return
+  }
+  If (StrLen(strComputerName) > 15)
+  {
+    SoundPlay *48
+    MsgBox, 48, Long Name, The computer name is too long for NETBIOS compatibility.`nPlease input a name that is fifteen characters or less.
+    Return
+  }
+  If (strLocation == "Location...")
+  {
+    SoundPlay *48
+    MsgBox, 48, No Location, Please select a location for this computer.
+    Return
+  }
+  If (strComputerRole == "Role...")
+  {
+    SoundPlay *48  
+    MsgBox, 48, No Role, Please select a role for this computer.
+    Return
+  }
+  SoundPlay *32
+  MsgBox, 36, Confirm, Please confirm the following:`nName: %strComputerName%`nLocation: %strLocation%`nRole: %strComputerRole%`n%WirelessText% `n%TypeText% `nIs this correct?
+  IfMsgBox, Yes
+  {
+    DoLogging("--   User has selected:")
+    DoLogging("--")
+    DoLogging("--                Name: " strComputerName)
+    DoLogging("--            Location: " strLocation)
+    DoLogging("--                Role: " strComputerRole)
+    DoLogging("--             Network: " WirelessText)
+    Gosub __main__
+    MsgBox Cthuhlu! ; This should never run!
+  }
+  MsgBox Cthuhlu! ; This should never run!
+  Return
+}
+MsgBox Cthuhlu! ; This should never run!
+__subCreateOUPath__:
+{
+  DoLogging("ii Creating distinguished name for domain join...")
+  Try {
+    If (strComputerRole == "Office")
+      strFinalOUPath := "OU=Offices,OU=Systems,OU=" . strLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
+    If (strComputerRole == "Frontline")
+      strFinalOUPath := "OU=Frontline,OU=Systems,OU=" . strLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
+    If (strComputerRole == "Frontline" and bIsWireless == 1) ;Staff Laptop
+      strFinalOUPath := "OU=Laptops,OU=Systems,OU=" . strLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
+    If (strComputerRole == "Patron")
+      strFinalOUPath := "OU=" . strLocation . ",OU=Patron,OU=DCLS,DC=dcls,DC=org"  
+    If (strComputerRole == "Patron" and bIsWireless == 1) ;Patron Laptop
+      strFinalOUPath := "OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
+    If (strComputerRole == "Catalog")
+      strFinalOUPath := "OU=Catalog,OU=Patron,OU=DCLS,DC=dcls,DC=org"
+    If (strComputerRole == "Self Checkout")
+      strFinalOUPath := "OU=Self Service,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
+    If (strComputerRole == "LPT Kiosk")
+      strFinalOUPath := "OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
+    DoLogging("ii Distinguished Name: "strFinalOUPath)
+  } Catch {
+    DoLogging("!! Failure to create distinguished name!")
+    vNumErrors += 1
+  }
+  Return
+}
+MsgBox Cthuhlu! ; This should never run!
 __subDefaultTasks__:
 {
-  Note("__ __subDefaultTasks__")
-  Gosub __subCreateOUPath__
+  DoLogging(" ")
+  DoLogging("__ __subDefaultTasks__")
+  DoLogging("ii wireless profile (optional) and Spiceworks agent, activation, domain join, Vipre install, LogMeIn...")
   arrDefaultTaskList := []
   If (bIsWireless == 1)
   {
@@ -41,17 +136,18 @@ __subDefaultTasks__:
   }
   arrDefaultTaskList.Insert("cscript //B c:\windows\system32\slmgr.vbs /ipk " strActivationKey) ; Copy activation key.
   arrDefaultTaskList.Insert("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
-  arrDefaultTaskList.Insert("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \"""strDomainPassword . "\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ strComputerName """ -OUPath '" vOUPath "'") ; Join domain, Move OU.
+  arrDefaultTaskList.Insert("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \"""strDomainPassword . "\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ strComputerName """ -OUPath '" strFinalOUPath "'") ; Join domain, Move OU.
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
-  DoTasks(arrDefaultTaskList)
+  iTotalErrors += DoExternalTasks(arrDefaultTaskList, bIsVerbose)
   Return
 }
-
+MsgBox Cthuhlu! ; This should never run!
 __subSpecificTasks__:
 {
-  Note("__ __subSpecificTasks__")
-  ;Note("-- Role-Specific Configuration for: " . strComputerRole . "")
+  DoLogging(" ")
+  DoLogging("__ __subSpecificTasks__")
+  DoLogging("-- Role-Specific Configuration for: " . strComputerRole)
   arrSpecificTaskList := []
   If (strComputerRole == "Office")
   {
@@ -95,137 +191,86 @@ __subSpecificTasks__:
   {
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")  ; EncoreAlways script.
   }
-  DoTasks(arrSpecificTaskList)
+  iTotalErrors += DoExternalTasks(arrSpecificTaskList, bIsVerbose)
   Return
 }
-
+MsgBox Cthuhlu! ; This should never run!
 __subAddAutoLogon__:
 {
-  Note("__ __subAddAutoLogon__")
+  DoLogging(" ")
+  DoLogging("__ __subAddAutoLogon__")
+  DoLogging("ii create AutoLogon profile for certain roles...")
+  arrAddAutoLogonList := []
   If (strComputerRole == "Office") ; because Office machines don't auto-logon
   {
     Return
   }
-  ;Note("-- Configuring Auto-Logon")
-  RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, AutoAdminLogon, 1
-  RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultDomainName, dcls.org
-  If (Computer == "Frontline")
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "AutoAdminLogon", "1"])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultDomainName", "dcls.org"])
+  If (strComputerRole == "Frontline")
   {
     strAutoLogonUser := arrAutoLogonUser[strLocation]
-    RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\%strAutoLogon%
-    RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %strALPWStaff%
-    Return
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultUserName", "dcls\" . strAutoLogonUser])
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultPassword", strALPWStaff])
   }
-  If (Computer == "Patron")
+  If (strComputerRole == "Patron")
   {  
-    RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\%strLocation%-PATRON
-    RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %strALPWPatron%
-    Return
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultUserName", "dcls\" . %strLocation% . "-PATRON"])
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultPassword", strALPWPatron])
   }
-  If (Computer == "Catalog") 
+  If (strComputerRole == "Catalog") 
   {
-    RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultUserName, dcls\esacatalog
-    RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon, DefaultPassword, %strALPWCatalog%
-    Return
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultUserName", "dcls\esacatalog"])
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultPassword", strALPWCatalog])
   }
-  Note("!! Failure to create auto logon profile!")
-  iTotalErrors += 1
+  iTotalErrors += DoInternalTasks(arrAddAutoLogonList, bIsVerbose)
   Return
 }
-  
+MsgBox Cthuhlu! ; This should never run!
 __subCleanupJobs__:
 {  
-  Note("__ __subCleanupJobs__")
-  Note("-- Registry and file cleanup...")
-  Try {
-  RegWrite, REG_DWORD, HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui, EnableSystray, 0
-  FileDelete C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk
-  FileDelete C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk
-  } Catch {
-    iTotalErrors += 1
-    Note("!! Error attempting LogMeIn cleanup!")
-  }
+  DoLogging(" ")
+  DoLogging("__ __subCleanupJobs__")
+  DoLogging("ii Registry and file cleanup...")
+  arrCleanupJobsList := []
+  arrCleanupJobsList.Insert(["RegWrite", "REG_DWORD", "HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui", "EnableSystray", "0"])
+  arrCleanupJobsList.Insert(["FileDelete", "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"])
+  arrCleanupJobsList.Insert(["FileDelete", "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"])
   If (strComputerRole == "Patron")
   {
-    RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, PatronAdminPanel, ""C:\PatronAdminPanel\PatronAdminPanel.exe"" ; Set PatronAdminPanel auto-start.
-    Sleep 15000
-    Gosub ClosePCReservation
+    arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run", "PatronAdminPanel", """C:\PatronAdminPanel\PatronAdminPanel.exe"""])
+    iTotalErrors += ClosePCReservation(5)
   }
   If (strComputerRole == "Catalog")
   {
-    RegWrite, REG_SZ, HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run, EncoreAways, ""C:\EncoreAlways\EncoreAlways.exe"" ; Set EncoreAways auto-start
+    arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run", "EncoreAways", """C:\EncoreAlways\EncoreAlways.exe"""])
   }
+  arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete", "%comspec% /c RD /S /Q C:\IT\Deployment"])
+  iTotalErrors += DoInternalTasks(arrCleanupJobsList, bIsVerbose)
   Return
 } 
-
-__subCreateOUPath__:
+MsgBox Cthuhlu! ; This should never run!
+__subFinishAndExit__:
 {
-  If (strComputerRole == "Office")
-    Return "OU=Offices,OU=Systems,OU=" . strLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
-  If (strComputerRole == "Frontline")
-    Return "OU=Frontline,OU=Systems,OU=" . strLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
-  If (strComputerRole == "Frontline" and bIsWireless == 1) ;Staff Laptop
-    Return "OU=Laptops,OU=Systems,OU=" . strLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
-  If (strComputerRole == "Patron")
-    Return "OU=" . strLocation . ",OU=Patron,OU=DCLS,DC=dcls,DC=org"  
-  If (strComputerRole == "Patron" and bIsWireless == 1) ;Patron Laptop
-    Return "OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
-  If (strComputerRole == "Catalog")
-    Return "OU=Catalog,OU=Patron,OU=DCLS,DC=dcls,DC=org"
-  If (strComputerRole == "Self Checkout")
-    Return "OU=Self Service,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
-  If (strComputerRole == "LPT Kiosk")
-    Return "OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
-  Note("!! Failure to create distinguished name!")
-  vNumErrors += 1
-  Return
+  If (iTotalErrors > 0) ; Final check for errors and closes program.
+  {
+    DoLogging("!! Configuration INCOMPLETE! There were " iTotalErrors . " errors with this run.")
+    SoundPlay *16
+    MsgBox, 16, Configuration INCOMPLETE,  There were %iTotalErrors% errors during the configuration process!`nSomething may not have configured or installed propery.`nCheck the log for more details.
+    ExitApp, 2 ; indicates errors
+  } Else {
+    DoLogging("== Configuration Successful! There were " iTotalErrors . " errors with this program.")
+    SoundPlay *64
+    MsgBox, 64, Configuration Successful,  Configuration completed successfully! The computer will now reboot., 10 ; MsgBox times out after 10 seconds.
+    ;Shutdown, 2 ; Reboots computer.
+    ExitApp, 0 ; indicates success
+  }
 }
-  
-ButtonExit: ; Label for Exit button. (WORKS)
+MsgBox Cthuhlu! ; This should never run!
+GuiClose: 
+2GuiClose: ; I am annoyed by the lack of ExitReasons
+ButtonExit:
 {
-  SoundPlay *48
-  MsgBox, 52, Exiting Configure-Image, This will end Configure-Image.`nAre you sure you want to exit?
-    IfMsgBox, No
-    Return
-  Note("-- User is exiting Configure-Image`, dying now.") ; comment
-  ExitApp
+  ExitApp, 1
 }
-
-ButtonStart: ; Label for Install button. Takes user input and prepares to run installers, confirming first. (WORKS)
-{
-  Gui, Submit, NoHide
-  ConfirmationWindow(bIsWireless, strLocation, "string", strComputerName)
-  Return
-}  
-
-ClosePCReservation: ; Label that closes Envisionware window after its installation.
-{
-  CoordMode, Mouse, Screen
-  MouseMove, (20), (A_ScreenHeight - 20)
-  Sleep, 250
-  ;Send, {Ctrl Down}{Click}{Ctrl up}
-  Send, ^{Click}
-  Sleep, 250
-  Send envisionware{enter}{enter}
-  Return
-}
-
-GuiClose: ; Label for default close functions, prompts confirmation screen. (WORKS)
-{
-  SoundPlay *48
-  MsgBox, 52, Exiting Configure-Image, This will end Configure-Image.`nAre you sure you want to exit?
-    IfMsgBox, No
-    Return
-  Note("-- User is exiting Configure-Image`, dying now.")
-  ExitApp
-}
-
-2GuiClose: ; Label for default close functions in second GUI, prompts confirmation screen. (WORKS)
-{
-  SoundPlay *48
-  MsgBox, 52, Exiting Configure-Image, This will end Configure-Image.`nAre you sure you want to exit?
-    IfMsgBox, No
-    Return
-  Note("-- User is exiting Configure-Image`, dying now.")
-  ExitApp
-}
+MsgBox Cthuhlu! ; This should never run!

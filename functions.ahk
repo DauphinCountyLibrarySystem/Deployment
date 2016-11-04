@@ -1,117 +1,170 @@
 
-ConfirmationWindow(Wireless, Location, Computer, Name) ; Checks that selections are correct before continuing.
+ClosePCReservation(sec) ; a recursive function that closes Envisionware window after its installation. I'm quite proud of using recursion.
 {
-  Gui +OwnDialogs
-  If (Wireless == 1)
-    WirelessText := "This is a Wireless computer."
-  else
-    WirelessText := "This is an Ethernet computer."
-    
-  If (Computer == "Office")
-    TypeText := "This will install:`n- Sierra`n- Office for staff computer`n- Staff printers"
-  If (Computer == "Frontline")
-    TypeText := "This will install:`n- Sierra`n- Offline Circulation`n- Staff printers`n- PC Reservation Reservation Station`n- Envisionware Print Release station`n- Auto Logon configuration for staff"
-  If (Computer == "Patron")
-    TypeText := "This will install:`n- Office for patron computer`n- Envisionware PC Reservation client`n- Envisionware LPTOne printer client`n- PatronAdminPanel`n- Auto Logon configuration for patrons"  
-  If (Computer == "Catalog")
-    TypeText := "This will install:`n- EncoreAlways`n- Auto Logon configuration for catalogs"
-    
-  If (Name == "")
+  DoLogging("-- ClosePCReservation() running: waiting for " sec " seconds...")
+  Sleep (sec*1000)
+  If ProcessExist("PC Reservation Client Module.exe")
   {
-    SoundPlay *48
-    MsgBox, 48, Not Named, Please type in a name for the computer.
-    Return
+    DoLogging("-- Attempting to close PC Reservation Client...")
+    CoordMode, Mouse, Screen
+    MouseMove, (20), (A_ScreenHeight - 20)
+    Sleep, 250
+    Send, ^{Click} ; this should work better than: Send, {Ctrl Down}{Click}{Ctrl up}
+    Sleep, 250
+    Send envisionware{enter}{enter}
+    Sleep, 1000 ; I'm trying to be generous here. It shouldn't take a second to close.
   }
-  If (StrLen(Name) > 15)
+  If ProcessExist("PC Reservation Client Module.exe")
   {
-    SoundPlay *48
-    MsgBox, 48, Large Name, The computer name is too long.`nPlease input a name that is fifteen characters or less.
-    Return
+    sec -= 1 ; decrement each time we recurse
+    If sec<1 ; our base case, as it were...
+    {
+      DoLogging("!! PC Reservation Client is still running, but ClosePCReservation() ran out of time!")
+      Return 1
+    }
+    DoLogging(">< PC Reservation Client is still running, trying again...")
+    Return ClosePCReservation(sec)
   }
-  If (Location == "Branch...")
-  {
-    SoundPlay *48
-    MsgBox, 48, No Library, Please select a library branch.
-    Return
-  }
-  If (Computer == "Computer...")
-  {
-    SoundPlay *48  
-    MsgBox, 48, No Computer, Please select a computer type.
-    Return
-  }
-  SoundPlay *32
-  MsgBox, 36, Confirm, Please confirm the following:`nName: %Name%`nLocation: %Location%`nRole: %Computer%`n%WirelessText% `n%TypeText% `nIs this correct?
-  IfMsgBox, Yes
-  {
-    Note("-- Selections complete:")
-    ;Note("-- " WirelessText " It is at " Location " and it will be named " Name ". " TypeText)
-    Note("--                Name: " Name)
-    Note("--            Location: " Location)
-    Note("--             Network: " WirelessText)
-    Gosub __main__
-    MsgBox Cthuhlu!
-  }
-  Return
+  DoLogging("<> PC Reservation Client seems to be closed, returning...")
+  Return 0
 }
 
+ProcessExist(Name){
+  Process,Exist,%Name%
+  return Errorlevel
+}
 
-
-
-; everything below this should remain a function
-
-
-DoTasks(arrTasks) ; Loops through an array of task commands, trying and logging each one.
+DoExternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, trying and logging each one.
 {
-  
-  ;MsgBox % "DoTasks():`n" . "arrTasks.MaxIndex() " . arrTasks.MaxIndex()
+  iTaskErrors := 0
+  ; parse!
   Loop % arrTasks.MaxIndex()
   {
     Task := arrTasks[A_Index]
     Try {
-      If (vIsVerbose == 1)
+      If (Verbosity == 1)
       {
-        Note("** Executing: " Task)
-      } else {
-        Note("** Executing: " Task, 1)
+        DoLogging("** Executing External Task: " Task)
+      } Else {
+        DoLogging("** Executing External Task: " Task, 1)
       }
     ;RunWait, Task
-   ;MsgBox % "Task Number: " . A_Index . "`n" . "Task: `n" . Task
+    ;MsgBox % "Task Number: " . A_Index . "`n" . "Task: `n" . Task
     } Catch {
     iTaskErrors += 1
-    Note("!! Error attempting "Task . "!")
+    DoLogging("!! Error attempting External Task: "Task . "!")
     }
   }
   Return iTaskErrors
 }
 
+DoInternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, trying and logging each one.
+{
+  iTaskErrors := 0
+  ; parse!
+  Try {
+    Loop % arrTasks.MaxIndex()
+    {
+      Task := arrTasks[A_Index]
+      strParams := ""
+      Loop % Task.MaxIndex()
+      {
+        Element := Task[A_Index]
+        If (A_Index>1)
+        {
+          strParams := strParams . Element
+        }
+        If (A_Index>1 And A_Index<Task.MaxIndex())
+        {
+          strParams := StrParams . ","
+        }
+      }
+      Output := Task[1] . "(" . strParams . ")"
+      If (Verbosity == 1)
+      {
+        DoLogging("** Executing Internal Task: " Output)
+      } Else {
+        DoLogging("** Executing Internal Task: " Output, 1)
+      }
+      Try {
+        Task[1](strParams)
+      } Catch {
+        iTaskErrors += 1
+        DoLogging("!! Error attempting Internal Task: "Output . "!")
+      }
+    }
+  } Catch {
+    iTaskErrors += 1
+    DoLogging("!! Error during parsing!")
+  }
+  Return iTaskErrors
+}
+
+RegWrite(strInput)
+{
+  Try {
+    StringSplit, arrParams, strInput, `,
+    ;MsgBox % "RegWrite, `n" arrParams1 "`n" arrParams2 "`n" arrParams3 "`n" arrParams4
+    ;RegWrite, %arrParams1%,%arrParams2%,%arrParams3%,%arrParams4%
+    } Catch {
+      Return 1 ; should count as an error...
+    }
+}
+
+FileDelete(strInput)
+{
+  Try {
+    StringSplit, arrParams, strInput, `,
+    ;MsgBox % "FileDelete, `n" arrParams1
+    ;FileDelete, %arrParams1%
+    } Catch {
+      Return 1 ; should count as an error...
+    }
+}
+
+
 ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closures.
 {
   Gui +OwnDialogs
-  if ExitReason in Menu,
-    {
+  If (ExitReason == "Menu") Or ((ExitReason == "Exit") And (ExitCode == 1))
+  {
     SoundPlay *48
-    MsgBox, 52, Exiting Deployment, This will end deployment.`nAre you sure you want to exit?
-        IfMsgBox, No
-          return 1  ; OnExit functions must return non-zero to prevent exit.
-    Note("-- User is exiting Deployment`, dying now.")
-    }
-  if ExitReason in Logoff,Shutdown
-  {
-    Note("-- System logoff or shutdown in process`, dying now.")
+    MsgBox, 52, Exiting Configure-Image, Configuration is not complete!`nThis will end Configure-Image.`nAre you sure you want to exit?
+      IfMsgBox, No
+        Return 1  ; OnExit functions must return non-zero to prevent exit.
+    DoLogging("-- User initiated and confirmed process exit via A_ExitReason: Menu (System Tray) or ExitCode: 2 (GUI Controls). Dying now.")
+    Return 0
   }
-  if ExitReason in Close
+  If ((A_ExitReason == "Exit") And (ExitCode == 0))
   {
-    Note("!! The system issued a WM_CLOSE or WM_QUIT`, or some other unusual termination is taking place`, dying now.")
+    DoLogging("-- Received ExitCode 0, which should indicate that the process succeeded. Dying now.")
+    Return 0
   }
-    if ExitReason not in Close,Exit,Logoff,Menu,Shutdown
+  If ((A_ExitReason == "Exit") And (ExitCode > 1))
   {
-    Note("!! I am closing unusually`, with ExitReason: " ExitReason ", dying now.")
+    DoLogging("-- Received ExitCode 1 or higher, which indicates that iTotalErrors was non-zero. Dying now.")
+    Return 0
   }
-    ; Do not call ExitApp -- that would prevent other OnExit functions from being called.
+  If A_ExitReason In Logoff,Shutdown
+  {
+    DoLogging("-- System logoff or shutdown in process`, dying now.")
+    Return 0  
+  }
+  If A_ExitReason == "Close"
+  {
+    DoLogging("!! The system issued a WM_CLOSE or WM_QUIT`, or some other unusual termination is taking place`, dying now.")
+    Return 0
+  }
+  DoLogging("!! I am closing unusually`, with A_ExitReason: " A_ExitReason " and ExitCode: " ExitCode ", dying now.")
+  ; Do not call ExitApp -- that would prevent other OnExit functions from being called.
 }
 
-Note(msg, Type=3) ; 1 logs to file, 2 logs to console, 3 does both, 10 is just a newline to file.
+ExitWait()
+{
+  Sleep 150 ; just in case the thread needs more time to finish the log
+}
+
+DoLogging(msg, Type=3) ; 1 logs to file, 2 logs to console, 3 does both, 10 is just a newline to file.
 {
   global ScriptBasename, AppTitle
   If (Type == 1) {
