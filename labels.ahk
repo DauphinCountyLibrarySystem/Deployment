@@ -147,7 +147,7 @@ __subSpecificTasks__:
 {
   DoLogging(" ")
   DoLogging("__ __subSpecificTasks__")
-  DoLogging("-- Role-Specific Configuration for: " . strComputerRole)
+  DoLogging("ii Role-Specific Configuration for: " . strComputerRole . "...")
   arrSpecificTaskList := []
   If (strComputerRole == "Office")
   {
