@@ -262,7 +262,7 @@ __subFinishAndExit__:
     DoLogging("== Configuration Successful! There were " iTotalErrors . " errors with this program.")
     SoundPlay *64
     MsgBox, 64, Configuration Successful,  Configuration completed successfully! The computer will now reboot., 10 ; MsgBox times out after 10 seconds.
-    ;Shutdown, 2 ; Reboots computer.
+    Shutdown, 2 ; Reboots computer.
     ExitApp, 0 ; indicates success
   }
 }

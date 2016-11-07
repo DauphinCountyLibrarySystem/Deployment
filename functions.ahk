@@ -48,7 +48,7 @@ DoExternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, 
       } Else {
         DoLogging("** Executing External Task: " Task, 1)
       }
-    ;RunWait, Task
+    RunWait, Task
     ;MsgBox % "Task Number: " . A_Index . "`n" . "Task: `n" . Task
     } Catch {
     iTaskErrors += 1
@@ -105,7 +105,7 @@ RegWrite(strInput)
   Try {
     StringSplit, arrParams, strInput, `,
     ;MsgBox % "RegWrite, `n" arrParams1 "`n" arrParams2 "`n" arrParams3 "`n" arrParams4
-    ;RegWrite, %arrParams1%,%arrParams2%,%arrParams3%,%arrParams4%
+    RegWrite, %arrParams1%,%arrParams2%,%arrParams3%,%arrParams4%
     } Catch {
       Return 1 ; should count as an error...
     }
@@ -116,7 +116,7 @@ FileDelete(strInput)
   Try {
     StringSplit, arrParams, strInput, `,
     ;MsgBox % "FileDelete, `n" arrParams1
-    ;FileDelete, %arrParams1%
+    FileDelete, %arrParams1%
     } Catch {
       Return 1 ; should count as an error...
     }
@@ -132,7 +132,7 @@ ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closure
     MsgBox, 52, Exiting Configure-Image, Configuration is not complete!`nThis will end Configure-Image.`nAre you sure you want to exit?
       IfMsgBox, No
         Return 1  ; OnExit functions must return non-zero to prevent exit.
-    DoLogging("-- User initiated and confirmed process exit via A_ExitReason: Menu (System Tray) or ExitCode: 2 (GUI Controls). Dying now.")
+    DoLogging("-- User initiated and confirmed process exit via A_ExitReason: Menu (System Tray) or ExitCode: 1 (GUI Controls). Dying now.")
     Return 0
   }
   If ((A_ExitReason == "Exit") And (ExitCode == 0))
