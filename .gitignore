@@ -47,6 +47,7 @@ Temporary Items
 .apdisk
 *.log
 
-# All INI files
+# Our additional ignores
 *.ini
 test.ahk
+*.exe
