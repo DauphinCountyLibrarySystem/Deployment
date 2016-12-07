@@ -48,7 +48,7 @@ DoExternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, 
       } Else {
         DoLogging("** Executing External Task: " Task, 1)
       }
-      RunWait, %comspec% /c ECHO %Task% && %Task%
+      RunWait, %comspec% /c ECHO %Task% && %Task%, , Hide
     } Catch {
       iTaskErrors += 1
       DoLogging("!! Error attempting External Task: "Task . "!")
@@ -125,6 +125,11 @@ FileDelete(strInput)
 ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closures.
 {
   Gui +OwnDialogs
+  If (ExitCode == 9999)
+  {
+    DoLogging("Restarting as Admin...")
+    Return 0
+  }
   If (ExitReason == "Menu") Or ((ExitReason == "Exit") And (ExitCode == 1))
   {
     SoundPlay *48

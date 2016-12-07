@@ -4,6 +4,7 @@
   Authors: Christopher Roth, Lucas Bodnyk
 
   Changelog:
+    2.4.0 - Everything should be ready as near as I can tell, I'm releasing this for testing.
     2.3.0 - Fixed DoExternalTasks()
               Our Runwait syntax was incorrect (honestly it's still a mess, but if it works...). I also snazzed up a few other things. More TODO as well!
     2.2.2 - more refactoring, but also some process improvements.
@@ -25,11 +26,10 @@
       bug hunting: follow (almost) all returns with 'MsgBox, Cthulhu!' so we can ensure that program flow is correct.
       examine log output to determine if it can be improved?
       banish Cthulhu!
-      LPTOne shortcuts for proper IPs
       PC Reservation shortcut for proper IPs
-      EncoreAlways auto-start
-      confirm whether we actually need to activate it.
-      replace all the office robocopies with *2016* PARTIALLY DONE
+        ^ I have code in place to test
+      confirm whether we actually need to activate Windows.
+      ensure that Add-Computer is renaming correctly
 */
 
 ;   ================================================================================
