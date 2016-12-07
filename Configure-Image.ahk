@@ -4,6 +4,8 @@
   Authors: Christopher Roth, Lucas Bodnyk
 
   Changelog:
+    2.3.0 - Fixed DoExternalTasks()
+              Our Runwait syntax was incorrect (honestly it's still a mess, but if it works...). I also snazzed up a few other things. More TODO as well!
     2.2.2 - more refactoring, but also some process improvements.
             ^ replace arrLPTOneServers with 'arrLPTOneServers'
             ^ vNumErrors is almost wiped out. Find out where else it is used (CreateOUPath frex.) and refactor
@@ -23,7 +25,11 @@
       bug hunting: follow (almost) all returns with 'MsgBox, Cthulhu!' so we can ensure that program flow is correct.
       examine log output to determine if it can be improved?
       banish Cthulhu!
-      uncomment the business end of the Tasks functions, so that it actually does anything...
+      LPTOne shortcuts for proper IPs
+      PC Reservation shortcut for proper IPs
+      EncoreAlways auto-start
+      confirm whether we actually need to activate it.
+      replace all the office robocopies with *2016* PARTIALLY DONE
 */
 
 ;   ================================================================================

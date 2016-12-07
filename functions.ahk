@@ -48,11 +48,10 @@ DoExternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, 
       } Else {
         DoLogging("** Executing External Task: " Task, 1)
       }
-    RunWait, Task
-    ;MsgBox % "Task Number: " . A_Index . "`n" . "Task: `n" . Task
+      RunWait, %comspec% /c ECHO %Task% && %Task%
     } Catch {
-    iTaskErrors += 1
-    DoLogging("!! Error attempting External Task: "Task . "!")
+      iTaskErrors += 1
+      DoLogging("!! Error attempting External Task: "Task . "!")
     }
   }
   Return iTaskErrors
@@ -189,4 +188,3 @@ SendToConsole(msg) ; For logging to Console window.
   GuiControlGet, Console, 1:
   GuiControl, 1:, Console, %Console%%msg%`r`n
 }
-

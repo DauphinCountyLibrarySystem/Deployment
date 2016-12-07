@@ -130,15 +130,15 @@ __subDefaultTasks__:
   arrDefaultTaskList := []
   If (bIsWireless == 1)
   {
-    arrDefaultTaskList.Insert("cmd.exe /c netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile.xml user=all") ; Install Wireless Profile
-    arrDefaultTaskList.Insert("cmd.exe /c timeout 6") ; Wait for profile to update.
-    arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY=""" strSpiceworksKey """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile
+    arrDefaultTaskList.Insert("""netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile-dclsstaff.xml user=all""") ; Install wireless profile
+    arrDefaultTaskList.Insert("PING -n 16 -w 1000 8.8.8.8") ; Wait up to 15 seconds for profile to update.
+    arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY=""" strSpiceworksKey """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile Agent
   }
-  arrDefaultTaskList.Insert("cscript //B c:\windows\system32\slmgr.vbs /ipk " strActivationKey) ; Copy activation key.
-  arrDefaultTaskList.Insert("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
-  arrDefaultTaskList.Insert("powershell.exe -NoExit -Command $pass = ConvertTo-SecureString -String \"""strDomainPassword . "\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ strComputerName """ -OUPath '" strFinalOUPath "'") ; Join domain, Move OU.
-  arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. (WORKS) 
-  arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn. (WORKS)
+  ;arrDefaultTaskList.Insert("%ComSpec% /c cscript //B c:\windows\system32\slmgr.vbs /ipk " strActivationKey) ; Install activation key.
+  ;arrDefaultTaskList.Insert("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
+  arrDefaultTaskList.Insert("powershell.exe -Command $pass = ConvertTo-SecureString -String \"""strDomainPassword . "\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -NewName """ strComputerName """ -OUPath '" strFinalOUPath "'") ; Join domain, Move OU.
+  arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. 
+  arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
   iTotalErrors += DoExternalTasks(arrDefaultTaskList, bIsVerbose)
   Return
 }
@@ -151,45 +151,46 @@ __subSpecificTasks__:
   arrSpecificTaskList := []
   If (strComputerRole == "Office")
   {
-    arrSpecificTaskList.Insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
-    arrSpecificTaskList.Insert("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_staff.xml") ; Office 365 for staff.
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut.
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*") ; Sierra shortcut.
-    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")    ;     <-|
-    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")    ;     | 
-    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*") ;   |- Copy Office shortcuts to Start
-    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")  ;   |
-    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Outlook*")  ;   <-|
-    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
+    arrSpecificTaskList.Insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s /UNILOG+:C:\Deployment\robocopy_Sierra.log") ; Sierra files.
+    arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_staff.xml") ; Office 365 for staff.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; ADP shortcut.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; Copy links to staff printers.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; Sierra shortcut.
+    ;arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs"" C:\Users\Public\Desktop Word* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")    ;    <-|
+    ;arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs"" C:\Users\Public\Desktop Excel* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")    ;     | 
+    ;arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs"" C:\Users\Public\Desktop PowerPoint* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ;   |- Copy Office shortcuts to Start
+    ;arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs"" C:\Users\Public\Desktop Publisher* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")  ;   |
+    ;arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs"" C:\Users\Public\Desktop Outlook* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")  ;   <-|
+    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs"" C:\Users\Public\Desktop *2016* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")
+    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
   }
   If (strComputerRole == "Frontline")
   {
-    arrSpecificTaskList.Insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s") ; Sierra files.
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s") ;  Offline circ files.
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP*") ; ADP shortcut
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s") ; Copy links to staff printers.
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra*") ; Sierra shortcut.
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline*") ; Offline Circ shortcut.  
-    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Envisionware\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
-    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Envisionware\_PCReservationStation.exe /S") ; Install Reservation Station
+    arrSpecificTaskList.Insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s /UNILOG+:C:\Deployment\robocopy_Sierra.log") ; Sierra files.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s /UNILOG+:C:\Deployment\robocopy_Millennium.log") ;  Offline circ files.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop ADP* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; ADP shortcut
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; Copy links to staff printers.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Sierra* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; Sierra shortcut.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts C:\Users\Public\Desktop Offline* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; Offline Circ shortcut.  
+    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
+    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") ; Install Reservation Station
   }
   If (strComputerRole == "Patron")
   {
     strEwareServer := arrLPTOneServers[strLocation]
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s") ; Copy PatronAdminPanel.
-    arrSpecificTaskList.Insert("cmd.exe /c "A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml") ; Office 365 for patrons.
-    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Word*")    ; <-|
-    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Excel*")    ;   |- Copy Office shortcuts to Start
-    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop PowerPoint*")  ;   |
-    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start\Programs"" C:\Users\Public\Desktop Publisher*")  ; <-|
-    arrSpecificTaskList.Insert("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s") ; Update Start menu.
-    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Envisionware\_LPTOneClient.exe /S -jqe.host="strEwareServer) ; Patron printers.
-    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Envisionware\_PCReservationClient.exe /S -ip="strEwareServer . " -tcpport=9432") ; Envisionware Client.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s /UNILOG+:C:\Deployment\robocopy_PatronAdminPanel.log") ; Copy PatronAdminPanel.
+    arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml") ; Office 365 for patrons.
+    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs"" C:\Users\Public\Desktop Word* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")    ;     <-|
+    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs"" C:\Users\Public\Desktop Excel* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")    ;      |- Copy Office shortcuts to Start
+    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs"" C:\Users\Public\Desktop PowerPoint* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")  ;   |
+    arrSpecificTaskList.Insert("robocopy ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs"" C:\Users\Public\Desktop Publisher* /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")  ;  <-|
+    arrSpecificTaskList.Insert("robocopy C:\Users\Public\Desktop C:\ProgramData\Microsoft\Windows\Start Menu /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; Update Start menu.
+    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\_LPTOneClient.exe /S -jqe.host="strEwareServer) ; Patron printers.
+    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\_PCReservationClient.exe /S -ip="strEwareServer . " -tcpport=9432") ; Envisionware Client.
   }
   If (strComputerRole == "Catalog")
   {
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s")  ; EncoreAlways script.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s /UNILOG+:C:\Deployment\robocopy.log")  ; EncoreAlways script.
   }
   iTotalErrors += DoExternalTasks(arrSpecificTaskList, bIsVerbose)
   Return
