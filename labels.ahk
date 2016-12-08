@@ -130,16 +130,16 @@ __subDefaultTasks__:
   arrDefaultTaskList := []
   If (bIsWireless == 1)
   {
-    arrDefaultTaskList.Insert("""netsh wlan add profile filename="A_ScriptDir . "\Resources\WirelessProfile-dclsstaff.xml user=all""") ; Install wireless profile
-    arrDefaultTaskList.Insert("PING -n 4 -w 4000 8.8.8.8") ; Wait between 4 and 16 seconds for the network.
-    arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY=""" strSpiceworksKey """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile Agent
+    arrDefaultTaskList.Insert("""netsh wlan add profile filename`="A_ScriptDir . "\Resources\WirelessProfile-dclsstaff.xml user`=all""") ; Install wireless profile
+    arrDefaultTaskList.Insert("PING -n 16 -w 1000 8.8.8.8") ; If the network adapter is down, general failure responds instantly; so variable wait won't work...
+    arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER`=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY`=""" strSpiceworksKey """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile Agent
   }
   ; ================================================================================
   ; WE DON'T KNOW IF WE NEED THIS YET
   ;arrDefaultTaskList.Insert("%ComSpec% /c cscript //B c:\windows\system32\slmgr.vbs /ipk " strActivationKey) ; Install activation key.
   ;arrDefaultTaskList.Insert("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
   ; ================================================================================
-  arrDefaultTaskList.Insert("powershell.exe -Command $pass = ConvertTo-SecureString -String \"""strDomainPassword . "\"" -AsPlainText -Force; $mycred = new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath '" strFinalOUPath "'" -NewName """ strComputerName """) ; Join domain, Move OU.
+  arrDefaultTaskList.Insert("powershell.exe -Command $pass `= ConvertTo-SecureString -String \"""strDomainPassword . "\"" -AsPlainText -Force; $mycred `= new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath '" strFinalOUPath "'" -NewName """ strComputerName """) ; Join domain, Move OU.
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. 
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
   iTotalErrors += DoExternalTasks(arrDefaultTaskList, bIsVerbose)
@@ -160,8 +160,8 @@ __subSpecificTasks__:
     ;arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal. not necessary for office?
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Printers.log") ; Copy links to staff printers.
     FileCreateShortcut, \\Contentserver\bucket, C:\Users\Public\Desktop\Bucket.lnk,  , , , C:\Windows\system32\imageres.dll, , 138
-    FileCreateShortcut, https://portal.adp.com/public/index.htm, C:\Users\Public\Desktop\ADP.lnk,  , , , I:\Deployment\Resources\Shortcuts\adp.ico, , 1
-    FileCreateShortcut, C:\Sierra Desktop App\iiirunner.exe, C:\Users\Public\Desktop\Sierra Desktop App.lnk, C:\Sierra Desktop App, , , I:\Deployment\Resources\Shortcuts\sierra.ico, , 1
+    FileCreateShortcut, https://portal.adp.com/public/index.htm, C:\Users\Public\Desktop\ADP.lnk,  , , , C:\Deployment\Resources\Shortcuts\adp.ico, , 1
+    FileCreateShortcut, C:\Sierra Desktop App\iiirunner.exe, C:\Users\Public\Desktop\Sierra Desktop App.lnk, C:\Sierra Desktop App, , , C:\Deployment\Resources\Shortcuts\sierra.ico, , 1
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE, C:\Users\Default\Desktop\Word 2016.lnk, , , , , , 1
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE, C:\Users\Default\Desktop\Excel 2016.lnk, , , , , , 1
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\POWERPNT.EXE, C:\Users\Default\Desktop\PowerPoint 2016.lnk, , , , , , 1
@@ -178,8 +178,8 @@ __subSpecificTasks__:
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") ; Install Reservation Station
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources ""C:\Program Files (x86)\EnvisionWare"" envisionware.lic /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")
     FileCreateShortcut, \\Contentserver\bucket, C:\Users\Public\Desktop\Bucket.lnk,  , , , C:\Windows\system32\imageres.dll, , 138
-    FileCreateShortcut, https://portal.adp.com/public/index.htm, C:\Users\Public\Desktop\ADP.lnk,  , , , I:\Deployment\Resources\Shortcuts\adp.ico, , 1
-    FileCreateShortcut, C:\Sierra Desktop App\iiirunner.exe, C:\Users\Public\Desktop\Sierra Desktop App.lnk, C:\Sierra Desktop App, , , I:\Deployment\Resources\Shortcuts\sierra.ico, , 1
+    FileCreateShortcut, https://portal.adp.com/public/index.htm, C:\Users\Public\Desktop\ADP.lnk,  , , , C:\Deployment\Resources\Shortcuts\adp.ico, , 1
+    FileCreateShortcut, C:\Sierra Desktop App\iiirunner.exe, C:\Users\Public\Desktop\Sierra Desktop App.lnk, C:\Sierra Desktop App, , , C:\Deployment\Resources\Shortcuts\sierra.ico, , 1
     FileCreateShortcut, C:\Millennium\Offline\offlinecirc.exe, C:\Users\Public\Desktop\Offline Circulation.lnk, C:\Millenium\Offline, , , C:\Millennium\Offline\offlinecirc.ico, , 1
     FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\lptone\lptprt\lptPRT.exe, C:\Users\Public\Desktop\LPTOne Print Release Terminal.lnk, C:\Program Files (x86)\EnvisionWare\lptone\lptprt,  -host:%strEwareServer% -runmode:staff, , C:\Program Files (x86)\EnvisionWare\lptone\lptprt\lptPRT.exe, , 1
     FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\PC Reservation\Reservation Station\PCRes_RS.exe, C:\Users\Public\Desktop\PCRes Reservation Station.lnk, C:\Program Files (x86)\EnvisionWare\PC Reservation\Reservation Station, -host:%strEwareServer%, , , , 1
@@ -188,8 +188,8 @@ __subSpecificTasks__:
   {
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s /UNILOG+:C:\Deployment\robocopy_PatronAdminPanel.log") ; Copy PatronAdminPanel.
     arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml") ; Office 365 for patrons.
-    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\_LPTOneClient.exe /S -jqe.host="strEwareServer) ; Patron printers.
-    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\_PCReservationClient.exe /S -ip="strEwareServer . " -tcpport=9432") ; Envisionware Client.
+    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\_LPTOneClient.exe /S -jqe.host`="strEwareServer) ; Patron printers.
+    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\_PCReservationClient.exe /S -ip`="strEwareServer . " -tcpport`=9432") ; Envisionware Client.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources ""C:\Program Files (x86)\EnvisionWare"" envisionware.lic /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE, C:\Users\Default\Desktop\Word 2016.lnk, , , , , , 1
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE, C:\Users\Default\Desktop\Excel 2016.lnk, , , , , , 1
@@ -224,7 +224,7 @@ __subAddAutoLogon__:
   }
   If (strComputerRole == "Patron")
   {  
-    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultUserName", "dcls\" . %strLocation% . "-PATRON"])
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultUserName", "dcls\" . strLocation . "-PATRON"])
     arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultPassword", strALPWPatron])
   }
   If (strComputerRole == "Catalog") 
