@@ -48,7 +48,16 @@ DoExternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, 
       } Else {
         DoLogging("** Executing External Task: " Task, 1)
       }
-      RunWait, %comspec% /c ECHO %Task% && %Task%, , Hide
+      ;RunWait, %comspec% /c ECHO %Task% && %Task% && PAUSE, , 
+      TaskString := "ECHO %Task% &&"Task . "&& PAUSE"
+      LogString := RunWaitOne(TaskString)
+      If (Verbosity == 1)
+      {
+        DoLogging("  ")
+        DoLogging(LogString)
+        DoLogging("  ")
+      }
+      ;RunWait, %comspec% /c ECHO %Task% && %Task%, , Hide
     } Catch {
       iTaskErrors += 1
       DoLogging("!! Error attempting External Task: "Task . "!")
@@ -192,4 +201,11 @@ SendToConsole(msg) ; For logging to Console window.
 {
   GuiControlGet, Console, 1:
   GuiControl, 1:, Console, %Console%%msg%`r`n
+}
+
+RunWaitOne(command)
+{
+  shell := ComObjCreate("WScript.Shell") ; WshShell object: http://msdn.microsoft.com/en-us/library/aew9yb99
+  exec := shell.Exec(ComSpec " /C " command) ; Execute a single command via cmd.exe
+  return exec.StdOut.ReadAll() ; Read and return the command's output
 }

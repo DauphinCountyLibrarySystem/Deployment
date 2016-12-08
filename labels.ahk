@@ -130,8 +130,8 @@ __subDefaultTasks__:
   arrDefaultTaskList := []
   If (bIsWireless == 1)
   {
-    arrDefaultTaskList.Insert("""netsh wlan add profile filename`="A_ScriptDir . "\Resources\WirelessProfile-dclsstaff.xml user`=all""") ; Install wireless profile
-    arrDefaultTaskList.Insert("PING -n 16 -w 1000 8.8.8.8") ; If the network adapter is down, general failure responds instantly; so variable wait won't work...
+    arrDefaultTaskList.Insert("netsh wlan add profile filename`="A_ScriptDir . "\Resources\WirelessProfile-dclsstaff.xml user`=all") ; Install wireless profile
+    arrDefaultTaskList.Insert("PING -n 20 -w 1000 8.8.8.8") ; If the network adapter is down, general failure responds instantly; so variable wait won't work...
     arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER`=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY`=""" strSpiceworksKey """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile Agent
   }
   ; ================================================================================
@@ -139,7 +139,9 @@ __subDefaultTasks__:
   ;arrDefaultTaskList.Insert("%ComSpec% /c cscript //B c:\windows\system32\slmgr.vbs /ipk " strActivationKey) ; Install activation key.
   ;arrDefaultTaskList.Insert("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
   ; ================================================================================
-  arrDefaultTaskList.Insert("powershell.exe -Command $pass `= ConvertTo-SecureString -String \"""strDomainPassword . "\"" -AsPlainText -Force; $mycred `= new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath '" strFinalOUPath "'" -NewName """ strComputerName """) ; Join domain, Move OU.
+  
+  arrDefaultTaskList.Insert("powershell.exe -NoExit -Command Rename-Computer -NewName """strComputerName . """ -Force -PassThru")
+  arrDefaultTaskList.Insert("powershell.exe -NoExit -Command $pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; $mycred `= new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath '"strFinalOUPath . "' -NewName '"strComputerName . "'") 
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. 
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
   iTotalErrors += DoExternalTasks(arrDefaultTaskList, bIsVerbose)
@@ -254,7 +256,7 @@ __subCleanupJobs__:
   {
     arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run", "EncoreAways", """C:\EncoreAlways\EncoreAlways.exe"""])
   }
-  arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete", "%comspec% /c RD /S /Q C:\IT\Deployment"])
+  arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete", "%comspec% /c RD /S /Q C:\Deployment"])
   iTotalErrors += DoInternalTasks(arrCleanupJobsList, bIsVerbose)
   Return
 } 

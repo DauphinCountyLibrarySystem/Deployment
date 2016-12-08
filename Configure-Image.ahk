@@ -1,9 +1,10 @@
 /*   
   Name: New Computer Deployment    
-  Version: 2.4.1
+  Version: 2.4.2
   Authors: Christopher Roth, Lucas Bodnyk
 
   Changelog:
+    2.4.2 - Testing RunWaitOne() function from AHK reference website. Adjusted domain join syntax, pointed RunOnce removal key to correct target.
     2.4.1 - Seems like equals symbols may not be parsed correctly in strings, so I'm escaping them. Also removed the % from strLocation...
     2.4.0 - Everything should be ready as near as I can tell, I'm releasing this for testing.
     2.3.0 - Fixed DoExternalTasks()
