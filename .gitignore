@@ -49,5 +49,6 @@ Temporary Items
 
 # Our additional ignores
 *.ini
-test.ahk
 *.exe
+test.ahk
+regex.ahk

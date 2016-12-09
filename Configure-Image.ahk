@@ -1,9 +1,21 @@
+strVersion := "2.5.0"
 /*   
-  Name: New Computer Deployment    
-  Version: 2.4.2
+  Name: Configure-Image
   Authors: Christopher Roth, Lucas Bodnyk
 
   Changelog:
+    2.5.0 - Lots of stuff. In no particular order:
+            Added RegEx to ensure NETBIOS compatible hostnames.
+            I was changing the version string in 3 places every time I updated. Now it's only two. Go me. Also It's been named Configure-Image for a long time now, but this comment block wasn't updated?
+            Refactored the wireless tasks. I'm hoping that it's not a problem for the Spiceworks agent to be installed before the network comes up. We might not be using the agent pretty soon anyway though.
+            Recording shell StdOut to console. The console now scrolls to the bottom on every line. Resized console.
+            Allocate a shell on init, then hide it. No more black screens popping up.
+            Created WaitForPing() which should return faster if the network comes up sooner.
+            Disabled the gui controls after the user confirms their choices.
+            Removed RegWrite and FileDelete functions - defining functions with the same name as existing statements is pure insanity. We also weren't using them.
+            Maybe other things I've forgotten already.
+            It's becoming increasingly absurd to see this primitive error-"handling" all over my code. I may have to factor it out. It's not hurting anything, but it's certainly not helping...
+    2.4.3 - Confirmed that Windows 10 is already activated. No need for activation script. This was actually last version, but w.e. 
     2.4.2 - Testing RunWaitOne() function from AHK reference website. Adjusted domain join syntax, pointed RunOnce removal key to correct target.
     2.4.1 - Seems like equals symbols may not be parsed correctly in strings, so I'm escaping them. Also removed the % from strLocation...
     2.4.0 - Everything should be ready as near as I can tell, I'm releasing this for testing.
@@ -25,13 +37,10 @@
   TODO:
       TEST IT OUT!
         I haven't actually run it in all configurations yet.
-      bug hunting: follow (almost) all returns with 'MsgBox, Cthulhu!' so we can ensure that program flow is correct.
       examine log output to determine if it can be improved?
       banish Cthulhu!
       PC Reservation shortcut for proper IPs
         ^ I have code in place to test
-      confirm whether we actually need to activate Windows.
-      ensure that Add-Computer is renaming correctly
 */
 
 ;   ================================================================================
@@ -100,6 +109,10 @@ IniRead, strALPWCatalog, KeysAndPasswords.ini, Passwords, Catalog       ; Passwo
 ;   INCLUDES, GLOBAL VARIABLES, ONEXIT, ETC...
 ;   ================================================================================
 #Include, functions.ahk
+ValidHostnameRegex := "i)^[a-z0-9]{1}[a-z0-9-\.]{0,14}$" ; obviously this isn't a very good pattern. I don't really know what other symbols are allowed other than dash and period, so...
+DllCall("AllocConsole")
+FileAppend test..., CONOUT$
+WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 SplitPath, A_ScriptName, , , , ScriptBasename
 StringReplace, AppTitle, ScriptBasename, _, %A_SPACE%, All
 OnExit("ExitFunc") ; Register a function to be called on exit
@@ -111,9 +124,9 @@ OnExit("ExitWait")
 __init__:
 Try {
   Gui 1: Font,, Lucida Console
-  Gui 1: Add, Edit, Readonly x10 y10 w620 h460 vConsole ; I guess not everything has to be a function...
+  Gui 1: Add, Edit, Readonly x10 y10 w780 h580 vConsole ; I guess not everything has to be a function...
   Gui 1: -SysMenu
-  Gui 1: Show, x20 y20 w640 h480, Console Window
+  Gui 1: Show, x20 y20 w800 h600, Console Window
   DoLogging("   Console window up.",2)
 } Catch {
   MsgBox failed to create console window! I can't run without console output! Dying now.
@@ -122,7 +135,7 @@ Try {
 Try {
   DoLogging("")
   DoLogging("   ********************************************************************************")
-  DoLogging("   Configure-Image v2.0 initializing for machine: " A_ComputerName)
+  DoLogging("   Configure-Image "strVersion . " initializing for machine: " A_ComputerName)
   DoLogging("   ********************************************************************************")
   DoLogging("")
 } Catch  {
@@ -137,7 +150,7 @@ __startup__:
 {
   DoLogging("")
   DoLogging("__ __startup__")
-  ;WinMinimizeAll
+  WinMinimizeAll
   WinRestore, Console Window
 
   Gosub __subMainGUI__ ; Here is where we construct the GUI and get the specific information we need
@@ -152,18 +165,23 @@ __main__: ; if we're running in __main__, we should have all the input we need f
 {
   DoLogging("")
   DoLogging("__ __main__")
+
+  Gosub, __subCreateOUPath__
+
+  If (bIsWireless == 1)
+  {
+    Gosub, __subWirelessTasks__
+  } 
+
+  Gosub, __subDefaultTasks__
+
+  Gosub, __subSpecificTasks__
+
+  Gosub, __subAddAutoLogon__
+
+  Gosub, __subCleanupJobs__
   
-  Gosub __subCreateOUPath__
-
-  Gosub __subDefaultTasks__
-
-  Gosub __subSpecificTasks__
-
-  Gosub __subAddAutoLogon__
-
-  Gosub __subCleanupJobs__
-  
-  Gosub __subFinishAndExit__
+  Gosub, __subFinishAndExit__
 
   MsgBox Cthuhlu! ; This should never run!
 }

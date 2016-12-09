@@ -12,7 +12,7 @@ __subMainGUI__: ; Label which creates the main GUI.
   Gui 2: Font, Bold s10
   Gui 2: Add, Text, Section, Select Branch:
   Gui 2: Font, Norm
-  Gui 2: Add, DDL, vstrLocation, Branch...||ESA|MRL|MOM|KL|AFL|EV|JOH|ND
+  Gui 2: Add, DDL, vstrLocation, Branch...||ESA|MRL|MOM|KL|AFL|EV|JOH|ND|VAN
   Gui 2: Font, Bold s10
   Gui 2: Add, Text, ys, Select computer type:
   Gui 2: Font, Norm
@@ -39,30 +39,23 @@ MsgBox Cthuhlu! ; This should never run!
 __subConfirmGUI__: ; confirms that selections are correct before continuing. 
 {
   Gui +OwnDialogs
-  If (bIsWireless == 1)
-    WirelessText := "This is a Wireless computer."
-  else
-    WirelessText := "This is an Ethernet computer."
-    
-  If (strComputerRole == "Office")
-    TypeText := "This will install:`n- Sierra`n- Office for staff computer`n- Staff printers"
-  If (strComputerRole == "Frontline")
-    TypeText := "This will install:`n- Sierra`n- Offline Circulation`n- Staff printers`n- PC Reservation Reservation Station`n- Envisionware Print Release station`n- Auto Logon configuration for staff"
-  If (strComputerRole == "Patron")
-    TypeText := "This will install:`n- Office for patron computer`n- Envisionware PC Reservation client`n- Envisionware LPTOne printer client`n- PatronAdminPanel`n- Auto Logon configuration for patrons"  
-  If (strComputerRole == "Catalog")
-    TypeText := "This will install:`n- EncoreAlways`n- Auto Logon configuration for catalogs"
-    
+
+  If ((strComputerRole != "Patron") And (strLocation == "VAN"))
+  {
+    SoundPlay *48
+    MsgBox, 48, Wrong Van, Only Patron computers can go on the Van!
+    Return
+  } 
   If (strComputerName == "")
   {
     SoundPlay *48
-    MsgBox, 48, No Named, Please type in a name for this computer.
+    MsgBox, 48, No Name, Please type in a name for this computer.
     Return
   }
-  If (StrLen(strComputerName) > 15)
+  If (RegExMatch(strComputerName, ValidHostnameRegex) == 0)
   {
     SoundPlay *48
-    MsgBox, 48, Long Name, The computer name is too long for NETBIOS compatibility.`nPlease input a name that is fifteen characters or less.
+    MsgBox, 48, Bad Name, The computer name failed NETBIOS compatibility.`nIt is either longer than 15 characters, or contains disallowed characters.`nTry a different name.
     Return
   }
   If (strLocation == "Location...")
@@ -77,10 +70,30 @@ __subConfirmGUI__: ; confirms that selections are correct before continuing.
     MsgBox, 48, No Role, Please select a role for this computer.
     Return
   }
+  If (bIsWireless == 1)
+    WirelessText := "This is a Wireless computer."
+  else
+    WirelessText := "This is an Ethernet computer."
+  If (strComputerRole == "Office")
+    TypeText := "This will install:`n- Sierra`n- Office for staff computer`n- Staff printers"
+  If (strComputerRole == "Frontline")
+    TypeText := "This will install:`n- Sierra`n- Offline Circulation`n- Staff printers`n- PC Reservation Reservation Station`n- Envisionware Print Release station`n- Auto Logon configuration for staff"
+  If ((strComputerRole == "Patron") And (strLocation != "VAN"))
+    TypeText := "This will install:`n- Office for patron computer`n- Envisionware PC Reservation client`n- Envisionware LPTOne printer client`n- PatronAdminPanel`n- Auto Logon configuration for patrons"  
+  If ((strComputerRole == "Patron") And (strLocation == "VAN"))
+    TypeText := "This will install:`n- Office for patron computer`n- PatronAdminPanel`n- Auto Logon configuration for patrons"  
+  If (strComputerRole == "Catalog")
+    TypeText := "This will install:`n- EncoreAlways`n- Auto Logon configuration for catalogs"
   SoundPlay *32
   MsgBox, 36, Confirm, Please confirm the following:`nName: %strComputerName%`nLocation: %strLocation%`nRole: %strComputerRole%`n%WirelessText% `n%TypeText% `nIs this correct?
   IfMsgBox, Yes
   {
+    GuiControl 2: Disable, strComputerName
+    GuiControl 2: Disable, strLocation
+    GuiControl 2: Disable, strComputerRole
+    GuiControl 2: Disable, bIsWireless
+    GuiControl 2: Disable, bIsVerbose
+    GuiControl 2: Disable, Start
     DoLogging("--   User has selected:")
     DoLogging("--")
     DoLogging("--                Name: " strComputerName)
@@ -90,7 +103,6 @@ __subConfirmGUI__: ; confirms that selections are correct before continuing.
     Gosub __main__
     MsgBox Cthuhlu! ; This should never run!
   }
-  MsgBox Cthuhlu! ; This should never run!
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
@@ -122,26 +134,30 @@ __subCreateOUPath__:
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
+__subWirelessTasks__:
+{
+  DoLogging(" ")
+  DoLogging("__ __subWirelessTasks__")
+  DoLogging("ii import wireless profile, install Spiceworks agent, then wait for a connection...")
+  arrWirelessTaskList := []
+  arrWirelessTaskList.Insert("netsh wlan add profile filename`="A_ScriptDir . "\Resources\WirelessProfile-dclsstaff.xml user`=all") ; Install wireless profile
+  arrWirelessTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER`=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY`=""" strSpiceworksKey """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile Agent
+  iTotalErrors += DoExternalTasks(arrWirelessTaskList, bIsVerbose)
+  DoLogging("ii sleep for 3 seconds before testing wireless")
+  Sleep 3000 ; for some odd reason, WaitForPing(30) seems to fail after only 15 pings. Here's a minimum time to wait to possibly allow the adapter to "catch up".
+  WaitForPing(30) ; up to 30 seconds, which is a long time I know, but it's not like we're staring at the console. It should only take like 5 seconds anyways.
+  Return
+}
+MsgBox Cthuhlu! ; This should never run!
 __subDefaultTasks__:
 {
   DoLogging(" ")
   DoLogging("__ __subDefaultTasks__")
-  DoLogging("ii wireless profile (optional) and Spiceworks agent, activation, domain join, Vipre install, LogMeIn...")
+  DoLogging("ii rename computer, join to domain, Vipre install, LogMeIn...")
   arrDefaultTaskList := []
-  If (bIsWireless == 1)
-  {
-    arrDefaultTaskList.Insert("netsh wlan add profile filename`="A_ScriptDir . "\Resources\WirelessProfile-dclsstaff.xml user`=all") ; Install wireless profile
-    arrDefaultTaskList.Insert("PING -n 20 -w 1000 8.8.8.8") ; If the network adapter is down, general failure responds instantly; so variable wait won't work...
-    arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi SPICEWORKS_SERVER`=""spiceworks.dcls.org"" SPICEWORKS_AUTH_KEY`=""" strSpiceworksKey """ SPICEWORKS_PORT=443 /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") ; Install Spiceworks Mobile Agent
-  }
-  ; ================================================================================
-  ; WE DON'T KNOW IF WE NEED THIS YET
-  ;arrDefaultTaskList.Insert("%ComSpec% /c cscript //B c:\windows\system32\slmgr.vbs /ipk " strActivationKey) ; Install activation key.
-  ;arrDefaultTaskList.Insert("cscript //B c:\windows\system32\slmgr.vbs /ato") ; Activate Windows.
-  ; ================================================================================
-  
-  arrDefaultTaskList.Insert("powershell.exe -NoExit -Command Rename-Computer -NewName """strComputerName . """ -Force -PassThru")
-  arrDefaultTaskList.Insert("powershell.exe -NoExit -Command $pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; $mycred `= new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath '"strFinalOUPath . "' -NewName '"strComputerName . "'") 
+ 
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& { Rename-Computer -NewName """strComputerName . """ -Force -PassThru }""")
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& { $pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; $mycred `= new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath '"strFinalOUPath . "' -NewName '"strComputerName . "' }""")
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. 
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
   iTotalErrors += DoExternalTasks(arrDefaultTaskList, bIsVerbose)
@@ -159,9 +175,8 @@ __subSpecificTasks__:
   {
     arrSpecificTaskList.Insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s /UNILOG+:C:\Deployment\robocopy_Sierra.log") ; Install Sierra
     arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_staff.xml") ; Install Office 365
-    ;arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal. not necessary for office?
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Printers.log") ; Copy links to staff printers.
-    FileCreateShortcut, \\Contentserver\bucket, C:\Users\Public\Desktop\Bucket.lnk,  , , , C:\Windows\system32\imageres.dll, , 138
+    FileCreateShortcut, \\contentserver\bucket, C:\Users\Public\Desktop\Bucket.lnk,  , , , C:\Windows\system32\imageres.dll, , 138
     FileCreateShortcut, https://portal.adp.com/public/index.htm, C:\Users\Public\Desktop\ADP.lnk,  , , , C:\Deployment\Resources\Shortcuts\adp.ico, , 1
     FileCreateShortcut, C:\Sierra Desktop App\iiirunner.exe, C:\Users\Public\Desktop\Sierra Desktop App.lnk, C:\Sierra Desktop App, , , C:\Deployment\Resources\Shortcuts\sierra.ico, , 1
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE, C:\Users\Default\Desktop\Word 2016.lnk, , , , , , 1
@@ -272,7 +287,7 @@ __subFinishAndExit__:
   } Else {
     DoLogging("== Configuration Successful! There were " iTotalErrors . " errors with this program.")
     SoundPlay *64
-    MsgBox, 64, Configuration Successful,  Configuration completed successfully! The computer will now reboot., 10 ; MsgBox times out after 10 seconds.
+    MsgBox, 64, Configuration Successful,  Configuration completed successfully! The computer will reboot in 10 seconds., 10 ; MsgBox times out after 10 seconds.
     Shutdown, 2 ; Reboots computer.
     ExitApp, 0 ; indicates success
   }

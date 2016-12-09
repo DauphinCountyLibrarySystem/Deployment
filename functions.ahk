@@ -29,7 +29,8 @@ ClosePCReservation(sec) ; a recursive function that closes Envisionware window a
   Return 0
 }
 
-ProcessExist(Name){
+ProcessExist(Name)
+{
   Process,Exist,%Name%
   return Errorlevel
 }
@@ -37,27 +38,23 @@ ProcessExist(Name){
 DoExternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, trying and logging each one.
 {
   iTaskErrors := 0
-  ; parse!
   Loop % arrTasks.MaxIndex()
   {
     Task := arrTasks[A_Index]
     Try {
       If (Verbosity == 1)
       {
-        DoLogging("** Executing External Task: " Task)
+        DoLogging("** "A_WorkingDir . "> " Task)
       } Else {
-        DoLogging("** Executing External Task: " Task, 1)
+        DoLogging("** "A_WorkingDir . "> " Task, 1)
       }
-      ;RunWait, %comspec% /c ECHO %Task% && %Task% && PAUSE, , 
-      TaskString := "ECHO %Task% &&"Task . "&& PAUSE"
-      LogString := RunWaitOne(TaskString)
-      If (Verbosity == 1)
+      shell := ComObjCreate("WScript.Shell") ; WshShell object: http://msdn.microsoft.com/en-us/library/aew9yb99
+      exec := shell.Exec(ComSpec " /C " Task) ; Execute a single command via cmd.exe
+      While !exec.StdOut.AtEndOfStream ;read the output line by line
       {
-        DoLogging("  ")
-        DoLogging(LogString)
-        DoLogging("  ")
+        DoLogging("   " exec.StdOut.ReadLine())
       }
-      ;RunWait, %comspec% /c ECHO %Task% && %Task%, , Hide
+      DoLogging("")
     } Catch {
       iTaskErrors += 1
       DoLogging("!! Error attempting External Task: "Task . "!")
@@ -108,33 +105,10 @@ DoInternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, 
   Return iTaskErrors
 }
 
-RegWrite(strInput)
-{
-  Try {
-    StringSplit, arrParams, strInput, `,
-    ;MsgBox % "RegWrite, `n" arrParams1 "`n" arrParams2 "`n" arrParams3 "`n" arrParams4
-    RegWrite, %arrParams1%,%arrParams2%,%arrParams3%,%arrParams4%
-    } Catch {
-      Return 1 ; should count as an error...
-    }
-}
-
-FileDelete(strInput)
-{
-  Try {
-    StringSplit, arrParams, strInput, `,
-    ;MsgBox % "FileDelete, `n" arrParams1
-    FileDelete, %arrParams1%
-    } Catch {
-      Return 1 ; should count as an error...
-    }
-}
-
-
 ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closures.
 {
   Gui +OwnDialogs
-  If (ExitCode == 9999)
+  If (ExitCode == 9999) ; this doesn't appear to work?
   {
     DoLogging("Restarting as Admin...")
     Return 0
@@ -201,11 +175,28 @@ SendToConsole(msg) ; For logging to Console window.
 {
   GuiControlGet, Console, 1:
   GuiControl, 1:, Console, %Console%%msg%`r`n
+  ControlSend, Edit1, ^{End}, Console
 }
 
-RunWaitOne(command)
+WaitForPing(num) ;
 {
   shell := ComObjCreate("WScript.Shell") ; WshShell object: http://msdn.microsoft.com/en-us/library/aew9yb99
-  exec := shell.Exec(ComSpec " /C " command) ; Execute a single command via cmd.exe
-  return exec.StdOut.ReadAll() ; Read and return the command's output
+  DoLogging("ii Pinging to determine when the wireless adapter has connected to the network")
+  DoLogging("** Ping -n "num . " -w 1000 8.8.8.8")
+  exec := shell.Exec(ComSpec " /C Ping -n "num . " -w 1000 8.8.8.8") ; I am just assuming that 8.8.8.8 will always be online...
+  Sleep 1000 ; Give it time to get started
+  While !exec.StdOut.AtEndOfStream ;read the output line by line
+  {
+    DoLogging("   " exec.StdOut.ReadLine())
+    If InStr(exec.StdOut.ReadLine(), "Reply") ; If we get a reply, we break early
+    {
+      DoLogging("   " exec.StdOut.ReadLine()) ; hopefully this is the line with the reply.
+      DoLogging("ii Received reply, we should be good to proceed.")
+      DoLogging("")
+      Return
+    }
+  }
+  MsgBox, This should not have happened, but it looks like you're not connected to the wireless network. Maybe take a look at that before proceeding?
+  DoLogging("")
+  Return 1
 }
