@@ -1,9 +1,13 @@
-strVersion := "2.5.0"
+strVersion := "2.6.0"
 /*   
   Name: Configure-Image
   Authors: Christopher Roth, Lucas Bodnyk
 
   Changelog:
+    2.6.0 - After tedious assessment of AHK "commands", I have pulled in a function from https://autohotkey.com/board/topic/37397-onelinecommands-execute-ahk-code-dynamically/
+            This obviously makes it more difficult to distribute. I'll have to look into that.
+            Added Icons folder which gets copied to C:\ so that shortcuts keep their icons...
+    2.5.1 - Removed -NewName from domain join; added -PassThru
     2.5.0 - Lots of stuff. In no particular order:
             Added RegEx to ensure NETBIOS compatible hostnames.
             I was changing the version string in 3 places every time I updated. Now it's only two. Go me. Also It's been named Configure-Image for a long time now, but this comment block wasn't updated?
@@ -20,7 +24,7 @@ strVersion := "2.5.0"
     2.4.1 - Seems like equals symbols may not be parsed correctly in strings, so I'm escaping them. Also removed the % from strLocation...
     2.4.0 - Everything should be ready as near as I can tell, I'm releasing this for testing.
     2.3.0 - Fixed DoExternalTasks()
-              Our Runwait syntax was incorrect (honestly it's still a mess, but if it works...). I also snazzed up a few other things. More TODO as well!
+            Our Runwait syntax was incorrect (honestly it's still a mess, but if it works...). I also snazzed up a few other things. More TODO as well!
     2.2.2 - more refactoring, but also some process improvements.
             ^ replace arrLPTOneServers with 'arrLPTOneServers'
             ^ vNumErrors is almost wiped out. Find out where else it is used (CreateOUPath frex.) and refactor
@@ -106,9 +110,8 @@ IniRead, strALPWStaff, KeysAndPasswords.ini, Passwords, Staff           ; Passwo
 IniRead, strALPWCatalog, KeysAndPasswords.ini, Passwords, Catalog       ; Password for AutoLogon function (pulled from external file).
 
 ;   ================================================================================
-;   INCLUDES, GLOBAL VARIABLES, ONEXIT, ETC...
+;   GLOBAL VARIABLES, ONEXIT, ETC...
 ;   ================================================================================
-#Include, functions.ahk
 ValidHostnameRegex := "i)^[a-z0-9]{1}[a-z0-9-\.]{0,14}$" ; obviously this isn't a very good pattern. I don't really know what other symbols are allowed other than dash and period, so...
 DllCall("AllocConsole")
 FileAppend test..., CONOUT$
@@ -190,4 +193,6 @@ MsgBox Cthuhlu! ; This should never run!
 ;   ================================================================================
 ;   FUNCTIONS AND LABELS
 ;   ================================================================================
+#Include, functions.ahk
 #Include, labels.ahk
+#Include, DynamicCommand.ahk
