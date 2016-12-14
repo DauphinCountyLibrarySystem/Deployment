@@ -55,7 +55,7 @@ __subConfirmGUI__: ; confirms that selections are correct before continuing.
   If (RegExMatch(strComputerName, ValidHostnameRegex) == 0)
   {
     SoundPlay *48
-    MsgBox, 48, Bad Name, The computer name failed NETBIOS compatibility.`nIt is either longer than 15 characters, or contains disallowed characters.`nTry a different name.
+    MsgBox, 48, Bad Name, The computer name failed NETBIOS compatibility check.`nIt is either longer than 15 characters, or contains disallowed characters.`nTry a different name.
     Return
   }
   If (strLocation == "Location...")
@@ -155,9 +155,13 @@ __subDefaultTasks__:
   DoLogging("__ __subDefaultTasks__")
   DoLogging("ii rename computer, join to domain, Vipre install, LogMeIn...")
   arrDefaultTaskList := []
-  ;arrDefaultTaskList.Insert("powershell.exe -Command ""& { $pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; $mycred `= new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath '"strFinalOUPath . "' -NewName '"strComputerName . "' }""")
-  arrDefaultTaskList.Insert("powershell.exe -Command ""& { $pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; $mycred `= new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath '"strFinalOUPath . "' -PassThru }""")
-  arrDefaultTaskList.Insert("powershell.exe -Command ""& { Rename-Computer -NewName """strComputerName . """ -Force -PassThru }""")
+  ;arrDefaultTaskList.Insert("powershell.exe -Command ""& { $pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; $mycred `= new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath '"strFinalOUPath . "' -NewName '"strComputerName . "' -PassThru -Verbose}""")
+  ;arrDefaultTaskList.Insert("powershell.exe -Command ""& { Rename-Computer -NewName '"strComputerName . "' -Force -PassThru }""")
+  ;
+  ;arrDefaultTaskList.Insert("powershell.exe -Command ""& { ``$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force -Verbose -Debug; ``$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,``$pass -Verbose; Rename-Computer -NewName '"strComputerName . "' -DomainCredential ``$mycred -Force -PassThru }""")
+  ;arrDefaultTaskList.Insert("sleep 1") ; Maybe dodge the "Directory service is busy" error? Shot in the dark, but I'm running out of ideas.
+  ;
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& { ``$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force -Verbose; ``$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,``$pass -Verbose; Add-Computer -NewName '"strComputerName . "' -DomainName dcls.org -Credential ``$mycred -Force -OUPath '"strFinalOUPath . "' -Options JoinWithNewName -PassThru }""")
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. 
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
   arrDefaultTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Icons C:\Icons /s /UNILOG+:C:\Deployment\robocopy_Icons.log") ; Copy links to staff printers.
@@ -176,7 +180,7 @@ __subSpecificTasks__:
   {
     arrSpecificTaskList.Insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s /UNILOG+:C:\Deployment\robocopy_Sierra.log") ; Install Sierra
     arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_staff.xml") ; Install Office 365
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Printers.log") ; Copy links to staff printers.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Printers C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Printers.log") ; Copy links to staff printers.
     FileCreateShortcut, \\contentserver\bucket, C:\Users\Public\Desktop\Bucket.lnk,  , , , C:\Windows\system32\imageres.dll, , 138
     FileCreateShortcut, https://portal.adp.com/public/index.htm, C:\Users\Public\Desktop\ADP.lnk,  , , , C:\Icons\adp.ico, , 1
     FileCreateShortcut, https://spiceworks.dcls.org/portal, C:\Users\Public\Desktop\Helpdesk Portal.lnk,  , , , C:\Icons\helpdeskportal.ico, , 1
@@ -192,9 +196,9 @@ __subSpecificTasks__:
   {
     arrSpecificTaskList.Insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s /UNILOG+:C:\Deployment\robocopy_Sierra.log") ; Sierra files.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s /UNILOG+:C:\Deployment\robocopy_Millennium.log") ;  Offline circ files.
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Shortcuts\Printers C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; Copy links to staff printers.
-    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Printers C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; Copy links to staff printers.
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") ; Install Reservation Station
+    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources ""C:\Program Files (x86)\EnvisionWare"" envisionware.lic /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")
     FileCreateShortcut, \\Contentserver\bucket, C:\Users\Public\Desktop\Bucket.lnk,  , , , C:\Windows\system32\imageres.dll, , 138
     FileCreateShortcut, https://portal.adp.com/public/index.htm, C:\Users\Public\Desktop\ADP.lnk,  , , , C:\Icons\adp.ico, , 1
@@ -208,8 +212,8 @@ __subSpecificTasks__:
   {
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s /UNILOG+:C:\Deployment\robocopy_PatronAdminPanel.log") ; Copy PatronAdminPanel.
     arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml") ; Office 365 for patrons.
-    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /S -jqe.host`="strEwareServer) ; Patron printers.
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S -ip`="strEwareServer . " -tcpport`=9432") ; Envisionware Client.
+    arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /S -jqe.host`="strEwareServer) ; Patron printers.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources ""C:\Program Files (x86)\EnvisionWare"" envisionware.lic /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE, C:\Users\Default\Desktop\Word 2016.lnk, , , , , , 1
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE, C:\Users\Default\Desktop\Excel 2016.lnk, , , , , , 1
@@ -274,9 +278,12 @@ __subCleanupJobs__:
   {
     arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run", "EncoreAways", """C:\EncoreAlways\EncoreAlways.exe"""])
   }
-  arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete", "%comspec% /c RD /S /Q C:\Deployment"])
-  arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete", "%comspec% /c RD /S /Q C:\Deployment"])
-  arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Lucas\Test\Test", "SelfDelete", "%comspec% /c RD /S /Q C:\Deployment"])
+  ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete1", "cmd.exe /c RD /S /Q C:\Deployment"])
+  ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete2", "cmd.exe /c RD /S /Q C:\Deployment > c:\00_runonce.log"])
+  arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete", "cmd.exe /c Robocopy.exe C:\Deployment\Resources\Empty C:\Deployment /MIR /XF *.log /UNILOG+:c:\Deployment\robocopy_selfdelete.log"])
+  ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete4", "cmd.exe /c RD /S /Q C:\Deployment > c:\02_runonce_on_empty.log"])
+  ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete5", "powershell.exe -Command ""& { Remove-Item -Path C:\Deployment -Recurse -Force | Out-File C:\03_powershell_remove-item.log }"" "])
+  ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete6", "cmd.exe /c c:\selfdelete.cmd > c:\selfdelete.log"])
   iTotalErrors += DoInternalTasks(arrCleanupJobsList, bIsVerbose)
   Return
 } 
@@ -292,8 +299,10 @@ __subFinishAndExit__:
   } Else {
     DoLogging("== Configuration Successful! There were " iTotalErrors . " errors with this program.")
     SoundPlay *64
-    MsgBox, 64, Configuration Successful,  Configuration completed successfully! The computer will reboot in 10 seconds., 10 ; MsgBox times out after 10 seconds.
-    ;Shutdown, 2 ; Reboots computer.
+    MsgBox, 1, Configuration Successful,  Configuration completed successfully!`nRebooting in 10 seconds unless cancelled..., 10 ; MsgBox times out after 10 seconds.
+    IfMsgBox, Cancel
+      ExitApp, 0
+    Shutdown, 2 ; Reboots computer.
     ExitApp, 0 ; indicates success
   }
 }

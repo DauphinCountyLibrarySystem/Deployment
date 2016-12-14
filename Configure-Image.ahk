@@ -1,11 +1,17 @@
-strVersion := "2.6.0"
+strVersion := "2.6.1"
 /*   
   Name: Configure-Image
   Authors: Christopher Roth, Lucas Bodnyk
 
   Changelog:
+    2.6.1 - turned out %comspec% doesn't work via RunOnce. using cmd.exe now.
+            The passwords file is now in the Resources folder.
+            The finish dialog now gives you a chance to decline rebooting.
+            The cleanup RunOnce should now leave behind log files.
+            Add-Computer now includes "-Options JoinWithNewName". If that fails, I might have to have the user manually rename the computer and then reboot it.
+            Add-Computer now only includes "-NewName". I might be going insane.
     2.6.0 - After tedious assessment of AHK "commands", I have pulled in a function from https://autohotkey.com/board/topic/37397-onelinecommands-execute-ahk-code-dynamically/
-            This obviously makes it more difficult to distribute. I'll have to look into that.
+            This obviously makes it more difficult to distribute. I'll have to look into that. It's also not lost on me that I removed some functions back in 2.5.0 that were obviously doing something.
             Added Icons folder which gets copied to C:\ so that shortcuts keep their icons...
     2.5.1 - Removed -NewName from domain join; added -PassThru
     2.5.0 - Lots of stuff. In no particular order:
@@ -101,13 +107,13 @@ arrAutoLogonUser := {"ESA": "esalogon0"
                    , "EV": "evlogon5"
                    , "ND": "ndlogon8" }
 
-IniRead, strActivationKey, KeysAndPasswords.ini, Keys, Windows10        ; Windows activation key (pulled from external file).
-IniRead, strSpiceworksKey, KeysAndPasswords.ini, Keys, Spiceworks       ; Spiceworks authentication key (pulled from external file).
-IniRead, strDomainPassword, KeysAndPasswords.ini, Passwords, DomainJoin ; Password for OU move (pulled from external file).
+IniRead, strActivationKey, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Windows10        ; Windows activation key (pulled from external file).
+IniRead, strSpiceworksKey, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Spiceworks       ; Spiceworks authentication key (pulled from external file).
+IniRead, strDomainPassword, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, DomainJoin ; Password for OU move (pulled from external file).
 
-IniRead, strALPWPatron, KeysAndPasswords.ini, Passwords, Patron         ; Password for AutoLogon function (pulled from external file).
-IniRead, strALPWStaff, KeysAndPasswords.ini, Passwords, Staff           ; Password for AutoLogon function (pulled from external file).
-IniRead, strALPWCatalog, KeysAndPasswords.ini, Passwords, Catalog       ; Password for AutoLogon function (pulled from external file).
+IniRead, strALPWPatron, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Patron         ; Password for AutoLogon function (pulled from external file).
+IniRead, strALPWStaff, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Staff           ; Password for AutoLogon function (pulled from external file).
+IniRead, strALPWCatalog, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Catalog       ; Password for AutoLogon function (pulled from external file).
 
 ;   ================================================================================
 ;   GLOBAL VARIABLES, ONEXIT, ETC...
