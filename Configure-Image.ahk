@@ -1,9 +1,12 @@
-strVersion := "2.6.2"
+strVersion := "2.6.3"
 /*   
   Name: Configure-Image
   Authors: Christopher Roth, Lucas Bodnyk
+  
+  Notes:    Uses a library from https://autohotkey.com/board/topic/37397-onelinecommands-execute-ahk-code-dynamically/
 
   Changelog:
+    2.6.3 - Added RegDelete to clear out 'AutoLogonCount', which was set by the unattend.xml. Autologon information should no longer be cleared on reboot.
     2.6.2 - Powershell/Command Shell syntax is a minefield.
     2.6.1 - turned out %comspec% doesn't work via RunOnce. using cmd.exe now.
             The passwords file is now in the Resources folder.
