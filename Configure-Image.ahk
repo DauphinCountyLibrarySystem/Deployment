@@ -1,9 +1,10 @@
-strVersion := "2.6.1"
+strVersion := "2.6.2"
 /*   
   Name: Configure-Image
   Authors: Christopher Roth, Lucas Bodnyk
 
   Changelog:
+    2.6.2 - Powershell/Command Shell syntax is a minefield.
     2.6.1 - turned out %comspec% doesn't work via RunOnce. using cmd.exe now.
             The passwords file is now in the Resources folder.
             The finish dialog now gives you a chance to decline rebooting.

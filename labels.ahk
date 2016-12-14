@@ -155,13 +155,9 @@ __subDefaultTasks__:
   DoLogging("__ __subDefaultTasks__")
   DoLogging("ii rename computer, join to domain, Vipre install, LogMeIn...")
   arrDefaultTaskList := []
-  ;arrDefaultTaskList.Insert("powershell.exe -Command ""& { $pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; $mycred `= new-object -typename System.Management.Automation.PSCredential -argumentlist unattend,$pass; Add-Computer -DomainName dcls.org -Credential $mycred -Force -OUPath '"strFinalOUPath . "' -NewName '"strComputerName . "' -PassThru -Verbose}""")
-  ;arrDefaultTaskList.Insert("powershell.exe -Command ""& { Rename-Computer -NewName '"strComputerName . "' -Force -PassThru }""")
-  ;
-  ;arrDefaultTaskList.Insert("powershell.exe -Command ""& { ``$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force -Verbose -Debug; ``$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,``$pass -Verbose; Rename-Computer -NewName '"strComputerName . "' -DomainCredential ``$mycred -Force -PassThru }""")
-  ;arrDefaultTaskList.Insert("sleep 1") ; Maybe dodge the "Directory service is busy" error? Shot in the dark, but I'm running out of ideas.
-  ;
-  arrDefaultTaskList.Insert("powershell.exe -Command ""& { ``$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force -Verbose; ``$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,``$pass -Verbose; Add-Computer -NewName '"strComputerName . "' -DomainName dcls.org -Credential ``$mycred -Force -OUPath '"strFinalOUPath . "' -Options JoinWithNewName -PassThru }""")
+  ; TRUST ME, THIS IS THE ONLY WAY
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& { `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& { Start-Sleep -s 3; `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Add-Computer -NewName '"strComputerName . "' -DomainName dcls.org -Credential `$mycred -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. 
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
   arrDefaultTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Icons C:\Icons /s /UNILOG+:C:\Deployment\robocopy_Icons.log") ; Copy links to staff printers.
