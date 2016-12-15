@@ -1,4 +1,4 @@
-strVersion := "2.6.3"
+strVersion := "2.6.4"
 /*   
   Name: Configure-Image
   Authors: Christopher Roth, Lucas Bodnyk
@@ -6,6 +6,8 @@ strVersion := "2.6.3"
   Notes:    Uses a library from https://autohotkey.com/board/topic/37397-onelinecommands-execute-ahk-code-dynamically/
 
   Changelog:
+    2.6.4 - Improved DoExternalTasks to log WScript.Shell.StdErr. It will also increment iTotalErrors if the StdErr stream is not empty. Hopefully this will help us catch what is happening when the domain join fails.
+            Also moved the Office icons for patrons from Default to Public desktop.
     2.6.3 - Added RegDelete to clear out 'AutoLogonCount', which was set by the unattend.xml. Autologon information should no longer be cleared on reboot.
     2.6.2 - Powershell/Command Shell syntax is a minefield.
     2.6.1 - turned out %comspec% doesn't work via RunOnce. using cmd.exe now.
@@ -137,9 +139,9 @@ OnExit("ExitWait")
 __init__:
 Try {
   Gui 1: Font,, Lucida Console
-  Gui 1: Add, Edit, Readonly x10 y10 w780 h580 vConsole ; I guess not everything has to be a function...
+  Gui 1: Add, Edit, Readonly x10 y10 w940 h620 vConsole ; I guess not everything has to be a function...
   Gui 1: -SysMenu
-  Gui 1: Show, x20 y20 w800 h600, Console Window
+  Gui 1: Show, x20 y20 w960 h640, Console Window
   DoLogging("   Console window up.",2)
 } Catch {
   MsgBox failed to create console window! I can't run without console output! Dying now.

@@ -214,10 +214,10 @@ __subSpecificTasks__:
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /S -jqe.host`="strEwareServer) ; Patron printers.
     }
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources ""C:\Program Files (x86)\EnvisionWare"" envisionware.lic /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")
-    FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE, C:\Users\Default\Desktop\Word 2016.lnk, , , , , , 1
-    FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE, C:\Users\Default\Desktop\Excel 2016.lnk, , , , , , 1
-    FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\POWERPNT.EXE, C:\Users\Default\Desktop\PowerPoint 2016.lnk, , , , , , 1
-    FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\MSPUB.EXE, C:\Users\Default\Desktop\Publisher 2016.lnk, , , , , , 1
+    FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE, C:\Users\Public\Desktop\Word 2016.lnk, , , , , , 1
+    FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE, C:\Users\Public\Desktop\Excel 2016.lnk, , , , , , 1
+    FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\POWERPNT.EXE, C:\Users\Public\Desktop\PowerPoint 2016.lnk, , , , , , 1
+    FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\MSPUB.EXE, C:\Users\Public\Desktop\Publisher 2016.lnk, , , , , , 1
   }
   If (strComputerRole == "Catalog")
   {

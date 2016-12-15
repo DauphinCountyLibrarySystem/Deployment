@@ -54,6 +54,15 @@ DoExternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, 
       {
         DoLogging("   " exec.StdOut.ReadLine())
       }
+      If !exec.StdErr.AtEndOfStream ; It's important to note that this does NOT get StdErr in parallel with StdOut - if you stack four commands in a row, and the first two fail, you will get their error output AFTER the 3rd and 4th commands finish StdOut.
+      {
+        iTaskErrors += 1 ; This will only count once even if you stack commands! At least my error handling counts for something again...
+        DoLogging("!! STDERR:")
+        While !exec.StdErr.AtEndOfStream
+        {
+          DoLogging("   " exec.StdErr.ReadLine())
+        }
+      }
       DoLogging("")
     } Catch {
       iTaskErrors += 1
