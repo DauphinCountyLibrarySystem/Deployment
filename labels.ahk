@@ -153,14 +153,20 @@ __subDefaultTasks__:
 {
   DoLogging(" ")
   DoLogging("__ __subDefaultTasks__")
-  DoLogging("ii rename computer, join to domain LogMeIn...")
   arrDefaultTaskList := []
   ; TRUST ME, THIS IS THE ONLY WAY
+  DoLogging("Renaming the computer.")
   arrDefaultTaskList.Insert("powershell.exe -Command ""& { `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
+  
+  DoLogging("Joining the Domain.")
   arrDefaultTaskList.Insert("powershell.exe -Command ""& { Start-Sleep -s 3; `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Add-Computer -NewName '"strComputerName . "' -DomainName dcls.org -Credential `$mycred -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
   ;DCLS no longer Viper and it should no longer be installed on out new computers
-  ;arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus. 
+  ;arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus.
+
+  DoLogging("Installing LogMeIn")
   arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
+
+  DoLogging("Copy links to staff printers.")
   arrDefaultTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Icons C:\Icons /s /UNILOG+:C:\Deployment\robocopy_Icons.log") ; Copy links to staff printers.
   iTotalErrors += DoExternalTasks(arrDefaultTaskList, bIsVerbose)
   Return
