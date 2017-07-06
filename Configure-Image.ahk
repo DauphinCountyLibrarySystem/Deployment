@@ -3,18 +3,25 @@ strVersion := "2.6.4"
   Name: Configure-Image
   Authors: Christopher Roth, Lucas Bodnyk
   
-  Notes:    Uses a library from https://autohotkey.com/board/topic/37397-onelinecommands-execute-ahk-code-dynamically/
+  External Libraries:
+      DynamicCommand.ahk
+        https://autohotkey.com/board/topic/37397-onelinecommands-execute-ahk-code-dynamically/
+        One of the comments has the entire source code for the library
 
   Changelog:
-    2.6.4 - Improved DoExternalTasks to log WScript.Shell.StdErr. It will also increment iTotalErrors if the StdErr stream is not empty. Hopefully this will help us catch what is happening when the domain join fails.
+    2.6.4 - Improved DoExternalTasks to log WScript.Shell.StdErr. 
+            It will also increment iTotalErrors if the StdErr stream is not empty.
+            Hopefully this will help us catch what is happening when the domain join fails.
             Also moved the Office icons for patrons from Default to Public desktop.
-    2.6.3 - Added RegDelete to clear out 'AutoLogonCount', which was set by the unattend.xml. Autologon information should no longer be cleared on reboot.
+    2.6.3 - Added RegDelete to clear out 'AutoLogonCount', which was set by the unattend.xml.
+            Autologon information should no longer be cleared on reboot.
     2.6.2 - Powershell/Command Shell syntax is a minefield.
     2.6.1 - turned out %comspec% doesn't work via RunOnce. using cmd.exe now.
             The passwords file is now in the Resources folder.
             The finish dialog now gives you a chance to decline rebooting.
             The cleanup RunOnce should now leave behind log files.
-            Add-Computer now includes "-Options JoinWithNewName". If that fails, I might have to have the user manually rename the computer and then reboot it.
+            Add-Computer now includes "-Options JoinWithNewName".
+            If that fails, I might have to have the user manually rename the computer and then reboot it.
             Add-Computer now only includes "-NewName". I might be going insane.
     2.6.0 - After tedious assessment of AHK "commands", I have pulled in a function from https://autohotkey.com/board/topic/37397-onelinecommands-execute-ahk-code-dynamically/
             This obviously makes it more difficult to distribute. I'll have to look into that. It's also not lost on me that I removed some functions back in 2.5.0 that were obviously doing something.
@@ -59,9 +66,9 @@ strVersion := "2.6.4"
         ^ I have code in place to test
 */
 
-;   ================================================================================
+;===============================================================================
 ;   AUTO-ELEVATE
-;   ================================================================================
+;===============================================================================
 If Not A_IsAdmin
 {
   If A_IsCompiled
@@ -75,26 +82,26 @@ If Not A_IsAdmin
   }
   Else {
     Try {
-    Run *RunAs "%A_AhkPath%" "%A_ScriptFullPath%"
+      Run *RunAs "%A_AhkPath%" "%A_ScriptFullPath%"
     } Catch {
       ExitApp 9999
     }
   }
 }
 
-;   ================================================================================
+;===============================================================================
 ;   DIRECTIVES, ETC.
-;   ================================================================================
-#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+;===============================================================================
+#NoEnv ; Recommended for performance and compatibility 
 ;#Warn  ; Enable warnings to assist with detecting common errors.
-SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
+SendMode Input  ; Recommended for new scripts due to its speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
-#Persistent ; Keeps a script permanently running (that is, until the user closes it or ExitApp is encountered).
-#SingleInstance FORCE ; automatically replaces an old version of the script - useful when auto-elevating.
+#Persistent ; Keeps a script permanently running (until the user closes it or ExitApp is encountered).
+#SingleInstance FORCE ; automatically replaces an old version of the script
 
-;   ================================================================================
+;===============================================================================
 ;   CONFIGURATION
-;   ================================================================================
+;===============================================================================
 arrLPTOneServers := {"ESA": "192.168.100.221"
                    , "MRL": "10.11.20.5"
                    , "MOM": "10.13.20.14"
@@ -113,18 +120,28 @@ arrAutoLogonUser := {"ESA": "esalogon0"
                    , "EV": "evlogon5"
                    , "ND": "ndlogon8" }
 
-IniRead, strActivationKey, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Windows10        ; Windows activation key (pulled from external file).
-IniRead, strSpiceworksKey, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Spiceworks       ; Spiceworks authentication key (pulled from external file).
-IniRead, strDomainPassword, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, DomainJoin ; Password for OU move (pulled from external file).
+;Activation Key for Windows (Pulled from an external file)
+IniRead, strActivationKey, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Windows10
+;Activation Key for Spiceworks (Pulled from an external file)
+IniRead, strSpiceworksKey, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Spiceworks
+;Password for OU (Pulled from external file)
+IniRead, strDomainPassword, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, DomainJoin
 
-IniRead, strALPWPatron, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Patron         ; Password for AutoLogon function (pulled from external file).
-IniRead, strALPWStaff, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Staff           ; Password for AutoLogon function (pulled from external file).
-IniRead, strALPWCatalog, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Catalog       ; Password for AutoLogon function (pulled from external file).
+;Patron Password for AutoLogon function (Pulled from an external file)
+IniRead, strALPWPatron, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Patron
 
-;   ================================================================================
+;Staff Password for AutoLogon function (Pulled from an external file)
+IniRead, strALPWStaff, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Staff
+
+;Catalog Password for AutoLogon function (Pulled from an external file)
+IniRead, strALPWCatalog, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Catalog
+
+;===============================================================================
 ;   GLOBAL VARIABLES, ONEXIT, ETC...
-;   ================================================================================
-ValidHostnameRegex := "i)^[a-z0-9]{1}[a-z0-9-\.]{0,14}$" ; obviously this isn't a very good pattern. I don't really know what other symbols are allowed other than dash and period, so...
+;===============================================================================
+; Obviously this isn't a very good pattern. I don't really know what other
+;   symbols are allowed other than dash and period, so...
+ValidHostnameRegex := "i)^[a-z0-9]{1}[a-z0-9-\.]{0,14}$" 
 DllCall("AllocConsole")
 FileAppend test..., CONOUT$
 WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
@@ -133,9 +150,9 @@ StringReplace, AppTitle, ScriptBasename, _, %A_SPACE%, All
 OnExit("ExitFunc") ; Register a function to be called on exit
 OnExit("ExitWait")
 
-;   ================================================================================
+;===============================================================================
 ;   INITIALIZATION
-;   ================================================================================
+;===============================================================================
 __init__:
 Try {
   Gui 1: Font,, Lucida Console
@@ -158,9 +175,9 @@ Try {
   ExitApp
 }
 
-;   ================================================================================
+;===============================================================================
 ;   STARTUP
-;   ================================================================================
+;===============================================================================
 __startup__:
 {
   DoLogging("")
@@ -168,25 +185,27 @@ __startup__:
   WinMinimizeAll
   WinRestore, Console Window
 
-  Gosub __subMainGUI__ ; Here is where we construct the GUI and get the specific information we need
+  ;Constructs the GUI and gets the specific information that we need
+  Gosub __subMainGUI__ 
 }
 
 Return ; Execution should stop here until the user submits ButtonStart
 MsgBox Cthuhlu! ; This should never run!
-;   ================================================================================
+;===============================================================================
 ;   MAIN
-;   ================================================================================
-__main__: ; if we're running in __main__, we should have all the input we need from the user.
+;===============================================================================
+; if we're in __main__, we should have all the input we need from the user.
+__main__:
 {
   DoLogging("")
   DoLogging("__ __main__")
+  
+    Gosub, __subCreateOUPath__
 
-  Gosub, __subCreateOUPath__
-
-  If (bIsWireless == 1)
-  {
-    Gosub, __subWirelessTasks__
-  } 
+    If (bIsWireless == 1)
+    {
+      Gosub, __subWirelessTasks__
+    } 
 
   Gosub, __subDefaultTasks__
 
@@ -198,13 +217,21 @@ __main__: ; if we're running in __main__, we should have all the input we need f
   
   Gosub, __subFinishAndExit__
 
+
   MsgBox Cthuhlu! ; This should never run!
 }
 
+__postReboot__:
+{
+  DoLogging("")
+  DoLogging("__ __postReboot__")
+
+}
+
 MsgBox Cthuhlu! ; This should never run!
-;   ================================================================================
+;===============================================================================
 ;   FUNCTIONS AND LABELS
-;   ================================================================================
+;===============================================================================
 #Include, functions.ahk
 #Include, labels.ahk
 #Include, DynamicCommand.ahk
