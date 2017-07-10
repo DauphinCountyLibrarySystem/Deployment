@@ -29,6 +29,8 @@ __subMainGUI__: ; Label which creates the main GUI.
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
+
+
 ButtonStart: ; Label for Install button. Takes user input and prepares to run installers, confirming first. (WORKS)
 {
   Gui, Submit, NoHide
@@ -36,6 +38,9 @@ ButtonStart: ; Label for Install button. Takes user input and prepares to run in
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
+
+
+
 __subConfirmGUI__: ; confirms that selections are correct before continuing. 
 {
   Gui +OwnDialogs
@@ -100,12 +105,27 @@ __subConfirmGUI__: ; confirms that selections are correct before continuing.
     DoLogging("--            Location: " strLocation)
     DoLogging("--                Role: " strComputerRole)
     DoLogging("--             Network: " WirelessText)
+    GoSub __subWriteXML__
     Gosub __main__
     MsgBox Cthuhlu! ; This should never run!
   }
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
+
+
+__subWriteXML__:
+{
+  ;This takes the user input and saves it to an XML document so we can save it
+  data := new KeyValStore("DeploymentInfo.xml")
+  data.Set("ComputerName", strComputerName)
+  data.Set("ComputerLocation", strLocation)
+  data.Set("ComputerRole", strcomputerRole)
+  data.Set("WirelessState", bIsWireless)
+  data.Set("VerboseState", bIsVerbose)
+  return
+}
+
 __subCreateOUPath__:
 {
   DoLogging("ii Creating distinguished name for domain join...")
@@ -134,6 +154,8 @@ __subCreateOUPath__:
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
+
+
 __subWirelessTasks__:
 {
   DoLogging(" ")
@@ -149,6 +171,8 @@ __subWirelessTasks__:
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
+
+
 __subDefaultTasks__:
 {
   DoLogging(" ")
@@ -159,19 +183,20 @@ __subDefaultTasks__:
   arrDefaultTaskList.Insert("powershell.exe -Command ""& { `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
   
   DoLogging("Joining the Domain.")
-  arrDefaultTaskList.Insert("powershell.exe -Command ""& { Start-Sleep -s 3; `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Add-Computer -NewName '"strComputerName . "' -DomainName dcls.org -Credential `$mycred -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
-  ;DCLS no longer Viper and it should no longer be installed on out new computers
+  ;arrDefaultTaskList.Insert("powershell.exe -Command ""& { Start-Sleep -s 3; `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Add-Computer -NewName '"strComputerName . "' -DomainName dcls.org -Credential `$mycred -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
+  
+  ;DCLS no longer Viper and it should no longer be installed on our new computers
   ;arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus.
-
-  DoLogging("Installing LogMeIn")
-  arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
-
+  
   DoLogging("Copy links to staff printers.")
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& {Register-ScheduledTask -Xml (get-content '"A_ScriptDir . "\Configure-ImageTask.xml' | out-string) -Taskname Test}""")
   arrDefaultTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Icons C:\Icons /s /UNILOG+:C:\Deployment\robocopy_Icons.log") ; Copy links to staff printers.
   iTotalErrors += DoExternalTasks(arrDefaultTaskList, bIsVerbose)
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
+
+
 __subSpecificTasks__:
 {
   ;FIXME: Github issues 15, 16
@@ -235,6 +260,8 @@ __subSpecificTasks__:
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
+
+
 __subAddAutoLogon__:
 {
   DoLogging(" ")
@@ -268,6 +295,8 @@ __subAddAutoLogon__:
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
+
+
 __subCleanupJobs__:
 {  
   DoLogging(" ")
@@ -295,7 +324,39 @@ __subCleanupJobs__:
   iTotalErrors += DoInternalTasks(arrCleanupJobsList, bIsVerbose)
   Return
 } 
+
+
+__subReboot__:
+{
+  ;We have the user's input saved to DeploymentInfo.xml and will use that after
+  ; the reboot to continue running this with the same configuration
+  ; but first we need to create an autologon key with admin credentials
+  ; to ensure it logs back in after reboot
+  arrAddAutoLogonList := []
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "AutoAdminLogon", "1"])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultDomainName",  ".\"])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultUserName",  strAdminUsername])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultPassword", strAdminPassword])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_DWORD", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "AutoLogonCount", 0x00000001])
+  iTotalErrors += DoInternalTasks(arrAddAutoLogonList, bIsVerbose)
+
+  ;This should be changed to reference variable to make it look nicer
+  ;FileMove, RunOnStartup.exe, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+
+  ;We will use an exported task to import a task to the windows task scheduler
+   arrDefaultTaskList.Insert("powershell.exe -Command ""& { `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
+  Run %comspec% /c "shutdown.exe /r /t 3" ;Restarts after 3 seconds
+  Return
+}
 MsgBox Cthuhlu! ; This should never run!
+
+
+__subAfterReboot__:
+{
+  DoLogging("Installing LogMeIn")
+  ;Fixme this need to remove the script from the Startup folder
+  arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
+}
 __subFinishAndExit__:
 {
   If (iTotalErrors > 0) ; Final check for errors and closes program.
