@@ -7,6 +7,8 @@ strVersion := "2.6.4"
       DynamicCommand.ahk
         https://autohotkey.com/board/topic/37397-onelinecommands-execute-ahk-code-dynamically/
         One of the comments has the entire source code for the library
+      KeyValStore.ahk
+        https://github.com/cocobelgica/AutoHotkey-KeyValStore
 
   Changelog:
     2.6.4 - Improved DoExternalTasks to log WScript.Shell.StdErr. 
@@ -136,6 +138,10 @@ IniRead, strALPWStaff, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords,
 ;Catalog Password for AutoLogon function (Pulled from an external file)
 IniRead, strALPWCatalog, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Catalog
 
+;Admin Credentials for Autologon Function (Pulled from an external file)
+IniRead, strAdminUsername, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Usernames, Admin
+IniRead, strAdminPassword, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Admin
+
 ;===============================================================================
 ;   GLOBAL VARIABLES, ONEXIT, ETC...
 ;===============================================================================
@@ -185,7 +191,18 @@ __startup__:
   WinMinimizeAll
   WinRestore, Console Window
 
+  If (%0% != 0) { ;Check if there are any command line arguments
+    ;Check each one to see if this script was rebooted.
+    Loop, %0% {
+      If (A_Index = "rebooted") {
+        ;If the command line argument is rebooted we will procede to second half
+        DoLogging ("The script was rebooted.")
+        GoSub, __subAfterReboot__
+      }
+    }
+  } 
   ;Constructs the GUI and gets the specific information that we need
+  ;We only want to do this if this is not the rebooted version of the app
   Gosub __subMainGUI__ 
 }
 
@@ -199,39 +216,37 @@ __main__:
 {
   DoLogging("")
   DoLogging("__ __main__")
-  
-    Gosub, __subCreateOUPath__
-
+  data := new KeyValStore("DeploymentInfo.xml")
+  data.Set("ComputerName", strComputerName)
+  data.Set("ComputerRole", strComputerRole)
+  Gosub, __subCreateOUPath__
     If (bIsWireless == 1)
     {
       Gosub, __subWirelessTasks__
     } 
 
   Gosub, __subDefaultTasks__
-
-  Gosub, __subSpecificTasks__
-
-  Gosub, __subAddAutoLogon__
-
-  Gosub, __subCleanupJobs__
   
-  Gosub, __subFinishAndExit__
+  Gosub, __subReboot__
 
-
+  Exit 0 ;After it triggers the reboot it should exit the script.
   MsgBox Cthuhlu! ; This should never run!
 }
 
-__postReboot__:
+__afterReboot__:
 {
   DoLogging("")
-  DoLogging("__ __postReboot__")
-
+  DoLogging("__ __subAfterReboot__")
+  ;FIXME: This needs to call the stuff after reboot
 }
 
+
 MsgBox Cthuhlu! ; This should never run!
+
 ;===============================================================================
 ;   FUNCTIONS AND LABELS
 ;===============================================================================
 #Include, functions.ahk
 #Include, labels.ahk
 #Include, DynamicCommand.ahk
+#Include, KeyValStore.ahk
