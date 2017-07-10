@@ -50,6 +50,7 @@ Temporary Items
 # Our additional ignores
 *.ini
 *.exe
+Resources
 test.ahk
 regex.ahk
 testing
