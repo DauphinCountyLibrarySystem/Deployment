@@ -160,6 +160,14 @@ OnExit("ExitWait")
 ;   INITIALIZATION
 ;===============================================================================
 __init__:
+;Check if the version has been marked as rebooted.
+bIsRebooted := false
+Loop, %0% {
+  If (A_Index == rebooted) {
+    bIsRebooted = true;
+    break;
+  }
+}
 Try {
   Gui 1: Font,, Lucida Console
   Gui 1: Add, Edit, Readonly x10 y10 w940 h620 vConsole ; I guess not everything has to be a function...
@@ -250,3 +258,4 @@ MsgBox Cthuhlu! ; This should never run!
 #Include, labels.ahk
 #Include, DynamicCommand.ahk
 #Include, KeyValStore.ahk
+
