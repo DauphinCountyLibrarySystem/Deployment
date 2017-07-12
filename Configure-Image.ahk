@@ -98,14 +98,16 @@ If Not A_IsAdmin
 ;#Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
-#Persistent ; Keeps a script permanently running (until the user closes it or ExitApp is encountered).
+#Persistent ; Keeps a script running (until closed).
 #SingleInstance FORCE ; automatically replaces an old version of the script
 
 ;===============================================================================
 ;   CONFIGURATION
 ;===============================================================================
+
+;GITHUB ISSUE 20; Verify that these are the servers that we should be targeting.
 arrLPTOneServers := {"ESA": "192.168.100.221"
-                   , "MRL": "10.11.20.5"
+                   , "MRL": ".111.20.5"
                    , "MOM": "10.13.20.14"
                    , "KL": "10.14.20.14"
                    , "AFL": "192.168.102.221"

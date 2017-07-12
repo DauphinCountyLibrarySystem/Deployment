@@ -242,6 +242,7 @@ __subSpecificTasks__:
     arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml") ; Office 365 for patrons.
     If (strLocation != "VAN")
     {
+      ;GITHUB ISSUE #20; Need to verify that this is the correct port that we should be targeting
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S -ip`="strEwareServer . " -tcpport`=9432") ; Envisionware Client.
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /S -jqe.host`="strEwareServer) ; Patron printers.
     }
