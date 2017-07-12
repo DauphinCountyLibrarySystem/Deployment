@@ -105,16 +105,6 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;   CONFIGURATION
 ;===============================================================================
 
-;GITHUB ISSUE 20; Verify that these are the servers that we should be targeting.
-arrLPTOneServers := {"ESA": "192.168.100.221"
-                   , "MRL": ".111.20.5"
-                   , "MOM": "10.13.20.14"
-                   , "KL": "10.14.20.14"
-                   , "AFL": "192.168.102.221"
-                   , "JOH": "192.168.106.221"
-                   , "EV": "192.168.105.221"
-                   , "ND": "10.18.40.200"}
-
 arrAutoLogonUser := {"ESA": "esalogon0"
                    , "KL": "kllogon4"
                    , "MOM": "momlogon3"

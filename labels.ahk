@@ -198,11 +198,11 @@ MsgBox Cthuhlu! ; This should never run!
 
 __subSpecificTasks__:
 {
-  ;FIXME: Github issues 15, 16
   DoLogging(" ")
   DoLogging("__ __subSpecificTasks__")
   DoLogging("ii Role-Specific Configuration for: " . strComputerRole . "...")
-  strEwareServer := arrLPTOneServers[strLocation]
+  IniRead, strEwareServer , %A_WorkingDir%\Resources\Servers.ini, Servers, %strLocation%
+  DoLogging("Targetting Eware Server " strEwareServer)
   arrSpecificTaskList := []
   If (strComputerRole == "Office")
   {
