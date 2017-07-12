@@ -240,10 +240,11 @@ __subSpecificTasks__:
   If (strComputerRole == "Patron")
   {
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s /UNILOG+:C:\Deployment\robocopy_PatronAdminPanel.log") ; Copy PatronAdminPanel.
+    ;GITHUB ISSUE #22; Patrons should not be installing 365 they should be installing Office 2016
     arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml") ; Office 365 for patrons.
     If (strLocation != "VAN")
     {
-      ;GITHUB ISSUE #20; Need to verify that this is the correct port that we should be targeting
+      ;GITHUB ISSUE #20; Need to verify that this is the correct port that we should be targeting might be 1969, 61969
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S -ip`="strEwareServer . " -tcpport`=9432") ; Envisionware Client.
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /S -jqe.host`="strEwareServer) ; Patron printers.
     }
@@ -346,9 +347,6 @@ __subReboot__:
   arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultPassword", strAdminPassword])
   arrAddAutoLogonList.Insert(["RegWrite", "REG_DWORD", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "AutoLogonCount", 0x00000001])
   iTotalErrors += DoInternalTasks(arrAddAutoLogonList, bIsVerbose)
-
-  ;This should be changed to reference variable to make it look nicer
-  ;FileMove, RunOnStartup.exe, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
 
   ;We will use an exported task to import a task to the windows task scheduler
   arrDefaultTaskList.Insert("powershell.exe -Command ""& { `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
