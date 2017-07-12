@@ -225,6 +225,7 @@ __subSpecificTasks__:
     arrSpecificTaskList.Insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s /UNILOG+:C:\Deployment\robocopy_Sierra.log") ; Sierra files.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s /UNILOG+:C:\Deployment\robocopy_Millennium.log") ;  Offline circ files.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Printers C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; Copy links to staff printers.
+    ;GITHUB ISSUE #13 This is where the issue seems to be happening for the install I don't see the install in Log
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") ; Install Reservation Station
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources ""C:\Program Files (x86)\EnvisionWare"" envisionware.lic /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")
