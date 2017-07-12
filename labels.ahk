@@ -235,8 +235,9 @@ __subSpecificTasks__:
     FileCreateShortcut, https://spiceworks.dcls.org/portal, C:\Users\Public\Desktop\Helpdesk Portal.lnk,  , , , C:\Icons\helpdeskportal.ico, , 1
     FileCreateShortcut, C:\Sierra Desktop App\iiirunner.exe, C:\Users\Public\Desktop\Sierra Desktop App.lnk, C:\Sierra Desktop App, , , C:\Icons\sierra.ico, , 1
     FileCreateShortcut, C:\Millennium\Offline\offlinecirc.exe, C:\Users\Public\Desktop\Offline Circulation.lnk, C:\Millenium\Offline, , , C:\Millennium\Offline\offlinecirc.ico, , 1
-    FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\lptone\lptprt\lptPRT.exe, C:\Users\Public\Desktop\LPTOne Print Release Terminal.lnk, C:\Program Files (x86)\EnvisionWare\lptone\lptprt,  -host:%strEwareServer% -runmode:staff, , C:\Program Files (x86)\EnvisionWare\lptone\lptprt\lptPRT.exe, , 1
-    FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\PC Reservation\Reservation Station\PCRes_RS.exe, C:\Users\Public\Desktop\PCRes Reservation Station.lnk, C:\Program Files (x86)\EnvisionWare\PC Reservation\Reservation Station, -host:%strEwareServer%, , , , 1
+    ;I Don't think either or these lines are needed because the install seems to be adding its own icon creating double icons.
+    ;FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\lptone\lptprt\lptPRT.exe, C:\Users\Public\Desktop\LPTOne Print Release Terminal.lnk, C:\Program Files (x86)\EnvisionWare\lptone\lptprt,  -host:%strEwareServer% -runmode:staff, , C:\Program Files (x86)\EnvisionWare\lptone\lptprt\lptPRT.exe, , 1
+    ;FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\PC Reservation\Reservation Station\PCRes_RS.exe, C:\Users\Public\Desktop\PCRes Reservation Station.lnk, C:\Program Files (x86)\EnvisionWare\PC Reservation\Reservation Station, -host:%strEwareServer%, , , , 1
     FileCreateShortcut, c:\windows\explorer.exe, :\Users\Default\Desktop\File Explorer.lnk, , , , , , 1
   }
   If (strComputerRole == "Patron")
