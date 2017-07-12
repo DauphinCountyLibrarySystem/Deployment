@@ -161,13 +161,7 @@ OnExit("ExitWait")
 ;===============================================================================
 __init__:
 ;Check if the version has been marked as rebooted.
-bIsRebooted := false
-Loop, %0% {
-  If (A_Index == rebooted) {
-    bIsRebooted = true;
-    break;
-  }
-}
+
 Try {
   Gui 1: Font,, Lucida Console
   Gui 1: Add, Edit, Readonly x10 y10 w940 h620 vConsole ; I guess not everything has to be a function...
@@ -178,12 +172,30 @@ Try {
   MsgBox failed to create console window! I can't run without console output! Dying now.
   ExitApp
 }
+bIsRebooted := false
+DoLogging(%0% . " arguments found.")
+Loop, %0% {
+  DoLogging("A_Index is: " . %A_Index%)
+  If (%A_Index% == "rebooted") {
+    bIsRebooted = true
+    break
+  }
+}
 Try {
-  DoLogging("")
-  DoLogging("   ********************************************************************************")
-  DoLogging("   Configure-Image "strVersion . " initializing for machine: " A_ComputerName)
-  DoLogging("   ********************************************************************************")
-  DoLogging("")
+  If (!bIsRebooted) {
+    DoLogging("")
+    DoLogging("   ********************************************************************************")
+    DoLogging("   Configure-Image "strVersion . " initializing for machine: " A_ComputerName)
+    DoLogging("   ********************************************************************************")
+    DoLogging("")
+  } else {
+    ;bIsRebooted == True
+    DoLogging("")
+    DoLogging("   ********************************************************************************")
+    DoLogging("   Configure-Image "strVersion . " restarting on machine: " A_ComputerName)
+    DoLogging("   ********************************************************************************")
+    DoLogging("")
+  }
 } Catch  {
   MsgBox Testing Deployment.log failed! You probably need to check file permissions. I won't run without my log! Dying now.
   ExitApp
@@ -199,19 +211,15 @@ __startup__:
   WinMinimizeAll
   WinRestore, Console Window
 
-  If (%0% != 0) { ;Check if there are any command line arguments
-    ;Check each one to see if this script was rebooted.
-    Loop, %0% {
-      If (A_Index = "rebooted") {
-        ;If the command line argument is rebooted we will procede to second half
-        DoLogging ("The script was rebooted.")
-        GoSub, __subAfterReboot__
-      }
-    }
-  } 
-  ;Constructs the GUI and gets the specific information that we need
-  ;We only want to do this if this is not the rebooted version of the app
-  Gosub __subMainGUI__ 
+  If (!bIsRebooted) {
+    ;Constructs the GUI and gets the specific information that we need
+    ;We only want to do this if this is not the rebooted version of the app
+    Gosub __subMainGUI__
+  } Else {
+    ;bIsRebooted == true
+    Gosub, __afterReboot__
+  }
+
 }
 
 Return ; Execution should stop here until the user submits ButtonStart
@@ -224,10 +232,7 @@ __main__:
 {
   DoLogging("")
   DoLogging("__ __main__")
-  data := new KeyValStore("DeploymentInfo.xml")
-  data.Set("ComputerName", strComputerName)
-  data.Set("ComputerRole", strComputerRole)
-  Gosub, __subCreateOUPath__
+  
     If (bIsWireless == 1)
     {
       Gosub, __subWirelessTasks__
@@ -243,9 +248,22 @@ __main__:
 
 __afterReboot__:
 {
-  DoLogging("")
-  DoLogging("__ __subAfterReboot__")
-  ;FIXME: This needs to call the stuff after reboot
+  GoSub, __subLoadUserInput__
+
+  Gosub, __subCreateOUPath__
+
+  GoSub, __subDefaultAfterReboot__
+
+  GoSub, __subSpecificTasks__
+
+  GoSub, __subAddAutoLogon__
+
+  GoSub, __subCleanupJobs__
+
+  GoSub, __subFinishAndExit__
+
+  DoLogging(" Advancing to task reserved for after the reboot.")
+
 }
 
 

@@ -182,14 +182,13 @@ __subDefaultTasks__:
   DoLogging("Renaming the computer.")
   arrDefaultTaskList.Insert("powershell.exe -Command ""& { `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
   
-  DoLogging("Joining the Domain.")
-  ;arrDefaultTaskList.Insert("powershell.exe -Command ""& { Start-Sleep -s 3; `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Add-Computer -NewName '"strComputerName . "' -DomainName dcls.org -Credential `$mycred -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
+  
   
   ;DCLS no longer Viper and it should no longer be installed on our new computers
   ;arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus.
   
   DoLogging("Copy links to staff printers.")
-  arrDefaultTaskList.Insert("powershell.exe -Command ""& {Register-ScheduledTask -Xml (get-content '"A_ScriptDir . "\Configure-ImageTask.xml' | out-string) -Taskname Test}""")
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& {Register-ScheduledTask -Xml (get-content '"A_ScriptDir . "\Configure-ImageTask.xml' | out-string) -Taskname RestartConfigureImage}""")
   arrDefaultTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Icons C:\Icons /s /UNILOG+:C:\Deployment\robocopy_Icons.log") ; Copy links to staff printers.
   iTotalErrors += DoExternalTasks(arrDefaultTaskList, bIsVerbose)
   Return
@@ -322,6 +321,12 @@ __subCleanupJobs__:
   ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete5", "powershell.exe -Command ""& { Remove-Item -Path C:\Deployment -Recurse -Force | Out-File C:\03_powershell_remove-item.log }"" "])
   ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete6", "cmd.exe /c c:\selfdelete.cmd > c:\selfdelete.log"])
   iTotalErrors += DoInternalTasks(arrCleanupJobsList, bIsVerbose)
+
+  ;Deleting tasks from Windows task scheduler is an external task
+  arrExternalCleanupJobs := []
+  arrExternalCleanupJobs.insert("powershell.exe -Command ""& { Unregister-ScheduledTask -TaskName RestartConfigureImage -Confirm:$false }""")
+  iTotalErrors += DoExternalTasks(arrExternalCleanupJobs, bIsVerbose)
+
   Return
 } 
 
@@ -344,18 +349,40 @@ __subReboot__:
   ;FileMove, RunOnStartup.exe, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
 
   ;We will use an exported task to import a task to the windows task scheduler
-   arrDefaultTaskList.Insert("powershell.exe -Command ""& { `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& { `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
   Run %comspec% /c "shutdown.exe /r /t 3" ;Restarts after 3 seconds
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
 
+__subLoadUserInput__:
+{
+  ;We need to load the data from the xml document that was created before the
+  ;reboot in order to maintain the user's input.
+  DoLogging(" Loading Saved input from the User.")
+  data := new KeyValStore("DeploymentInfo.xml")
+  strComputerName := data.Get("ComputerName")
+  DoLogging("strComputerName loaded to " strComputerName)
+  strLocation := data.Get("ComputerLocation")
+  DoLogging("strComputerLocation loaded to " strComputerLocation)
+  strComputerRole := data.Get("ComputerRole")
+  DoLogging("strComputerRole loaded to " strComputerRole)
+  bIsWireless := data.Get("WirelessState")
+  DoLogging("bIsWireless loaded to " bIsWireless)
+  bIsVerbose := data.Get("VerboseState")
+  DoLogging("bIsVerbose loaded to " bIsVerbose)
+  return
+}
 
-__subAfterReboot__:
+__subDefaultAfterReboot__:
 {
   DoLogging("Installing LogMeIn")
-  ;Fixme this need to remove the script from the Startup folder
-  arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
+  arrDefaultTaskListAR := []
+  DoLogging("Joining the Domain.")
+  arrDefaultTaskListAR.Insert("powershell.exe -Command ""& { Start-Sleep -s 3; `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Add-Computer  -DomainName dcls.org -Credential `$mycred -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
+  arrDefaultTaskListAR.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
+  iTotalErrors += DoExternalTasks(arrDefaultTaskListAR, bIsVerbose)
+  Return
 }
 __subFinishAndExit__:
 {

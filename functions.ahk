@@ -188,7 +188,7 @@ SendToConsole(msg) ; For logging to Console window.
   ControlSend, Edit1, ^{End}, Console
 }
 
-WaitForPing(num) ;
+WaitForPing(num) 
 {
   shell := ComObjCreate("WScript.Shell") ; WshShell object: http://msdn.microsoft.com/en-us/library/aew9yb99
   DoLogging("ii Pinging to determine when the wireless adapter has connected to the network")
