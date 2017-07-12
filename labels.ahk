@@ -218,6 +218,7 @@ __subSpecificTasks__:
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\POWERPNT.EXE, C:\Users\Default\Desktop\PowerPoint 2016.lnk, , , , , , 1
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\MSPUB.EXE, C:\Users\Default\Desktop\Publisher 2016.lnk, , , , , , 1
     FileCreateShortcut, C:\Program Files (x86)\Microsoft Office\root\Office16\OUTLOOK.EXE, C:\Users\Default\Desktop\Outlook 2016.lnk, , , , , , 1
+    FileCreateShortcut, c:\windows\explorer.exe, :\Users\Default\Desktop\File Explorer.lnk, , , , , , 1
     
   }
   If (strComputerRole == "Frontline")
@@ -236,6 +237,7 @@ __subSpecificTasks__:
     FileCreateShortcut, C:\Millennium\Offline\offlinecirc.exe, C:\Users\Public\Desktop\Offline Circulation.lnk, C:\Millenium\Offline, , , C:\Millennium\Offline\offlinecirc.ico, , 1
     FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\lptone\lptprt\lptPRT.exe, C:\Users\Public\Desktop\LPTOne Print Release Terminal.lnk, C:\Program Files (x86)\EnvisionWare\lptone\lptprt,  -host:%strEwareServer% -runmode:staff, , C:\Program Files (x86)\EnvisionWare\lptone\lptprt\lptPRT.exe, , 1
     FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\PC Reservation\Reservation Station\PCRes_RS.exe, C:\Users\Public\Desktop\PCRes Reservation Station.lnk, C:\Program Files (x86)\EnvisionWare\PC Reservation\Reservation Station, -host:%strEwareServer%, , , , 1
+    FileCreateShortcut, c:\windows\explorer.exe, :\Users\Default\Desktop\File Explorer.lnk, , , , , , 1
   }
   If (strComputerRole == "Patron")
   {
