@@ -226,8 +226,8 @@ __subSpecificTasks__:
     arrSpecificTaskList.Insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"" ""C:\Sierra Desktop App"" /s /UNILOG+:C:\Deployment\robocopy_Sierra.log") ; Sierra files.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium /s /UNILOG+:C:\Deployment\robocopy_Millennium.log") ;  Offline circ files.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Printers C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log") ; Copy links to staff printers.
-    ;GITHUB ISSUE #13 This is where the issue seems to be happening for the install I don't see the install in Log
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") ; Install Reservation Station
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EnvisionWareConfigs\"strLocation . "\ ""C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"" /mov") ;specifies ip and port of eware server
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S") ; Install staff Print Release Terminal.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources ""C:\Program Files (x86)\EnvisionWare"" envisionware.lic /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")
     FileCreateShortcut, \\Contentserver\bucket, C:\Users\Public\Desktop\Bucket.lnk,  , , , C:\Windows\system32\imageres.dll, , 138
@@ -247,8 +247,10 @@ __subSpecificTasks__:
     arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml") ; Office 365 for patrons.
     If (strLocation != "VAN")
     {
-      ;GITHUB ISSUE #20; Need to verify that this is the correct port that we should be targeting might be 1969, 61969
-      arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S -ip`="strEwareServer . " -tcpport`=9432") ; Envisionware Client.
+      ;I believe the port and server ip do nothing in the command line here but am not sure
+      arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S -ip="strEwareServer . " -tcpport=9432") ; Envisionware Client.
+      ;This is the actual command that specifies the IP and port
+      arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EnvisionWareConfigs\"strLocation . "\ ""C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"" /mov")
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /S -jqe.host`="strEwareServer) ; Patron printers.
     }
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources ""C:\Program Files (x86)\EnvisionWare"" envisionware.lic /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")
@@ -262,6 +264,8 @@ __subSpecificTasks__:
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EncoreAlways\ C:\EncoreAlways /s /UNILOG+:C:\Deployment\robocopy.log")  ; EncoreAlways script.
   }
   iTotalErrors += DoExternalTasks(arrSpecificTaskList, bIsVerbose)
+  ;Envisionware does not actually install until this point so after it isntalls we can go ahead and move the config file
+  ;FileMove, \Resources\EnvisionwareConfigs\%strLocation%\pcrClient.ewp, C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config , 1
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
@@ -367,7 +371,7 @@ __subLoadUserInput__:
   strComputerName := data.Get("ComputerName")
   DoLogging("strComputerName loaded to " strComputerName)
   strLocation := data.Get("ComputerLocation")
-  DoLogging("strComputerLocation loaded to " strComputerLocation)
+  DoLogging("strComputerLocation loaded to " strLocation)
   strComputerRole := data.Get("ComputerRole")
   DoLogging("strComputerRole loaded to " strComputerRole)
   bIsWireless := data.Get("WirelessState")
