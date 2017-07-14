@@ -164,6 +164,7 @@ Try {
   MsgBox failed to create console window! I can't run without console output! Dying now.
   ExitApp
 }
+
 bIsRebooted := false
 DoLogging(%0% . " arguments found.")
 Loop, %0% {
@@ -222,6 +223,10 @@ MsgBox Cthuhlu! ; This should never run!
 ; if we're in __main__, we should have all the input we need from the user.
 __main__:
 {
+  If (strComputerRole == "Self-Check") {
+    MsgBox, "The Self-Check role is not currently Supported."
+    ExitApp, 1
+  }
   DoLogging("")
   DoLogging("__ __main__")
   
