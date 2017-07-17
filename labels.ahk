@@ -322,25 +322,42 @@ __subAddAutoLogon__:
   {
     Return
   }
-  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "AutoAdminLogon", "1"])
-  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultDomainName", "dcls.org"])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+    , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+    , "AutoAdminLogon", "1"])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+    , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+    , "DefaultDomainName", "dcls.org"])
   If (strComputerRole == "Frontline")
   {
     strAutoLogonUser := arrAutoLogonUser[strLocation]
-    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultUserName", "dcls\" . strAutoLogonUser])
-    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultPassword", strALPWStaff])
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+      , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+      , "DefaultUserName", "dcls\" . strAutoLogonUser])
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+      , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+      , "DefaultPassword", strALPWStaff])
   }
   If (strComputerRole == "Patron")
   {  
-    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultUserName", "dcls\" . strLocation . "-PATRON"])
-    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultPassword", strALPWPatron])
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+      , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+      , "DefaultUserName", "dcls\" . strLocation . "-PATRON"])
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+      , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+      , "DefaultPassword", strALPWPatron])
   }
   If (strComputerRole == "Catalog") 
   {
-    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultUserName", "dcls\esacatalog"])
-    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultPassword", strALPWCatalog])
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+      , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+      , "DefaultUserName", "dcls\esacatalog"])
+    arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+      , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+      , "DefaultPassword", strALPWCatalog])
   }
-  arrAddAutoLogonList.Insert(["RegDelete", "HKEY_LOCAL_MACHINE", "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "AutoLogonCount"])
+  arrAddAutoLogonList.Insert(["RegDelete", "HKEY_LOCAL_MACHINE"
+    , "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "AutoLogonCount"])
   iTotalErrors += DoInternalTasks(arrAddAutoLogonList, bIsVerbose)
   Return
 }
@@ -353,21 +370,30 @@ __subCleanupJobs__:
   DoLogging("__ __subCleanupJobs__")
   DoLogging("ii Registry and file cleanup...")
   arrCleanupJobsList := []
-  arrCleanupJobsList.Insert(["RegWrite", "REG_DWORD", "HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui", "EnableSystray", "0"])
-  arrCleanupJobsList.Insert(["FileDelete", "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"])
-  arrCleanupJobsList.Insert(["FileDelete", "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"])
+  arrCleanupJobsList.Insert(["RegWrite", "REG_DWORD"
+    , "HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui", "EnableSystray", "0"])
+  arrCleanupJobsList.Insert(["FileDelete"
+    , "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"])
+  arrCleanupJobsList.Insert(["FileDelete"
+    , "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"])
   If (strComputerRole == "Patron")
   {
-    arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run", "PatronAdminPanel", """C:\PatronAdminPanel\PatronAdminPanel.exe"""])
+    arrCleanupJobsList.Insert(["RegWrite", "REG_SZ"
+      , "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run"
+      , "PatronAdminPanel", """C:\PatronAdminPanel\PatronAdminPanel.exe"""])
     iTotalErrors += ClosePCReservation(5)
   }
   If (strComputerRole == "Catalog")
   {
-    arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run", "EncoreAways", """C:\EncoreAlways\EncoreAlways.exe"""])
+    arrCleanupJobsList.Insert(["RegWrite", "REG_SZ"
+      , "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run"
+      , "EncoreAways", """C:\EncoreAlways\EncoreAlways.exe"""])
   }
   ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete1", "cmd.exe /c RD /S /Q C:\Deployment"])
   ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete2", "cmd.exe /c RD /S /Q C:\Deployment > c:\00_runonce.log"])
-  arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete", "cmd.exe /c Robocopy.exe C:\Deployment\Resources\Empty C:\Deployment /MIR /XF *.log /UNILOG+:c:\Deployment\robocopy_selfdelete.log"])
+  arrCleanupJobsList.Insert(["RegWrite", "REG_SZ"
+    , "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce"
+    , "SelfDelete", "cmd.exe /c Robocopy.exe C:\Deployment\Resources\Empty C:\Deployment /MIR /XF *.log /UNILOG+:c:\Deployment\robocopy_selfdelete.log"])
   ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete4", "cmd.exe /c RD /S /Q C:\Deployment > c:\02_runonce_on_empty.log"])
   ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete5", "powershell.exe -Command ""& { Remove-Item -Path C:\Deployment -Recurse -Force | Out-File C:\03_powershell_remove-item.log }"" "])
   ;arrCleanupJobsList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce", "SelfDelete6", "cmd.exe /c c:\selfdelete.cmd > c:\selfdelete.log"])
@@ -389,11 +415,21 @@ __subReboot__:
   ; but first we need to create an autologon key with admin credentials
   ; to ensure it logs back in after reboot
   arrAddAutoLogonList := []
-  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "AutoAdminLogon", "1"])
-  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultDomainName",  ".\"])
-  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultUserName",  strAdminUsername])
-  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "DefaultPassword", strAdminPassword])
-  arrAddAutoLogonList.Insert(["RegWrite", "REG_DWORD", "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon", "AutoLogonCount", 0x00000001])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+    , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+    , "AutoAdminLogon", "1"])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+    , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+    , "DefaultDomainName",  ".\"])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+    , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+    , "DefaultUserName",  strAdminUsername])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
+    , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+    , "DefaultPassword", strAdminPassword])
+  arrAddAutoLogonList.Insert(["RegWrite", "REG_DWORD"
+    , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+    , "AutoLogonCount", 0x00000001])
   iTotalErrors += DoInternalTasks(arrAddAutoLogonList, bIsVerbose)
 
   ;We will use an exported task to import a task to the windows task scheduler
@@ -432,7 +468,8 @@ __subDefaultAfterReboot__:
   DoLogging("Joining the Domain.")
   arrDefaultTaskListAR.Insert("powershell.exe -Command ""& { "
     . " Start-Sleep -s 3; "
-    . " `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; "
+    . " `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; "
+    . " `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; "
     . " Add-Computer  -DomainName dcls.org -Credential `$mycred -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
   arrDefaultTaskListAR.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
   iTotalErrors += DoExternalTasks(arrDefaultTaskListAR, bIsVerbose)
@@ -444,12 +481,18 @@ __subFinishAndExit__:
   {
     DoLogging("!! Configuration INCOMPLETE! There were " iTotalErrors . " errors with this run.")
     SoundPlay *16
-    MsgBox, 16, Configuration INCOMPLETE,  There were %iTotalErrors% errors during the configuration process!`nSomething may not have configured or installed propery.`nCheck the log for more details.
+    errorMsg := "There were " . %iTotalErrors% . "durring configuration.`n"
+      . "Something(s) may not have been configured or installed properly.`n"
+      . "Check the log to to see more details."
+    MsgBox, 16, Configuration INCOMPLETE,  %errorMsg%
     ExitApp, 2 ; indicates errors
   } Else {
     DoLogging("== Configuration Successful! There were " iTotalErrors . " errors with this program.")
     SoundPlay *64
-    MsgBox, 1, Configuration Successful,  Configuration completed successfully!`nRebooting in 10 seconds unless cancelled..., 10 ; MsgBox times out after 10 seconds.
+    successMsg := "Configuration completed successfully!`n"
+      . "Restarting in 10 seconds unless canceled. . ."
+    ;This msgBox will time out after 10 seconds
+    MsgBox, 1, Configuration Successful,  %successMsg%, 10 
     IfMsgBox, Cancel
       ExitApp, 0
     Shutdown, 2 ; Reboots computer.
