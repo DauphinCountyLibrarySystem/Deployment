@@ -18,8 +18,7 @@ __subMainGUI__: ; Label which creates the main GUI.
   Gui 2: Font, Bold s10
   Gui 2: Add, Text, ys, Select computer type:
   Gui 2: Font, Norm
-  Gui 2: Add, DDL, vstrComputerRole, Computer...||Office|Frontline|Patron
-          |Catalog|Self-Check
+  Gui 2: Add, DDL, vstrComputerRole, Computer...||Office|Frontline|Patron|Catalog|Self-Check
 
  ;----This section contains Checkbox toggles.----
   Gui 2: Font, Bold s10
@@ -68,35 +67,36 @@ __subConfirmGUI__:
   If (RegExMatch(strComputerName, ValidHostnameRegex) == 0)
   {
     SoundPlay *48
-    netBIOSMsg := "The Computer name failed the NETBIOS compatability check. "
-      . " It is ethier longer than 15 characters or contains disallowed characters."
+    netBIOSMsg := "The Computer name failed the NETBIOS compatability check. `n"
+      . " It is ethier longer than 15 characters or "
+      . " contains disallowed characters. `n"
       . " Try a different name."
     MsgBox, 48, Bad Name, %netBIOSMsg%
     Return
   }
-  If (strLocation == "Location...")
+  If (strLocation == "Branch...")
   {
     SoundPlay *48
     MsgBox, 48, No Location, Please select a location for this computer.
     Return
   }
-  If (strComputerRole == "Role...")
+  If (strComputerRole == "Computer...")
   {
     SoundPlay *48  
     MsgBox, 48, No Role, Please select a role for this computer.
     Return
   }
   If (bIsWireless == 1)
-    WirelessText := "This is a Wireless computer."
+    wirelessText := "This is a Wireless computer."
   else
-    WirelessText := "This is an Ethernet computer."
+    wirelessText := "This is an Ethernet computer."
   If (strComputerRole == "Office")
-    TypeText := "This will install:`n"
+    typeText := "This will install:`n"
       . "- Sierra`n"
       . "- Office for staff computer`n"
       . "- Staff printers"
   If (strComputerRole == "Frontline")
-    TypeText := "This will install:"
+    typeText := "This will install:"
       . "- Sierra`n"
       . "- Offline Circulation`n"
       . "- Staff printers`n"
@@ -104,29 +104,26 @@ __subConfirmGUI__:
       . "- Envisionware Print Release station`n"
       . "- Auto Logon configuration for staff"
   If ((strComputerRole == "Patron") And (strLocation != "VAN"))
-    TypeText := "This will install:`n"
-      . "- Office for patron computer`n"
+    typeText := "This will install:"
+      . "`n- Office for patron computer`n"
       . "- Envisionware PC Reservation client`n"
       . "- Envisionware LPTOne printer client`n"
       . "- PatronAdminPanel`n"
       . "- Auto Logon configuration for patrons"  
   If ((strComputerRole == "Patron") And (strLocation == "VAN"))
-    TypeText := "This will install:`n"
+    typeText := "This will install:`n"
       . "- Office for patron computer`n"
       . "- PatronAdminPanel`n"
       . "- Auto Logon configuration for patrons"  
   If (strComputerRole == "Catalog")
-    TypeText := "This will install:`n"
+    typeText := "This will install:`n"
       . "- EncoreAlways`n"
       . "- Auto Logon configuration for catalogs"
   SoundPlay *32
-  confirmMsg := "Please confirm the follow `n"
-    . "Name: " . %strComputerName% . "`n"
-    . "Location: " . %strLocation%% . "`n"
-    . "Role: " . %strComputerRole% . "`n"
-    . "Wireless: " . %WirelessText% . "`n"
-    . %TypeText% . "`n"
-    . "Is this correct?"
+  confirmMsg := "Please confirm the follow `n" 
+      . typeText . "`n"
+      . " " . wirelessText . "`n"
+      . "Is this correct?"
   MsgBox, 36, Confirm, %confirmMsg%
   IfMsgBox, Yes
   {
@@ -142,6 +139,7 @@ __subConfirmGUI__:
     DoLogging("--            Location: " strLocation)
     DoLogging("--                Role: " strComputerRole)
     DoLogging("--             Network: " WirelessText)
+    ExitApp, 0
     GoSub __subWriteXML__
     Gosub __main__
     MsgBox Cthuhlu! ; This should never run!
