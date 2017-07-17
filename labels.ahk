@@ -223,15 +223,14 @@ __subDefaultTasks__:
   arrDefaultTaskList := []
   ; TRUST ME, THIS IS THE ONLY WAY
   DoLogging("Renaming the computer.")
-  arrDefaultTaskList.Insert("powershell.exe -Command ""& { `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
-  
-  
-  
-  ;DCLS no longer Viper and it should no longer be installed on our new computers
-  ;arrDefaultTaskList.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_VIPRE.MSI /quiet /norestart /log "A_ScriptDir . "\vipre_install.log") ; Install VIPRE antivirus.
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& { "
+    . "`$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; "
+    . " `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass;
+    ." Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""") 
   
   DoLogging("Copy links to staff printers.")
-  arrDefaultTaskList.Insert("powershell.exe -Command ""& {Register-ScheduledTask -Xml (get-content '"A_ScriptDir . "\Configure-ImageTask.xml' | out-string) -Taskname RestartConfigureImage}""")
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& { "
+    . "Register-ScheduledTask -Xml (get-content '"A_ScriptDir . "\Configure-ImageTask.xml' | out-string) -Taskname RestartConfigureImage}""")
   arrDefaultTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Icons C:\Icons /s /UNILOG+:C:\Deployment\robocopy_Icons.log") ; Copy links to staff printers.
   iTotalErrors += DoExternalTasks(arrDefaultTaskList, bIsVerbose)
   Return
@@ -398,7 +397,10 @@ __subReboot__:
   iTotalErrors += DoInternalTasks(arrAddAutoLogonList, bIsVerbose)
 
   ;We will use an exported task to import a task to the windows task scheduler
-  arrDefaultTaskList.Insert("powershell.exe -Command ""& { `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
+  arrDefaultTaskList.Insert("powershell.exe -Command ""& {"
+   . " `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; "
+   . " `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; "
+   . "Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""")
   Run %comspec% /c "shutdown.exe /r /t 3" ;Restarts after 3 seconds
   Return
 }
@@ -428,7 +430,10 @@ __subDefaultAfterReboot__:
   DoLogging("Installing LogMeIn")
   arrDefaultTaskListAR := []
   DoLogging("Joining the Domain.")
-  arrDefaultTaskListAR.Insert("powershell.exe -Command ""& { Start-Sleep -s 3; `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; Add-Computer  -DomainName dcls.org -Credential `$mycred -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
+  arrDefaultTaskListAR.Insert("powershell.exe -Command ""& { "
+    . " Start-Sleep -s 3; "
+    . " `$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; "
+    . " Add-Computer  -DomainName dcls.org -Credential `$mycred -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
   arrDefaultTaskListAR.Insert("msiexec.exe /i "A_ScriptDir . "\Resources\Installers\_LogMeIn.msi /quiet /norestart /log "A_ScriptDir . "\logmein_install.log") ; Install LogMeIn.
   iTotalErrors += DoExternalTasks(arrDefaultTaskListAR, bIsVerbose)
   Return
