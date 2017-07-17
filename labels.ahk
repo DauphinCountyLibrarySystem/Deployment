@@ -3,11 +3,13 @@ __subMainGUI__: ; Label which creates the main GUI.
 {
   DoLogging("-- Creating GUI...")
   Gui 2: New, ,Computer Deployment
+
  ;----This Section contains the Computer Name label and field.----
   Gui 2: Font, Bold s10
   Gui 2: Add, Text,, Type in Computer Name:
   Gui 2: Font, Norm
   Gui 2: Add, Edit, Uppercase vstrComputerName,
+
  ;----This section contains a Drop Down Lists for Library locations and computer types.----
   Gui 2: Font, Bold s10
   Gui 2: Add, Text, Section, Select Branch:
@@ -16,12 +18,17 @@ __subMainGUI__: ; Label which creates the main GUI.
   Gui 2: Font, Bold s10
   Gui 2: Add, Text, ys, Select computer type:
   Gui 2: Font, Norm
-  Gui 2: Add, DDL, vstrComputerRole, Computer...||Office|Frontline|Patron|Catalog|Self-Check
+  Gui 2: Add, DDL, vstrComputerRole, Computer...||Office|Frontline|Patron
+          |Catalog|Self-Check
+
  ;----This section contains Checkbox toggles.----
   Gui 2: Font, Bold s10
-  Gui 2: Add, Checkbox, Section xm vbIsWireless, This is a Wireless computer. ; Wireless check toggle.
-  Gui 2: Add, Checkbox, vbIsVerbose, Use Verbose logging. ; Verbose logging toggle.
+  ; Wireless Checkbox
+  Gui 2: Add, Checkbox, Section xm vbIsWireless, This is a Wireless computer.
+  ;Verbose logging checkbox
+  Gui 2: Add, Checkbox, vbIsVerbose, Use Verbose logging. 
   Gui 2: Font, Norm
+
  ;----This Section contains Submit and Exit Buttons.----
   Gui 2: Add, Button, Section xm+50 gButtonStart w100 Default, Start
   Gui 2: Add, Button, yp xp+110 gButtonExit w100, Exit
@@ -30,8 +37,8 @@ __subMainGUI__: ; Label which creates the main GUI.
 }
 MsgBox Cthuhlu! ; This should never run!
 
-
-ButtonStart: ; Label for Install button. Takes user input and prepares to run installers, confirming first. (WORKS)
+; Label for Install button. Takes user input and prepares to run installers, confirming first. (WORKS)
+ButtonStart: 
 {
   Gui, Submit, NoHide
   Gosub __subConfirmGUI__
@@ -40,8 +47,9 @@ ButtonStart: ; Label for Install button. Takes user input and prepares to run in
 MsgBox Cthuhlu! ; This should never run!
 
 
-
-__subConfirmGUI__: ; confirms that selections are correct before continuing. 
+;Prompts user to confirm that the input is correct before continuing with the 
+;Deployment
+__subConfirmGUI__: 
 {
   Gui +OwnDialogs
 
@@ -60,7 +68,10 @@ __subConfirmGUI__: ; confirms that selections are correct before continuing.
   If (RegExMatch(strComputerName, ValidHostnameRegex) == 0)
   {
     SoundPlay *48
-    MsgBox, 48, Bad Name, The computer name failed NETBIOS compatibility check.`nIt is either longer than 15 characters, or contains disallowed characters.`nTry a different name.
+    netBIOSMsg := "The Computer name failed the NETBIOS compatability check. "
+      . " It is ethier longer than 15 characters or contains disallowed characters."
+      . " Try a different name."
+    MsgBox, 48, Bad Name, %netBIOSMsg%
     Return
   }
   If (strLocation == "Location...")
@@ -80,17 +91,43 @@ __subConfirmGUI__: ; confirms that selections are correct before continuing.
   else
     WirelessText := "This is an Ethernet computer."
   If (strComputerRole == "Office")
-    TypeText := "This will install:`n- Sierra`n- Office for staff computer`n- Staff printers"
+    TypeText := "This will install:`n"
+      . "- Sierra`n"
+      . "- Office for staff computer`n"
+      . "- Staff printers"
   If (strComputerRole == "Frontline")
-    TypeText := "This will install:`n- Sierra`n- Offline Circulation`n- Staff printers`n- PC Reservation Reservation Station`n- Envisionware Print Release station`n- Auto Logon configuration for staff"
+    TypeText := "This will install:"
+      . "- Sierra`n"
+      . "- Offline Circulation`n"
+      . "- Staff printers`n"
+      . "- PC Reservation Reservation Station`n"
+      . "- Envisionware Print Release station`n"
+      . "- Auto Logon configuration for staff"
   If ((strComputerRole == "Patron") And (strLocation != "VAN"))
-    TypeText := "This will install:`n- Office for patron computer`n- Envisionware PC Reservation client`n- Envisionware LPTOne printer client`n- PatronAdminPanel`n- Auto Logon configuration for patrons"  
+    TypeText := "This will install:`n"
+      . "- Office for patron computer`n"
+      . "- Envisionware PC Reservation client`n"
+      . "- Envisionware LPTOne printer client`n"
+      . "- PatronAdminPanel`n"
+      . "- Auto Logon configuration for patrons"  
   If ((strComputerRole == "Patron") And (strLocation == "VAN"))
-    TypeText := "This will install:`n- Office for patron computer`n- PatronAdminPanel`n- Auto Logon configuration for patrons"  
+    TypeText := "This will install:`n"
+      . "- Office for patron computer`n"
+      . "- PatronAdminPanel`n"
+      . "- Auto Logon configuration for patrons"  
   If (strComputerRole == "Catalog")
-    TypeText := "This will install:`n- EncoreAlways`n- Auto Logon configuration for catalogs"
+    TypeText := "This will install:`n"
+      . "- EncoreAlways`n"
+      . "- Auto Logon configuration for catalogs"
   SoundPlay *32
-  MsgBox, 36, Confirm, Please confirm the following:`nName: %strComputerName%`nLocation: %strLocation%`nRole: %strComputerRole%`n%WirelessText% `n%TypeText% `nIs this correct?
+  confirmMsg := "Please confirm the follow `n"
+    . "Name: " . %strComputerName% . "`n"
+    . "Location: " . %strLocation%% . "`n"
+    . "Role: " . %strComputerRole% . "`n"
+    . "Wireless: " . %WirelessText% . "`n"
+    . %TypeText% . "`n"
+    . "Is this correct?"
+  MsgBox, 36, Confirm, %confirmMsg%
   IfMsgBox, Yes
   {
     GuiControl 2: Disable, strComputerName
@@ -131,13 +168,21 @@ __subCreateOUPath__:
   DoLogging("ii Creating distinguished name for domain join...")
   Try {
     If (strComputerRole == "Office")
-      strFinalOUPath := "OU=Offices,OU=Systems,OU=" . strLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
+      strFinalOUPath := "OU=Offices,OU=Systems,OU="
+                          . strLocation
+                          . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
     If (strComputerRole == "Frontline")
-      strFinalOUPath := "OU=Frontline,OU=Systems,OU=" . strLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
+      strFinalOUPath := "OU=Frontline,OU=Systems,OU=" 
+                          . strLocation 
+                          . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
     If (strComputerRole == "Frontline" and bIsWireless == 1) ;Staff Laptop
-      strFinalOUPath := "OU=Laptops,OU=Systems,OU=" . strLocation . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
+      strFinalOUPath := "OU=Laptops,OU=Systems,OU=" 
+                          . strLocation
+                          . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
     If (strComputerRole == "Patron")
-      strFinalOUPath := "OU=" . strLocation . ",OU=Patron,OU=DCLS,DC=dcls,DC=org"  
+      strFinalOUPath := "OU=" 
+                          . strLocation 
+                          . ",OU=Patron,OU=DCLS,DC=dcls,DC=org"  
     If (strComputerRole == "Patron" and bIsWireless == 1) ;Patron Laptop
       strFinalOUPath := "OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
     If (strComputerRole == "Catalog")
