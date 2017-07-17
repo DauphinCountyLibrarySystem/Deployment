@@ -189,7 +189,6 @@ Loop, %0% {
 Try {
   If (!bIsRebooted) {
     DoLogging("")
-    MsgBox, %strAdminUsername%
     DoLogging("***************************************************************")
     DoLogging("       Configure-Image " . strVersion                           )
     DoLogging("       initializing for machine: " . A_ComputerName             )
