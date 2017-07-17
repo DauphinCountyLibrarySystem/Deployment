@@ -244,7 +244,7 @@ __subSpecificTasks__:
   {
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\PatronAdminPanel C:\PatronAdminPanel /s /UNILOG+:C:\Deployment\robocopy_PatronAdminPanel.log") ; Copy PatronAdminPanel.
     ;GITHUB ISSUE #22; Patrons should not be installing 365 they should be installing Office 2016
-    arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office365\setup.exe /configure "A_ScriptDir . "\Resources\Office365\customconfiguration_patron.xml") ; Office 365 for patrons.
+    arrSpecificTaskList.Insert(""A_ScriptDir . "\Resources\Office2016\setup.exe ") ; Office 2016 for patrons.
     If (strLocation != "VAN")
     {
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S") ; Envisionware Client.
@@ -332,9 +332,9 @@ __subCleanupJobs__:
   iTotalErrors += DoInternalTasks(arrCleanupJobsList, bIsVerbose)
 
   ;Deleting tasks from Windows task scheduler is an external task
-  arrExternalCleanupJobs := []
-  arrExternalCleanupJobs.insert("powershell.exe -Command ""& { Unregister-ScheduledTask -TaskName RestartConfigureImage -Confirm:$false }""")
-  iTotalErrors += DoExternalTasks(arrExternalCleanupJobs, bIsVerbose)
+  ;arrExternalCleanupJobs := []
+  ;arrExternalCleanupJobs.insert("powershell.exe -Command ""& { Unregister-ScheduledTask -TaskName RestartConfigureImage -Confirm:$false }""")
+  ;iTotalErrors += DoExternalTasks(arrExternalCleanupJobs, bIsVerbose)
 
   Return
 } 
