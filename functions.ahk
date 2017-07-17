@@ -1,5 +1,8 @@
 
-ClosePCReservation(sec) ; a recursive function that closes Envisionware window after its installation. I'm quite proud of using recursion.
+; A recursive function that will attempt to close the Envisionware window after
+; installation. It will attempt to close the window until it does.
+; I'm quite proud of using recursion.
+ClosePCReservation(sec)
 {
   DoLogging("-- ClosePCReservation() running: waiting for " sec " seconds...")
   Sleep (sec*1000)
@@ -9,20 +12,24 @@ ClosePCReservation(sec) ; a recursive function that closes Envisionware window a
     CoordMode, Mouse, Screen
     MouseMove, (20), (A_ScreenHeight - 20)
     Sleep, 250
-    Send, ^{Click} ; this should work better than: Send, {Ctrl Down}{Click}{Ctrl up}
+    ; this should work better than: Send, {Ctrl Down}{Click}{Ctrl up}
+    Send, ^{Click} ; This == Crtl + Click
     Sleep, 250
     Send envisionware{enter}{enter}
-    Sleep, 1000 ; I'm trying to be generous here. It shouldn't take a second to close.
+    ; I'm trying to be generous here. It shouldn't take a second to close.
+    Sleep, 1000 
   }
   If ProcessExist("PC Reservation Client Module.exe")
   {
     sec -= 1 ; decrement each time we recurse
     If sec<1 ; our base case, as it were...
     {
-      DoLogging("!! PC Reservation Client is still running, but ClosePCReservation() ran out of time!")
+      DoLogging("!! PC Reservation Client is still running !!")
+      DoLogging("But ClosePCReservation() ran out of time!")
       Return 1
     }
-    DoLogging(">< PC Reservation Client is still running, trying again...")
+    DoLogging(">< PC Reservation Client is still running ><")
+    DoLogging("Attempting ClosePCReservation again...")
     Return ClosePCReservation(sec)
   }
   DoLogging("<> PC Reservation Client seems to be closed, returning...")
@@ -31,11 +38,13 @@ ClosePCReservation(sec) ; a recursive function that closes Envisionware window a
 
 ProcessExist(Name)
 {
-  Process,Exist,%Name%
+  Process, Exist, %Name%
   return Errorlevel
 }
 
-DoExternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, trying and logging each one.
+; Loops through the provided array of commands (arrTasks) and attempts to
+; execute each of the commands. It will log each attempt.
+DoExternalTasks(arrTasks, Verbosity) 
 {
   iTaskErrors := 0
   Loop % arrTasks.MaxIndex()
@@ -53,7 +62,8 @@ DoExternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, 
       While !exec.StdOut.AtEndOfStream ;read the output line by line
       {
         DoLogging("   " exec.StdOut.ReadLine())
-      }
+      }      
+      ;
       If !exec.StdErr.AtEndOfStream ; It's important to note that this does NOT get StdErr in parallel with StdOut - if you stack four commands in a row, and the first two fail, you will get their error output AFTER the 3rd and 4th commands finish StdOut.
       {
         iTaskErrors += 1 ; This will only count once even if you stack commands! At least my error handling counts for something again...
@@ -72,7 +82,9 @@ DoExternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, 
   Return iTaskErrors
 }
 
-DoInternalTasks(arrTasks, Verbosity) ; Loops through an array of task commands, trying and logging each one.
+; Loops through the provided array of commands (arrTasks) and attempts to
+; execute each of the commands. It will log each attempt.
+DoInternalTasks(arrTasks, Verbosity) 
 {
   iTaskErrors := 0
   ; parse!
@@ -142,7 +154,7 @@ ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closure
     DoLogging("-- Received ExitCode 1 or higher, which indicates that iTotalErrors was non-zero. Dying now.")
     Return 0
   }
-  If A_ExitReason In Logoff,Shutdown
+  If A_ExitReason In Logoff, Shutdown
   {
     DoLogging("-- System logoff or shutdown in process`, dying now.")
     Return 0  
