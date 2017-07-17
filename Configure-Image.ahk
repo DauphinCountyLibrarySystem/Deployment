@@ -115,24 +115,32 @@ arrAutoLogonUser := {"ESA": "esalogon0"
                    , "ND": "ndlogon8" }
 
 ;Activation Key for Windows (Pulled from an external file)
-IniRead, strActivationKey, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Windows10
+IniRead, strActivationKey
+    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Windows10
 ;Activation Key for Spiceworks (Pulled from an external file)
-IniRead, strSpiceworksKey, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Spiceworks
+IniRead, strSpiceworksKey
+    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Spiceworks
 ;Password for OU (Pulled from external file)
-IniRead, strDomainPassword, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, DomainJoin
+IniRead, strDomainPassword
+    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, DomainJoin
 
 ;Patron Password for AutoLogon function (Pulled from an external file)
-IniRead, strALPWPatron, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Patron
+IniRead, strALPWPatron
+    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Patron
 
 ;Staff Password for AutoLogon function (Pulled from an external file)
-IniRead, strALPWStaff, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Staff
+IniRead, strALPWStaff
+    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Staff
 
 ;Catalog Password for AutoLogon function (Pulled from an external file)
-IniRead, strALPWCatalog, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Catalog
+IniRead, strALPWCatalog
+    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Catalog
 
 ;Admin Credentials for Autologon Function (Pulled from an external file)
-IniRead, strAdminUsername, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Usernames, Admin
-IniRead, strAdminPassword, %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Admin
+IniRead, strAdminUsername
+    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Usernames, Admin
+IniRead, strAdminPassword
+    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Admin
 
 ;===============================================================================
 ;   GLOBAL VARIABLES, ONEXIT, ETC...
@@ -156,19 +164,23 @@ __init__:
 
 Try {
   Gui 1: Font,, Lucida Console
-  Gui 1: Add, Edit, Readonly x10 y10 w940 h620 vConsole ; I guess not everything has to be a function...
+  ; This is not required to be a function
+  Gui 1: Add, Edit, Readonly x10 y10 w940 h620 vConsole 
   Gui 1: -SysMenu
   Gui 1: Show, x20 y20 w960 h640, Console Window
   DoLogging("   Console window up.",2)
 } Catch {
-  MsgBox failed to create console window! I can't run without console output! Dying now.
+  MsgBox, Failed to create console window. Script will exit now.
   ExitApp
 }
 
-bIsRebooted := false
+
+bIsRebooted := false ; Will be used to track if this is first run
 DoLogging(%0% . " arguments found.")
+;This loops through the command line arguments
 Loop, %0% {
   DoLogging("A_Index is: " . %A_Index%)
+  ;If it finds that it has been rebooted it flags itself as rebooted
   If (%A_Index% == "rebooted") {
     bIsRebooted = true
     break
@@ -177,20 +189,23 @@ Loop, %0% {
 Try {
   If (!bIsRebooted) {
     DoLogging("")
-    DoLogging("   ********************************************************************************")
-    DoLogging("   Configure-Image "strVersion . " initializing for machine: " A_ComputerName)
-    DoLogging("   ********************************************************************************")
+    MsgBox, %strAdminUsername%
+    DoLogging("***************************************************************")
+    DoLogging("       Configure-Image " . strVersion                           )
+    DoLogging("       initializing for machine: " . A_ComputerName             )
+    DoLogging("***************************************************************")
     DoLogging("")
   } else {
     ;bIsRebooted == True
     DoLogging("")
-    DoLogging("   ********************************************************************************")
-    DoLogging("   Configure-Image "strVersion . " restarting on machine: " A_ComputerName)
-    DoLogging("   ********************************************************************************")
+    DoLogging("***************************************************************")
+    DoLogging("       Resuming Configure-Image " . strVersion                  )
+    DoLogging("       on machine: " . A_ComputerName                           )
+    DoLogging("***************************************************************")
     DoLogging("")
   }
 } Catch  {
-  MsgBox Testing Deployment.log failed! You probably need to check file permissions. I won't run without my log! Dying now.
+  MsgBox Testing Deployment.log failed! Check file permissions.
   ExitApp
 }
 
