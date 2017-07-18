@@ -224,7 +224,7 @@ WaitForPing(num)
   Return 1
 }
 
-CreateEwareConfig(location, configType)
+CreatePatronEwareConfig(location)
 {
     ;Path to where Servers.ini is found
     serversPath := A_WorkingDir . "\Resources\Servers.ini"
@@ -235,7 +235,7 @@ CreateEwareConfig(location, configType)
     IniRead, strManagementServicePort
         , %serversPath%, ManagementServicePort, %location%
 
-  fileName := "Resources\EwareConfig\"configType
+  fileName := "Resources\EwareConfig\pcrClient.ewp"
   fileContent := ""
   . "<!DOCTYPE Settings> `n"
   . "<Settings> `n"
@@ -248,6 +248,60 @@ CreateEwareConfig(location, configType)
   . "        <entry name=""LPT:One Print Cost Management"">Skip When Closing</entry> `n"
   . "    </collection>`n"
   . "</Settings>"
+
+  FileAppend, %fileContent%, %fileName%
+}
+
+CreateFrontLineEwareConfig(location)
+{
+    ;Path to where Servers.ini is found
+    serversPath := A_WorkingDir . "\Resources\Servers.ini"
+    IniRead, strEwareServer
+        , %serversPath%, Servers, %location%
+    IniRead, strAutoDiscoveryPort
+        , %serversPath%, AutoDiscoveryPort, %location%
+    IniRead, strManagementServicePort
+        , %serversPath%, ManagementServicePort, %location%
+
+  fileName := "Resources\EwareConfig\rsConfig.ewp"
+  fileContent := ""
+  . "<?xml version=""1.0"" encoding=""utf-8"" ?> `n"
+  . "<Settings> `n"
+  . "<version>1.1</version> `n"
+  . "<type>RS Config</type> `n"
+  . "<entry name='Allow No Area Selection'>0</entry> `n"
+  . "<entry name='Allow Receipt Printing'>0</entry> `n"
+  . "<entry name='Allowed Areas'></entry> `n"
+  . "<entry name='Always Print Receipt'>0</entry> `n"
+  . "<entry name='Background Color'>0</entry> `n"
+  . "<entry name='Barcode Printer'></entry> `n"
+  . "<entry name='Barcode Printer Left Margin'>0</entry> `n"
+  . "<entry name='Barcode Printer Top Margin'>0</entry> `n"
+  . "<entry name='Blank Lines'>0</entry> `n"
+  . "<entry name='Dedicated'>0</entry> `n"
+  . "<entry name='Default Area'></entry> `n"
+  . "<entry name='Fields'>0</entry> `n"
+  . "<entry name='Footer Text'></entry> `n"
+  . "<entry name='Foreground Color'>0</entry> `n"
+  . "<entry name='LPT:One Print Cost Management'>Skip When Closing</entry> `n"
+  . "<entry name='Management Console: Host Name'></entry> `n"
+  . "<entry name='Management Console: IP Address'>"strEwareServer . "</entry> `n"
+  . "<entry name='Management Console: NetBIOS Name'></entry> `n"
+  . "<entry name='Management Console: TCP Port'>1969</entry> `n"
+  . "<entry name='Management Console: TCP Socket Keep-Alive Interval'>15000</entry> `n"
+  . "<entry name='Management Console: UDP Port'>0</entry> `n"
+  . "<entry name='Network: Management Service Auto-Discovery Port'>61969</entry> `n"
+  . "<entry name='Network: Management Service IP Address/Host Name'>"strEwareServer . "</entry> `n"
+  . "<entry name='Network: Management Service Port'>9432</entry> `n"
+  . "<entry name='Printer Name'></entry> `n"
+  . "<entry name='Receipt Fields'>0</entry> `n"
+  . "<entry name='Staff Managed'>0</entry> `n"
+  . "<entry name='Window Height'>0</entry> `n"
+  . "<entry name='Window Position X'>0</entry>  `n"
+  . "<entry name='Window Position Y'>0</entry> `n"
+  . "<entry name='Window Width'>0</entry> `n"
+  . "</Settings> `n"
+
 
   FileAppend, %fileContent%, %fileName%
 }

@@ -302,7 +302,7 @@ __subSpecificTasks__:
     ; Install Reservation Station
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") 
     ;specifies ip and port of eware server I'm not sure that this is correct
-    createEwareConfig(strLocation, "rsConfig.ewp")
+    createFrontLineEwareConfig(strLocation)
       arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EwareConfig"
         . " ""C:\ProgramData\EnvisionWare\PC Reservation\Reservation Station\config"""
         . " /mov")
@@ -337,7 +337,7 @@ __subSpecificTasks__:
     {
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S") ; Envisionware Client.
       ;This is the actual command that specifies the IP and port
-      createEwareConfig(strLocation, "pcrClient.ewp")
+      createPatronEwareConfig(strLocation)
       arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EwareConfig"
         . " ""C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"""
         . " /mov")
