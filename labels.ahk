@@ -455,9 +455,9 @@ __subCleanupJobs__:
   iTotalErrors += DoInternalTasks(arrCleanupJobsList, bIsVerbose)
 
   ;Deleting tasks from Windows task scheduler is an external task
-  ;arrExternalCleanupJobs := []
-  ;arrExternalCleanupJobs.insert("powershell.exe -Command ""& { Unregister-ScheduledTask -TaskName RestartConfigureImage -Confirm:$false }""")
-  ;iTotalErrors += DoExternalTasks(arrExternalCleanupJobs, bIsVerbose)
+  arrExternalCleanupJobs := []
+  arrExternalCleanupJobs.insert("powershell.exe -Command ""& { Unregister-ScheduledTask -TaskName RestartConfigureImage -Confirm:$false }""")
+  iTotalErrors += DoExternalTasks(arrExternalCleanupJobs, bIsVerbose)
 
   Return
 } 
