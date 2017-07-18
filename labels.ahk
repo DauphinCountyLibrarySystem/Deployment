@@ -302,7 +302,7 @@ __subSpecificTasks__:
     ; Install Reservation Station
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") 
     ;specifies ip and port of eware server
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EnvisionWareConfigs\"strLocation . "\ "
+    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EnvisionWareConfig\"strLocation . "\ "
       . """C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"" /mov")
     ; Install staff Print Release Terminal.
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S")
@@ -335,8 +335,10 @@ __subSpecificTasks__:
     {
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S") ; Envisionware Client.
       ;This is the actual command that specifies the IP and port
-      arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EnvisionWareConfigs\"strLocation . "\ "
-        . " ""C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"" /mov")
+      createEwareConfig(strLocation)
+      arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EwareConfig"
+        . " ""C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"""
+        . " /mov")
       ; Patron printers.
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /S -jqe.host`="strEwareServer) 
     }
@@ -534,7 +536,7 @@ __subFinishAndExit__:
   {
     DoLogging("!! Configuration INCOMPLETE! There were " iTotalErrors . " errors with this run.")
     SoundPlay *16
-    errorMsg := "There were " . %iTotalErrors% . "durring configuration.`n"
+    errorMsg := "There were " iTotalErrors . " error(s) durring configuration.`n"
       . "Something(s) may not have been configured or installed properly.`n"
       . "Check the log to to see more details."
     MsgBox, 16, Configuration INCOMPLETE,  %errorMsg%
