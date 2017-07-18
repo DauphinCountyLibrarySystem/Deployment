@@ -231,12 +231,12 @@ __subDefaultTasks__:
   DoLogging("Renaming the computer.")
   arrDefaultTaskList.Insert("powershell.exe -Command ""& { "
     . "`$pass `= ConvertTo-SecureString -String "strDomainPassword . " -AsPlainText -Force; "
-    . " `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass;
-    ." Rename-Computer -NewName '"strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""") 
+    . " `$mycred `= New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList unattend,`$pass; "
+    . " Rename-Computer -NewName '" . strComputerName . "' -DomainCredential `$mycred -Force -PassThru }""") 
   
   DoLogging("Copy links to staff printers.")
   arrDefaultTaskList.Insert("powershell.exe -Command ""& { "
-    . "Register-ScheduledTask -Xml (get-content '"A_ScriptDir . "\Configure-ImageTask.xml' | out-string)
+    . "Register-ScheduledTask -Xml (get-content '"A_ScriptDir . "\Configure-ImageTask.xml' | out-string) "
     . " -Taskname RestartConfigureImage}""")
   ; Copy links to staff printers.
   arrDefaultTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Icons "
@@ -308,7 +308,7 @@ __subSpecificTasks__:
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S")
     ;Envisionware License
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources "
-      """C:\Program Files (x86)\EnvisionWare"" envisionware.lic /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")
+      . """C:\Program Files (x86)\EnvisionWare"" envisionware.lic /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")
     FileCreateShortcut, \\Contentserver\bucket, C:\Users\Public\Desktop\Bucket.lnk
       , , , , C:\Windows\system32\imageres.dll, , 138
     FileCreateShortcut, https://portal.adp.com/public/index.htm, C:\Users\Public\Desktop\ADP.lnk
@@ -335,7 +335,7 @@ __subSpecificTasks__:
     {
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S") ; Envisionware Client.
       ;This is the actual command that specifies the IP and port
-      arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EnvisionWareConfigs\"strLocation . "\ 
+      arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EnvisionWareConfigs\"strLocation . "\ "
         . " ""C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"" /mov")
       ; Patron printers.
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOneClient.exe /S -jqe.host`="strEwareServer) 
