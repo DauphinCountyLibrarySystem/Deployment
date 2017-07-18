@@ -114,7 +114,8 @@ DoInternalTasks(arrTasks, Verbosity)
       }
       Try {
         P := StrSplit(strParams, ",")
-        #(Task[1], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10], P[11], P[12], P[13], P[14], P[15], P[16], P[17], P[18], P[19])
+        #(Task[1], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10]
+          , P[11], P[12], P[13], P[14], P[15], P[16], P[17], P[18], P[19])
       } Catch {
         iTaskErrors += 1
         DoLogging("!! Error attempting Internal Task: "Output . "A_LastError: " . A_LastError)
@@ -223,13 +224,18 @@ WaitForPing(num)
   Return 1
 }
 
-CreateEwareConfig(location)
+CreateEwareConfig(location, configType)
 {
-  IniRead, strEwareServer , %A_WorkingDir%\Resources\Servers.ini, Servers, %location%
-  IniRead, strAutoDiscoveryPort, %A_WorkingDir%\Resources\Servers.ini, AutoDiscoveryPort, %location%
-  IniRead, strManagementServicePort, %A_WorkingDir%\Resources\Servers.ini, ManagementServicePort, %location%
+    ;Path to where Servers.ini is found
+    serversPath := A_WorkingDir . "\Resources\Servers.ini"
+    IniRead, strEwareServer
+        , %serversPath%, Servers, %location%
+    IniRead, strAutoDiscoveryPort
+        , %serversPath%, AutoDiscoveryPort, %location%
+    IniRead, strManagementServicePort
+        , %serversPath%, ManagementServicePort, %location%
 
-  fileName := "Resources\EwareConfig\pcrClient.ewp"
+  fileName := "Resources\EwareConfig\"configType
   fileContent := ""
   . "<!DOCTYPE Settings> `n"
   . "<Settings> `n"

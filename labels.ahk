@@ -292,7 +292,7 @@ __subSpecificTasks__:
   {
     ; Sierra files.
     arrSpecificTaskList.Insert("robocopy """A_ScriptDir . "\Resources\Sierra Desktop App"""
-      . """C:\Sierra Desktop App"" /s /UNILOG+:C:\Deployment\robocopy_Sierra.log")
+      . " ""C:\Sierra Desktop App"" /s /UNILOG+:C:\Deployment\robocopy_Sierra.log")
     ;  Offline circ files.
     arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\Millennium C:\Millennium "
       . " /s /UNILOG+:C:\Deployment\robocopy_Millennium.log") 
@@ -302,9 +302,9 @@ __subSpecificTasks__:
     ; Install Reservation Station
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") 
     ;specifies ip and port of eware server I'm not sure that this is correct
-    createEwareConfig(strLocation)
+    createEwareConfig(strLocation, "rsConfig.ewp")
       arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EwareConfig"
-        . " ""C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"""
+        . " ""C:\ProgramData\EnvisionWare\PC Reservation\Reservation Station\config"""
         . " /mov")
     ; Install staff Print Release Terminal.
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S")
@@ -337,7 +337,7 @@ __subSpecificTasks__:
     {
       arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationClient.exe /S") ; Envisionware Client.
       ;This is the actual command that specifies the IP and port
-      createEwareConfig(strLocation)
+      createEwareConfig(strLocation, "pcrClient.ewp")
       arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EwareConfig"
         . " ""C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"""
         . " /mov")
