@@ -301,9 +301,11 @@ __subSpecificTasks__:
       . "C:\Users\Default\Desktop\Printers /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")
     ; Install Reservation Station
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_PCReservationStation.exe /S") 
-    ;specifies ip and port of eware server
-    arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EnvisionWareConfig\"strLocation . "\ "
-      . """C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"" /mov")
+    ;specifies ip and port of eware server I'm not sure that this is correct
+    createEwareConfig(strLocation)
+      arrSpecificTaskList.Insert("robocopy "A_ScriptDir . "\Resources\EwareConfig"
+        . " ""C:\ProgramData\EnvisionWare\PC Reservation\Client Module\config"""
+        . " /mov")
     ; Install staff Print Release Terminal.
     arrSpecificTaskList.Insert(A_ScriptDir . "\Resources\Installers\_LPTOnePrintRelease.exe /S")
     ;Envisionware License
