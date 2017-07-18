@@ -222,3 +222,26 @@ WaitForPing(num)
   DoLogging("")
   Return 1
 }
+
+CreateEwareConfig(location)
+{
+  IniRead, strEwareServer , %A_WorkingDir%\Resources\Servers.ini, Servers, %location%
+  IniRead, strAutoDiscoveryPort, %A_WorkingDir%\Resources\Servers.ini, AutoDiscoveryPort, %location%
+  IniRead, strManagementServicePort, %A_WorkingDir%\Resources\Servers.ini, ManagementServicePort, %location%
+
+  fileName := "Resources\EwareConfig\pcrClient.ewp"
+  fileContent := ""
+  . "<!DOCTYPE Settings> `n"
+  . "<Settings> `n"
+  . "    <version>1</version> `n"
+  . "    <type>PC Reservation Client</type> `n"
+  . "    <entry name=""Network: Management Service Auto-Discovery Port"">" strAutoDiscoveryPort . "</entry> `n"
+  . "    <entry name=""Network: Management Service IP Address/Host Name"">" strEwareServer . "</entry> `n"
+  . "    <entry name=""Network: Management Service Port"">"  strManagementServicePort . "</entry> `n"
+  . "    <collection name=""Process Exceptions""> `n"
+  . "        <entry name=""LPT:One Print Cost Management"">Skip When Closing</entry> `n"
+  . "    </collection>`n"
+  . "</Settings>"
+
+  FileAppend, %fileContent%, %fileName%
+}
