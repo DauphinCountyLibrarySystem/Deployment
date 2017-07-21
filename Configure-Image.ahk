@@ -147,7 +147,8 @@ IniRead, strAdminPassword
 ;===============================================================================
 ; Obviously this isn't a very good pattern. I don't really know what other
 ;   symbols are allowed other than dash and period, so...
-ValidHostnameRegex := "i)^[a-z0-9]{1}[a-z0-9-\.]{0,14}$" 
+ValidHostnameRegex := "i)^[a-z0-9]{1}[a-z0-9-\.]{0,14}$"
+strResourcesPath := A_ScriptDir . "\Reources"
 DllCall("AllocConsole")
 FileAppend test..., CONOUT$
 WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
