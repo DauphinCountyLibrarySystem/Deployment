@@ -269,7 +269,7 @@ __main__:
 
 __afterReboot__:
 {
-  GoSub, __subLoadUserInput__
+  GoSub, __subLoadUserInput__ ; Change to function? 
 
   Gosub, __subCreateOUPath__ ; Fixe Me can be entirely removed after Issue #25
 

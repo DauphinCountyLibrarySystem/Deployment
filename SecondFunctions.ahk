@@ -37,8 +37,9 @@ ExecuteExternalCommand(task, Verbosity)
   }
 }
 
-ExecuteInternalCommand(arrTasks, Verbosity) 
+ExecuteInternalCommand(task) 
 {
+  Global bIsVerbose
   iTaskErrors := 0
   ; parse!
   Try {
@@ -80,3 +81,4 @@ ExecuteInternalCommand(arrTasks, Verbosity)
   }
   Return iTaskErrors
 }
+

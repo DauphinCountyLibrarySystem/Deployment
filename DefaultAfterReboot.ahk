@@ -1,10 +1,7 @@
 __subDefaultAfterReboot__:
 {
-	arrDefaultTaskListAR := []  
-
-	; Install LogMeIn.
-	
-	iTotalErrors += DoExternalTasks(arrDefaultTaskListAR, bIsVerbose)
+	JoinDomain()
+	InstallLogMeIn()
 
 	Return
 }
@@ -28,13 +25,17 @@ JoinDomain()
 		. " System.Management.Automation.PSCredential "
 		. " -ArgumentList unattend,`$pass; "
 		. " Add-Computer  -DomainName dcls.org -Credential `$mycred "
-		. " -OUPath '"strFinalOUPath . "' -Force -PassThru }""")	
+		. " -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
+
+	return
 }
 
 InstallLogMeIn()
 {
 	ExecuteExternalCommand("msiexec.exe /i \Resources\Installers\_LogMeIn.msi "
-		. " /quiet /norestart /log \logmein_install.log") 
+		. " /quiet /norestart /log \logmein_install.log")
+
+	return
 }
 
 CreateOUPath()
