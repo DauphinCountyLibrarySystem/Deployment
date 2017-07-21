@@ -266,7 +266,7 @@ __afterReboot__:
 
   GoSub, __subDefaultAfterReboot__
 
-  GoSub, __subSpecificTasks__
+  GoSub, __subSpecificTasks__ ;Fix Me should be changed to Specific tasks Issue #25
 
   GoSub, __subAddAutoLogon__
 
