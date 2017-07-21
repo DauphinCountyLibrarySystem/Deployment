@@ -123,6 +123,8 @@ IniRead, strActivationKey
 ;Activation Key for Spiceworks (Pulled from an external file)
 IniRead, strSpiceworksKey
     , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Spiceworks
+
+;
 ;Password for OU (Pulled from external file)
 IniRead, strDomainPassword
     , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, DomainJoin
@@ -257,7 +259,7 @@ __main__:
       Gosub, __subWirelessTasks__ ; FixMe should be changed to WirelessTasks Issue #25
     } 
 
-  Gosub, __subDefaultTasks__
+  Gosub, __subDefaultTasks__ ;Fixeme Should be changed to Default Tasks Issue #25
   
   Gosub, __subReboot__
 
@@ -269,9 +271,9 @@ __afterReboot__:
 {
   GoSub, __subLoadUserInput__
 
-  Gosub, __subCreateOUPath__
+  Gosub, __subCreateOUPath__ ; Fixe Me can be entirely removed after Issue #25
 
-  GoSub, __subDefaultAfterReboot__
+  GoSub, __subDefaultAfterReboot__ ; Fixeme should be changed to DefaultAfterTask
 
   GoSub, __subSpecificTasks__ ;Fix Me should be changed to Specific tasks Issue #25
 
