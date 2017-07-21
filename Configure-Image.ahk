@@ -118,6 +118,8 @@ arrAutoLogonUser := {"ESA": "esalogon0"
 ;Activation Key for Windows (Pulled from an external file)
 IniRead, strActivationKey
     , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Windows10
+
+;Can be removed after Issue #25
 ;Activation Key for Spiceworks (Pulled from an external file)
 IniRead, strSpiceworksKey
     , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Spiceworks
@@ -252,7 +254,7 @@ __main__:
   
     If (bIsWireless == 1)
     {
-      Gosub, __subWirelessTasks__
+      Gosub, __subWirelessTasks__ ; FixMe should be changed to WirelessTasks Issue #25
     } 
 
   Gosub, __subDefaultTasks__
