@@ -105,14 +105,15 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;   CONFIGURATION
 ;===============================================================================
 
+;Can be removed after Issue #25
 arrAutoLogonUser := {"ESA": "esalogon0"
-                   , "KL": "kllogon4"
-                   , "MOM": "momlogon3"
-                   , "MRL": "mrllogon1"
-                   , "AFL": "afllogon2"
-                   , "JOH":"johlogon6"
-                   , "EV": "evlogon5"
-                   , "ND": "ndlogon8" }
+              , "KL": "kllogon4"
+              , "MOM": "momlogon3"
+              , "MRL": "mrllogon1"
+              , "AFL": "afllogon2"
+              , "JOH":"johlogon6"
+              , "EV": "evlogon5"
+              , "ND": "ndlogon8" }
 
 ;Activation Key for Windows (Pulled from an external file)
 IniRead, strActivationKey
@@ -124,14 +125,18 @@ IniRead, strSpiceworksKey
 IniRead, strDomainPassword
     , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, DomainJoin
 
+;Can be removed after Issue #25
+;Staff Password for AutoLogon function (Pulled from an external file)
+Local strALPWStaff
+IniRead, strALPWStaff
+    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Staff   
+
+; Can be Removed After Issue #25
 ;Patron Password for AutoLogon function (Pulled from an external file)
 IniRead, strALPWPatron
     , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Patron
 
-;Staff Password for AutoLogon function (Pulled from an external file)
-IniRead, strALPWStaff
-    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Staff
-
+;Can be removed after Issue #25
 ;Catalog Password for AutoLogon function (Pulled from an external file)
 IniRead, strALPWCatalog
     , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Catalog
@@ -268,7 +273,7 @@ __afterReboot__:
 
   GoSub, __subSpecificTasks__ ;Fix Me should be changed to Specific tasks Issue #25
 
-  GoSub, __subAddAutoLogon__
+  GoSub, __subAddAutoLogon__ ; FixMe should be chagned to AddAutoLogon tasks Issue #25
 
   GoSub, __subCleanupJobs__
 
