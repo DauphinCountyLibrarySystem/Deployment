@@ -10,11 +10,9 @@ __WirelessTasks__:
 {
 	DoLogging(" ")
 	DoLogging("===============================================================")
-	DoLogging("		Starting AddAutoLogon for Role:" . strComputerRole)
+	DoLogging("		Starting Wireless Task for Role:" . strComputerRole)
 	DoLogging("===============================================================")
 	DoLogging(" ")
-	DoLogging("import wireless profile, install Spiceworks agent, then wait for a connection...")
-
 
 	AddWirelessProfile()
 	InstallSpiceWorksAgent();
@@ -27,10 +25,12 @@ __WirelessTasks__:
 
 ;===============================================================================
 ;								AddWirelessProfile
-; This Function adds the staff wifi profile for all users of the computer.
+; This Function adds the staff wifi profile for all user accounts on the server.
 ;===============================================================================
 AddWirelessProfile()
 {
+	DoLogging("Adding the Wireless Profile")
+
 	; Install wireless profile
 	ExecuteExternalCommand("netsh wlan add profile filename`="strResourcesPath 
 		. "\WirelessProfile-dclsstaff.xml user`=all") 
@@ -44,8 +44,9 @@ AddWirelessProfile()
 ;===============================================================================
 InstallSpiceWorksAgent()
 {
+	DoLogging("Installing SpiceWorks Agent")
 	Local strSpiceworksKey
-	
+
 	;Activation Key for Spiceworks (Pulled from an external file)
 	IniRead, strSpiceworksKey										; Variable
 		, %A_WorkingDir%\Resources\KeysAndPasswords.ini 			; File
