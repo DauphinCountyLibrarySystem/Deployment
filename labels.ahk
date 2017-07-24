@@ -18,7 +18,7 @@ __subMainGUI__: ; Label which creates the main GUI.
   Gui 2: Font, Bold s10
   Gui 2: Add, Text, ys, Select computer type:
   Gui 2: Font, Norm
-  Gui 2: Add, DDL, vstrComputerRole, Computer...||Office|Frontline|Patron|Catalog|Self-Check
+  Gui 2: Add, DDL, vstrComputerRole, Computer...||Office|Frontline|Patron|Catalog|Self-Check|Kiosk
 
  ;----This section contains Checkbox toggles.----
   Gui 2: Font, Bold s10

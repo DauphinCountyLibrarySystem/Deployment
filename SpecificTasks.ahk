@@ -25,6 +25,10 @@ __SpecificTasks__:
 		PatronTasks()
 	} Else If (strComputerRole == "Catalog") {
 		CatalogTasks()
+	} Else If (strComputerRole == "Self-Check") {
+		SelfCheckTasks();
+	} Else If (strComputerRole == "Kiosk") {
+
 	}
 
 	Return
@@ -438,4 +442,29 @@ CatalogTasks()
     	. strResourcesPath . "\EncoreAlways "					; Source
     	. " C:\EncoreAlways "									; Dest
     	. "/s /UNILOG+:C:\Deployment\robocopy.log")  			; Options
+}
+
+;===============================================================================
+;								Self Check Tasks
+;
+;
+;===============================================================================
+SelfCheckTasks()
+{
+	DoLogging("Configuring Self Check Tasks")
+	;Run EnvisionWare OneStop
+	;Check the OneStop configure found on one note
+}
+
+
+;===============================================================================
+;								Kiosk Tasks
+;
+;
+;===============================================================================
+KioskTasks()
+{
+	DoLogging("Configuring Kiosk Tasks")
+	;Check OneNote / GitHub to see if there are more details on what this has 
+	;installed
 }
