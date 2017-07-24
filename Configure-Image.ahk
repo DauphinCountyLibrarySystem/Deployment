@@ -156,8 +156,10 @@ IniRead, strAdminPassword
 ;===============================================================================
 ; Obviously this isn't a very good pattern. I don't really know what other
 ;   symbols are allowed other than dash and period, so...
-ValidHostnameRegex := "i)^[a-z0-9]{1}[a-z0-9-\.]{0,14}$"
-strResourcesPath := A_ScriptDir . "\Reources"
+Global ValidHostnameRegex := "i)^[a-z0-9]{1}[a-z0-9-\.]{0,14}$"
+Global strResourcesPath := A_ScriptDir . "\Reources"
+Global strSavedInputPath = "DeploymentInfo.xml"
+
 DllCall("AllocConsole")
 FileAppend test..., CONOUT$
 WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
@@ -269,7 +271,7 @@ __main__:
 
 __afterReboot__:
 {
-  GoSub, __subLoadUserInput__ ; Change to function? 
+  GoSub, oadUserInput__ ; Fixme Can be changed to loadUserInput(); Issue #25
 
   Gosub, __subCreateOUPath__ ; Fixe Me can be entirely removed after Issue #25
 
@@ -285,6 +287,40 @@ __afterReboot__:
 
   DoLogging(" Advancing to task reserved for after the reboot.")
 
+}
+
+;===============================================================================
+;                                Load User Input
+;
+; This function loads the User Input from the file path that is specified in the 
+; Global variable section. It then loads the data found in this XML to the
+; Global variabls for the deployment info i.e. Computer Role, Computer Location,
+; and Wireless State.
+;===============================================================================
+loadUserInput()
+{
+  Global strSavedInputPath ; The Global variable that points to the desired save
+  Local data := new KeyValStore(strSavedInputPath)
+  Global strComputerName
+  Global strLocation
+  Global strComputerRole
+  Global bIsWireless
+  Global bIsVerbose
+
+  DoLogging("Loading the saved deployment info from " . strSavedInputPath); 
+
+  strComputerName := data.Get("ComputerName")
+  DoLogging("strComputerName loaded to " strComputerName)
+  strLocation := data.Get("ComputerLocation")
+  DoLogging("strLocation loaded to " strLocation)
+  strComputerRole := data.Get("ComputerRole")
+  DoLogging("strComputerRole loaded to " strComputerRole)
+  bIsWireless := data.Get("WirelessState")
+  DoLogging("bIsWireless loaded to " bIsWireless)
+  bIsVerbose := data.Get("VerboseState")
+  DoLogging("bIsVerbose loaded to " bIsVerbose)
+
+  return
 }
 
 
