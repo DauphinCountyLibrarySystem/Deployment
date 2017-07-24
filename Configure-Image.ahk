@@ -106,50 +106,49 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;===============================================================================
 
 ;Can be removed after Issue #25
-arrAutoLogonUser := {"ESA": "esalogon0"
-              , "KL": "kllogon4"
-              , "MOM": "momlogon3"
-              , "MRL": "mrllogon1"
-              , "AFL": "afllogon2"
-              , "JOH":"johlogon6"
-              , "EV": "evlogon5"
-              , "ND": "ndlogon8" }
+;arrAutoLogonUser := {"ESA": "esalogon0"
+;              , "KL": "kllogon4"
+;              , "MOM": "momlogon3"
+;              , "MRL": "mrllogon1"
+;              , "AFL": "afllogon2"
+;              , "JOH":"johlogon6"
+;              , "EV": "evlogon5"
+;              , "ND": "ndlogon8" }
 
 ;Activation Key for Windows (Pulled from an external file)
-IniRead, strActivationKey
-    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Windows10
+;IniRead, strActivationKey
+;    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Windows10
 
 ;Can be removed after Issue #25
 ;Activation Key for Spiceworks (Pulled from an external file)
-IniRead, strSpiceworksKey
-    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Spiceworks
+;IniRead, strSpiceworksKey
+;    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Keys, Spiceworks
 
 ;
 ;Password for OU (Pulled from external file)
-IniRead, strDomainPassword
-    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, DomainJoin
+;IniRead, strDomainPassword
+;    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, DomainJoin
 
 ;Can be removed after Issue #25
 ;Staff Password for AutoLogon function (Pulled from an external file)
-Local strALPWStaff
-IniRead, strALPWStaff
-    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Staff   
+;IniRead, strALPWStaff
+;    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Staff   
 
 ; Can be Removed After Issue #25
 ;Patron Password for AutoLogon function (Pulled from an external file)
-IniRead, strALPWPatron
-    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Patron
+;IniRead, strALPWPatron
+;    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Patron
 
 ;Can be removed after Issue #25
 ;Catalog Password for AutoLogon function (Pulled from an external file)
-IniRead, strALPWCatalog
-    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Catalog
+;IniRead, strALPWCatalog
+;    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Catalog
 
 ;Admin Credentials for Autologon Function (Pulled from an external file)
-IniRead, strAdminUsername
-    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Usernames, Admin
-IniRead, strAdminPassword
-    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Admin
+;IniRead, strAdminUsername
+ ;   , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Usernames, Admin
+;IniRead, strAdminPassword
+;    , %A_WorkingDir%\Resources\KeysAndPasswords.ini, Passwords, Admin
 
 ;===============================================================================
 ;   GLOBAL VARIABLES, ONEXIT, ETC...
@@ -157,8 +156,14 @@ IniRead, strAdminPassword
 ; Obviously this isn't a very good pattern. I don't really know what other
 ;   symbols are allowed other than dash and period, so...
 Global ValidHostnameRegex := "i)^[a-z0-9]{1}[a-z0-9-\.]{0,14}$"
-Global strResourcesPath := A_ScriptDir . "\Reources"
+Global strResourcesPath := A_ScriptDir . "\Resources"
 Global strSavedInputPath = "DeploymentInfo.xml"
+Global strComputerName
+Global strComputerRole
+Global strLocation
+Global bIsWireless
+Global bIsVerbose
+Global iTotalErrors
 
 DllCall("AllocConsole")
 FileAppend test..., CONOUT$
@@ -256,14 +261,13 @@ __main__:
   DoLogging("")
   DoLogging("__ __main__")
   
-    If (bIsWireless == 1)
-    {
-      Gosub, __subWirelessTasks__ ; FixMe should be changed to WirelessTasks Issue #25
+    If (bIsWireless == 1) {
+      Gosub, __WirelessTasks__ ; FixMe should be changed to WirelessTasks Issue #25
     } 
 
-  Gosub, __subDefaultTasks__ ;Fixeme Should be changed to Default Tasks Issue #25
+  Gosub, __DefaultTasks__ 
   
-  Gosub, __subReboot__
+  Gosub, __Reboot__
 
   Exit 0 ;After it triggers the reboot it should exit the script.
   MsgBox Cthuhlu! ; This should never run!
@@ -271,19 +275,15 @@ __main__:
 
 __afterReboot__:
 {
-  GoSub, oadUserInput__ ; Fixme Can be changed to loadUserInput(); Issue #25
+  loadUserInput()
 
-  Gosub, __subCreateOUPath__ ; Fixe Me can be entirely removed after Issue #25
+  GoSub, __DefaultAfterReboot__
 
-  GoSub, __subDefaultAfterReboot__ ; Fixeme should be changed to DefaultAfterTask
+  GoSub, __SpecificTasks__
 
-  GoSub, __subSpecificTasks__ ;Fix Me should be changed to Specific tasks Issue #25
+  GoSub, __AutoLogon__
 
-  GoSub, __subAddAutoLogon__ ; FixMe should be chagned to AddAutoLogon tasks Issue #25
-
-  GoSub, __subCleanupJobs__
-
-  GoSub, __subFinishAndExit__
+  GoSub, __Finish__
 
   DoLogging(" Advancing to task reserved for after the reboot.")
 
@@ -300,14 +300,14 @@ __afterReboot__:
 loadUserInput()
 {
   Global strSavedInputPath ; The Global variable that points to the desired save
-  Local data := new KeyValStore(strSavedInputPath)
+  Global data := new KeyValStore(strSavedInputPath)
   Global strComputerName
   Global strLocation
   Global strComputerRole
   Global bIsWireless
   Global bIsVerbose
 
-  DoLogging("Loading the saved deployment info from " . strSavedInputPath); 
+  DoLogging("Loading the saved deployment info from " . strSavedInputPath)
 
   strComputerName := data.Get("ComputerName")
   DoLogging("strComputerName loaded to " strComputerName)
@@ -333,4 +333,10 @@ MsgBox Cthuhlu! ; This should never run!
 #Include, labels.ahk
 #Include, DynamicCommand.ahk
 #Include, KeyValStore.ahk
-
+#Include, Finish.ahk
+#Include, DefaultAfterReboot.ahk
+#Include, SpecificTasks.ahk
+#Include, AutoLogon.ahk
+#Include, Reboot.ahk
+#Include, DefaultTasks.ahk
+#Include, WireLessTasks.ahk

@@ -418,7 +418,7 @@ __subAddAutoLogon__:
 MsgBox Cthuhlu! ; This should never run!
 
 
-__subCleanupJobs__:
+__subCleanupJobs2__:
 {  
   DoLogging(" ")
   DoLogging("__ __subCleanupJobs__")
@@ -518,7 +518,7 @@ __subLoadUserInput__:
 
 __subDefaultAfterReboot__:
 {
-  DoLogging("Joins the domain and installs LogMeIng")
+  DoLogging("Joins the domain and installs LogMeIn")
   arrDefaultTaskListAR := []  
   ;Adds computer to Domain
   arrDefaultTaskListAR.Insert("powershell.exe -Command ""& { "
@@ -532,7 +532,7 @@ __subDefaultAfterReboot__:
   iTotalErrors += DoExternalTasks(arrDefaultTaskListAR, bIsVerbose)
   Return
 }
-__subFinishAndExit__:
+__subFinishAndExit2__:
 {
   If (iTotalErrors > 0) ; Final check for errors and closes program.
   {

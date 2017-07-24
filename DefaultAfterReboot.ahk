@@ -1,4 +1,6 @@
-__subDefaultAfterReboot__:
+#Include, SecondFunctions.ahk
+
+__DefaultAfterReboot__:
 {
 	JoinDomain()
 	InstallLogMeIn()
@@ -8,8 +10,6 @@ __subDefaultAfterReboot__:
 
 JoinDomain()
 {
-	Local strDomainPassword
-	Local strFinalOuPath = CreateOUPath()
 
 	IniRead, strDomainPassword										; Variable
 		, %A_WorkingDir%\Resources\KeysAndPasswords.ini 			; File
@@ -19,29 +19,37 @@ JoinDomain()
 	;Adds computer to Domain
 	ExecuteExternalCommand("powershell.exe -Command ""& { "
 		. " Start-Sleep -s 3; "
-		. " `$pass `= ConvertTo-SecureString -String "strDomainPassword 
+		. " `$pass `= ConvertTo-SecureString -String " . strDomainPassword 
 		. " -AsPlainText -Force; "
 		. " `$mycred `= New-Object -TypeName "
 		. " System.Management.Automation.PSCredential "
 		. " -ArgumentList unattend,`$pass; "
 		. " Add-Computer  -DomainName dcls.org -Credential `$mycred "
-		. " -OUPath '"strFinalOUPath . "' -Force -PassThru }""")
+		. " -OUPath '" . CreateOUPath() . "' -Force -PassThru }""")
 
 	return
 }
 
 InstallLogMeIn()
 {
-	ExecuteExternalCommand("msiexec.exe /i \Resources\Installers\_LogMeIn.msi "
-		. " /quiet /norestart /log \logmein_install.log")
+	Global strResourcesPath
+
+	ExecuteExternalCommand("msiexec.exe /i " . strResourcesPath . "\Installers\_LogMeIn.msi "
+    	. " /quiet /norestart /log "A_ScriptDir . "\logmein_install.log")
 
 	return
 }
 
+;===============================================================================
+;
+;
+;===============================================================================
 CreateOUPath()
 {
+	Global iTotalErrors
 	Global strLocation
-	Local strOUPath
+	;Local strOUPath
+
 	DoLogging("ii Creating distinguished name for domain join...")
 	Try {
 		If (strComputerRole == "Office")
@@ -68,11 +76,11 @@ CreateOUPath()
 			strOUPath := "OU=Self Service,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
 		If (strComputerRole == "LPT Kiosk")
 			strOUPath := "OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
-		DoLogging("ii Distinguished Name: "strFinalOUPath)
+		DoLogging("ii Distinguished Name: " . strOUPath)
 	} Catch {
 		DoLogging("!! Failure to create distinguished name!")
-		vNumErrors += 1
+		iTotalErrors++
 	}
 
-	Return strFinalOUPath
+	Return strOUPath
 }

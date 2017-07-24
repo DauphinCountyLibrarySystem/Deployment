@@ -1,4 +1,4 @@
-﻿Include, SecondFunctions.ahk
+﻿#Include, SecondFunctions.ahk
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn  ; Enable warnings to assist with detecting common errors.
@@ -15,7 +15,7 @@ __WirelessTasks__:
 	DoLogging(" ")
 
 	AddWirelessProfile()
-	InstallSpiceWorksAgent();
+	InstallSpiceWorksAgent()
 	
 	DoLogging("ii sleep for 3 seconds before testing wireless")
 	Sleep 3000 ; for some odd reason, WaitForPing(30) seems to fail after only 15 pings. Here's a minimum time to wait to possibly allow the adapter to "catch up".
@@ -45,7 +45,7 @@ AddWirelessProfile()
 InstallSpiceWorksAgent()
 {
 	DoLogging("Installing SpiceWorks Agent")
-	Local strSpiceworksKey
+	;Local strSpiceworksKey
 
 	;Activation Key for Spiceworks (Pulled from an external file)
 	IniRead, strSpiceworksKey										; Variable

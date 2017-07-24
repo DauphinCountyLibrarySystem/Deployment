@@ -1,4 +1,5 @@
-﻿Include, SecondFunctions
+﻿#Include, SecondFunctions.ahk
+#Include, functions.ahk
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn  ; Enable warnings to assist with detecting common errors.
@@ -6,14 +7,14 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 
-__AddAutoLogon__:
+__AutoLogon__:
 {
 	DoLogging(" ")
 	DoLogging("===============================================================")
 	DoLogging("		Starting AddAutoLogon for Role:" . strComputerRole)
 	DoLogging("===============================================================")
 	DoLogging(" ")
-	DoLogging("ii create AutoLogon profile for certain roles...")
+
 	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 
 	; because Office machines don't auto-logon
@@ -40,9 +41,11 @@ MsgBox Cthuhlu! ; This should never run!
 ; Office Computers to not support Auto Logon, so this just removes Auto Logon.
 ;
 ;===============================================================================
-OfficeAutoLogon ()
+OfficeAutoLogon()
 {
+	DoLogging("Configuring for Office Auto Logon")
 	RemoveAutoLogon()
+
 	return
 }
 
@@ -53,11 +56,13 @@ OfficeAutoLogon ()
 ; user from the KeysAndPasswords.ini.
 ;
 ;===============================================================================
-FrontLineAutoLogon () 
+FrontLineAutoLogon() 
 {
+	DoLogging("Configuring for Front Line Auto Logon")
 	Global strLocation
+	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 	; The Default Usernames for each Location
-	Local arrAutoLogonUser := {"ESA": "esalogon0"
+	arrAutoLogonUser := {"ESA": "esalogon0"
 							, "KL": "kllogon4"
 							, "MOM": "momlogon3"
 							, "MRL": "mrllogon1"
@@ -65,9 +70,9 @@ FrontLineAutoLogon ()
 							, "JOH":"johlogon6"
 							, "EV": "evlogon5"
 							, "ND": "ndlogon8" }
-	Local strAutoLogonUser := arrAutoLogonUser[strLocation]
+	strAutoLogonUser := arrAutoLogonUser[strLocation]
 	;Staff Password for AutoLogon function (Pulled from an external file)
-	Local strALPWStaff
+
 	IniRead, strALPWStaff											; Variable
 			, %A_WorkingDir%\Resources\KeysAndPasswords.ini 		; File
 			, Passwords 											; Section
@@ -80,7 +85,7 @@ FrontLineAutoLogon ()
 		, "dcls\" . strAutoLogonUser])
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%
+		, strWinLogon
 		, "DefaultPassword"
 		, strALPWStaff])
 
@@ -93,10 +98,13 @@ FrontLineAutoLogon ()
 ; UserName is just the Location + "-Patron". It then reads that password in from 
 ; the KeysAndPasswords.ini. 
 ;===============================================================================
-PatronAutoLogon
+PatronAutoLogon()
 {
+	DoLogging("Configuring for Patron Auto Logon")
+
 	Global strLocation
-	Local strALPWPatron
+	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+
 	;Patron Password for AutoLogon function (Pulled from an external file)
 	IniRead, strALPWPatron											; Variable
     	, %A_WorkingDir%\Resources\KeysAndPasswords.ini 			; File
@@ -104,12 +112,12 @@ PatronAutoLogon
 
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%
+		, strWinLogon
 		, "DefaultUserName"
 		, "dcls\" . strLocation . "-PATRON"])
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%
+		, strWinLogon
 		, "DefaultPassword"
 		, strALPWPatron])
 
@@ -122,9 +130,11 @@ PatronAutoLogon
 ; computers use the username "esacatalog". The password for this account is read
 ; in from the KeysAndPasswords.ini
 ;===============================================================================
-CatalogAutoLogon
+CatalogAutoLogon()
 {
-	Local strALPWCatalog
+	DoLogging("Configuring for Catalog Auto Logon")
+
+	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 	;Catalog Password for AutoLogon function (Pulled from an external file)
 	IniRead, strALPWCatalog
 		, %A_WorkingDir%\Resources\KeysAndPasswords.ini
@@ -133,12 +143,12 @@ CatalogAutoLogon
 
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%
+		, strWinLogon
 		, "DefaultUserName"
 		, "dcls\esacatalog"])
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%"
+		, strWinLogon
 		, "DefaultPassword"
 		, strALPWCatalog])
 
@@ -149,20 +159,23 @@ CatalogAutoLogon
 ;							Enable Auto Logon
 ; This function Enables AutLogon.
 ;===============================================================================
-EnableAutoLogon ()
+EnableAutoLogon()
 {
+	DoLogging("Enabling Auto Logon")
+
+	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%
+		, strWinLogon
 		, "AutoAdminLogon"
 		, "1"])
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%
+		, strWinLogon
 		, "DefaultDomainName"
 		, "dcls.org"])
 	ExecuteInternalCommand(["RegDelete"
-		, %strWinLogon%
+		, strWinLogon
 		, "AutoLogonCount"])
 
 	return
@@ -175,28 +188,31 @@ EnableAutoLogon ()
 ;===============================================================================
 RemoveAutoLogon()
 {
+	DoLogging("Disabling autologn")
+
+	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%
+		, strWinLogon
 		, "AutoAdminLogon"
 		, "0"])
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%
+		, strWinLogon
 		, "DefaultDomainName"
 		, "dcls.org"])
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%
+		, strWinLogon
 		, "DefaultUserName"
 		, " "])
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, %strWinLogon%
+		, strWinLogon
 		, "DefaultPassword"
 		, " "])
 	ExecuteInternalCommand(["RegDelete"
-		, %strWinLogon%
+		, strWinLogon
 		, "AutoLogonCount"])
 
 	return

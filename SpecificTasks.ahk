@@ -1,4 +1,4 @@
-#Include, SecondFunctions ; This file will be renamed at some point 
+#Include, SecondFunctions.ahk ; This file will be renamed at some point 
 
 ;======================================||=======================================
 ;								 Specific Tasks
@@ -45,6 +45,7 @@ MsgBox SpecificTasks overran ; This code should never run
 OfficeTasks() 
 {
 	;This section of OfficeTasks handles the installation of the programs
+	Global strResourcesPath
 
 	; Moves the Seirra Portable app to C: drive
 	ExecuteExternalCommand("robocopy " 								; Command
@@ -64,9 +65,10 @@ OfficeTasks()
 		. " /s /UNILOG+:C:\Deployment\robocopy_Printers.log")		; Options
 
 	;This section handles different Windows tasks
-	local strOfficePath := C:\Program Files (x86)\Microsoft Office\root\Office16
-	local strPublicDesktop := C:\Users\Public\Desktop
-	local strDefaultDesktop := C:\Users\Default\Desktop
+	;These variables will be local
+	strOfficePath := "C:\Program Files (x86)\Microsoft Office\root\Office16"
+	strPublicDesktop := "C:\Users\Public\Desktop"
+	strDefaultDesktop := "C:\Users\Default\Desktop"
 
 	; Notes about Public vs Default Desktop
 	; Public Desktop:
@@ -193,7 +195,7 @@ OfficeTasks()
 FrontLineTasks() 
 {
 	;This section of FrontLineasks handles the installation of the programs
-
+	Global strResourcesPath
 	; Moves the Seirra Portable app from Source to Dest 
 	ExecuteExternalCommand("robocopy "								; Command
 		. strResourcesPath . "\Sierra Desktop App"""				; Source
@@ -216,7 +218,7 @@ FrontLineTasks()
 	ExecuteExternalCommand(strResourcesPath . "\Installers\_PCReservationStation.exe /S")
 
 	createFrontLineEwareConfig(strLocation)
-	local strPCResPath = "C:\ProgramData\EnvisionWare\PC Reservation"
+	strPCResPath = "C:\ProgramData\EnvisionWare\PC Reservation"
 	; Moves the Config File to the proper location
 	ExecuteExternalCommand("robocopy "								; Command
 		. strResourcesPath . "\EwareConfig"							; Source
@@ -234,8 +236,8 @@ FrontLineTasks()
 		. " /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")		; Options
 
 	;This section handles different Windows tasks
-	local strPublicDesktop := C:\Users\Public\Desktop
-	local strDefaultDesktop := C:\Users\Default\Desktop
+	strPublicDesktop := "C:\Users\Public\Desktop"
+	strDefaultDesktop := "C:\Users\Default\Desktop"
 
 	; Notes about Public vs Default Desktop
 	; Public Desktop:
@@ -323,8 +325,12 @@ FrontLineTasks()
 PatronTasks()
 {
 	;This section of PatronTasks handles the installation of the programs
-
+	Global strResourcesPath
 	; Copy PatronAdminPanel from Source to Dest
+	IniRead, strEwareServer
+		, %A_WorkingDir%\Resources\Servers.ini
+		, Servers
+		, %strLocation%
 	ExecuteExternalCommand("robocopy "								; Command
 		. A_ScriptDir . "\Resources\PatronAdminPanel "				; Source
 	  	. " C:\PatronAdminPanel "									; Dest
@@ -337,7 +343,6 @@ PatronTasks()
 	If (strLocation == "VAN") {
 		; Do Nothing
 	} Else {
-		local strPCResPath = "C:\ProgramData\EnvisionWare\PC Reservation"
 		; Installs the envisionware Client
 		ExecuteExternalCommand(strResourcesPath "\Installers"
 			. "\_PCReservationClient.exe /S") 
@@ -345,8 +350,9 @@ PatronTasks()
 		;This is the actual command that specifies the IP and port
 		createPatronEwareConfig(strLocation)
 		ExecuteExternalCommand("robocopy "							; Command
-			. A_ScriptDir . "\Resources\EwareConfig"				; Source
-			. " """ . strPCResPath . "\Client Module\config"""		; Dest
+			. """" . A_ScriptDir . "\Resources\EwareConfig """		; Source
+			. " ""C:\ProgramData\EnvisionWare\PC Reservation"		; Dest
+			. "\Client Module\config"""								; Dest cont
 			. " /mov")												; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
 		
 		; Patron printers.
@@ -359,9 +365,9 @@ PatronTasks()
 		. " envisionware.lic " ; Will Only Copy this File 			; Options					
 		. " /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")		; Options
 
-	local strOfficePath := C:\Program Files (x86)\Microsoft Office\Office16
-	local strPublicDesktop := C:\Users\Public\Desktop
-	local strDefaultDesktop := C:\Users\Default\Desktop
+	strOfficePath := "C:\Program Files (x86)\Microsoft Office\Office16"
+	strPublicDesktop := "C:\Users\Public\Desktop"
+	strDefaultDesktop := "C:\Users\Default\Desktop"
 
 
 	; Notes about Public vs Default Desktop
@@ -424,11 +430,12 @@ PatronTasks()
 ; one task.
 ;
 ;======================================||=======================================
-CatalogTask()
+CatalogTasks()
 {
+	Global strResourcesPath
 	; Moves the Encore Always Files from Source to Dest 
     ExecuteExternalCommand("robocopy "							; Command
-    	. strResourcesPath ."\EncoreAlways\ "					; Source
+    	. strResourcesPath . "\EncoreAlways "					; Source
     	. " C:\EncoreAlways "									; Dest
     	. "/s /UNILOG+:C:\Deployment\robocopy.log")  			; Options
 }
