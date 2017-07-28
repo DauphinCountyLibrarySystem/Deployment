@@ -254,10 +254,6 @@ MsgBox Cthuhlu! ; This should never run!
 ; if we're in __main__, we should have all the input we need from the user.
 __main__:
 {
-  If (strComputerRole == "Self-Check" || strComputerRole == "Kiosk") {
-    MsgBox, "The Self-Check role is not currently Supported."
-    ExitApp, 1
-  }
   DoLogging("")
   DoLogging("__ __main__")
   

@@ -6,6 +6,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ExecuteExternalCommand(task) 
 {
+  Global iTotalErrors
   Global bIsVerbose
   Try {
     If (bIsVerbose == 1) {
@@ -29,7 +30,7 @@ ExecuteExternalCommand(task)
     }
     DoLogging("")
   } Catch {
-    iTaskErrors += 1
+    iTotalErrors++
     DoLogging("!! Error attempting External Task: "Task . "!")
   }
 }
@@ -38,7 +39,6 @@ ExecuteInternalCommand(task)
 {
   Global bIsVerbose
   Global iTotalErrors
-  iTaskErrors := 0
   ; parse!
   Try {
     strParams := ""
@@ -73,6 +73,7 @@ ExecuteInternalCommand(task)
     iTotalErrors++
     DoLogging("!! Error during parsing!")
   }
-  Return iTaskErrors
+
+  return
 }
 

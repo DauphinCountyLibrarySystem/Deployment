@@ -46,7 +46,7 @@ ProcessExist(Name)
 ; execute each of the commands. It will log each attempt.
 DoExternalTasks(arrTasks, Verbosity) 
 {
-  iTaskErrors := 0
+  Global iTotalErrors
   Loop % arrTasks.MaxIndex()
   {
     Task := arrTasks[A_Index]
@@ -75,18 +75,18 @@ DoExternalTasks(arrTasks, Verbosity)
       }
       DoLogging("")
     } Catch {
-      iTaskErrors += 1
+      iTotalErrors++
       DoLogging("!! Error attempting External Task: "Task . "!")
     }
   }
-  Return iTaskErrors
+  Return
 }
 
 ; Loops through the provided array of commands (arrTasks) and attempts to
 ; execute each of the commands. It will log each attempt.
 DoInternalTasks(arrTasks, Verbosity) 
 {
-  iTaskErrors := 0
+  Global iTotalErrors
   ; parse!
   Try {
     Loop % arrTasks.MaxIndex()
@@ -117,15 +117,16 @@ DoInternalTasks(arrTasks, Verbosity)
         #(Task[1], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10]
           , P[11], P[12], P[13], P[14], P[15], P[16], P[17], P[18], P[19])
       } Catch {
-        iTaskErrors += 1
+        iTotalErrors++
         DoLogging("!! Error attempting Internal Task: "Output . "A_LastError: " . A_LastError)
       }
     }
   } Catch {
-    iTaskErrors += 1
+    iTotalErrors++
     DoLogging("!! Error during parsing!")
   }
-  Return iTaskErrors
+
+  Return
 }
 
 ExitFunc(ExitReason, ExitCode) ; Checks and logs various unusual program closures.

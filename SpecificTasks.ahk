@@ -26,9 +26,9 @@ __SpecificTasks__:
 	} Else If (strComputerRole == "Catalog") {
 		CatalogTasks()
 	} Else If (strComputerRole == "Self-Check") {
-		SelfCheckTasks();
+		SelfCheckTasks()
 	} Else If (strComputerRole == "Kiosk") {
-
+		KioskTasks()
 	}
 
 	Return
@@ -221,8 +221,9 @@ FrontLineTasks()
 	; Install Reservation Station
 	ExecuteExternalCommand(strResourcesPath . "\Installers\_PCReservationStation.exe /S")
 
+	;Check that this is not needed to be changed to be a staff controlled computer
 	createFrontLineEwareConfig(strLocation)
-	strPCResPath = "C:\ProgramData\EnvisionWare\PC Reservation"
+	strPCResPath := "C:\ProgramData\EnvisionWare\PC Reservation"
 	; Moves the Config File to the proper location
 	ExecuteExternalCommand("robocopy "								; Command
 		. strResourcesPath . "\EwareConfig"							; Source
@@ -236,7 +237,8 @@ FrontLineTasks()
 	;Envisionware License
 	ExecuteExternalCommand("robocopy "								; Command
 		. strResourcesPath											; Source
-		. " ""C:\Program Files (x86)\EnvisionWare"" envisionware.lic" ; Dest
+		. " ""C:\Program Files (x86)\EnvisionWare"""				; Dest
+		. " envisionware.lic" ;Copies only this file 				; Option
 		. " /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")		; Options
 
 	;This section handles different Windows tasks
@@ -361,12 +363,13 @@ PatronTasks()
 		
 		; Patron printers.
 		ExecuteExternalCommand(strResourcesPath . "\Installers\_LPTOneClient.exe"
-			. " /S -jqe.host`=" . strEwareServer) 
+			. " /S -host`:" . strEwareServer) 
+
 	}
-	arrSpecificTaskList.Insert("robocopy "							; Command
+	ExecuteExternalCommand("robocopy "								; Command
 		. strResourcesPath 											; Source
 		. """C:\Program Files (x86)\EnvisionWare"""					; Dest
-		. " envisionware.lic " ; Will Only Copy this File 			; Options					
+		. " envisionware.lic " ; Will Only Copy this File 			; Options
 		. " /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")		; Options
 
 	strOfficePath := "C:\Program Files (x86)\Microsoft Office\Office16"
@@ -452,8 +455,25 @@ CatalogTasks()
 SelfCheckTasks()
 {
 	DoLogging("Configuring Self Check Tasks")
-	;Run EnvisionWare OneStop
+
+	Global strResourcesPath
+	strInstallersPath :=  strResourcesPath . "\Installers"
+	
+	ExecuteExternalCommand(strInstallersPath . "\_SelfCheckoout.exe /S")
+
+	;Move the License
+	;Envisionware License
+	ExecuteExternalCommand("robocopy "								; Command
+		. strResourcesPath 											; Source
+		. """C:\Program Files (x86)\EnvisionWare"""					; Dest
+		. " envisionware.lic " ; Will Only Copy this File 			; Options
+		. " /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")		; Options
+
 	;Check the OneStop configure found on one note
+	;this definetly will need config
+	;Config will be in custom_text_en_us.js
+	;ewSelfCheck.ewp
+	;may need to change it to auto start but not sure. 
 }
 
 
@@ -465,6 +485,79 @@ SelfCheckTasks()
 KioskTasks()
 {
 	DoLogging("Configuring Kiosk Tasks")
+	IniRead, strEwareServer
+		, %A_WorkingDir%\Resources\Servers.ini
+		, Servers
+		, %strLocation%
 	;Check OneNote / GitHub to see if there are more details on what this has 
 	;installed
+
+	; Install Reservation Station
+	ExecuteExternalCommand(strResourcesPath . "\Installers\_PCReservationStation.exe /S")
+
+	createFrontLineEwareConfig(strLocation)
+	strPCResPath := "C:\ProgramData\EnvisionWare\PC Reservation"
+	; Moves the Config File to the proper location
+	ExecuteExternalCommand("robocopy "								; Command
+		. strResourcesPath . "\EwareConfig"							; Source
+		. " """ . strPCResPath . "\Reservation Station\config""" 	; Dest
+		. " /mov")													; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
+	ExecuteExternalCommand("del ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\PC Reservation Reservation Station.lnk""")
+
+	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers\_InstallAAM.exe /S")
+
+	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers\mysql-connector-odbc-5.3.2-win32.msi /passive")
+	; Install staff Print Release Terminal.
+	; Because fuck all logic EnvisionWare does not allow you to silently
+	; install a configure system. So instead the installation for Printer thing
+	; Will actually have to happen in two steps. First step does the silent del
+	; install second step will robocopy things over that we needed to configure
+	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers"
+		. "\_LPTOnePrintRelease.exe /S host`=" . strEwareServer)
+	;LPTOne cannot connect to JQE? may need to robocopy in a config
+	ExecuteExternalCommand("del ""C:\Users\Public\Desktop\LPT One Print Release"
+		. " Terminal.lnk""")
+
+	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\lptPRT.exe 	; Target
+		, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk ; Link Frenameile
+		, ; Standard Working directory							; WorkingDirr
+		, -host:%strEwareServer% -runmode:prompt				; Args 
+		, Launch LPT One Print Release Terminal					; Description
+		, ; Takes icon from file								; Icon
+		, ; No Shortcut Key										; Shortcut Key
+		, 1														; Icon Number
+		, 1														; Run State
+	
+	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk 	; Target
+		, C:\Users\Public\Desktop\LPT One Print Realease Terminal.lnk ; Link Frenameile
+		, ; Standard Working directory							; WorkingDirr
+		, 														; Args 
+		, Launch LPT One Print Release Terminal					; Description
+		, ; Takes icon from file								; Icon
+		, ; No Shortcut Key										; Shortcut Key
+		, 1														; Icon Number
+		, 1														; Run State
+	ExecuteExternalCommand("robocopy "								; Command
+		. """" . strResourcesPath . "\Launch Command"""				; Source
+		. " C:\" 													; Dest
+		. " /e /is /move")											; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
+
+	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\ewLaunch\ewlaunch.exe	; Target
+		, C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\ewLaunch.lnk ; Link Frenameile
+		, ; Standard Working directory							; WorkingDirr
+		, ; No Arguments										; Args 
+		, Launch ewLaunch kiosk controller						; Description
+		, ; Takes icon from file								; Icon
+		, ; No Shortcut Key										; Shortcut Key
+		, 1														; Icon Number
+		, 1														; Run State
+	
+
+
+
+	;Installing kiosk is the prolly the most complex task we Have
+	;Need to install all the things from kiosk folder
+	;With some interesting configuring
+	; then drop the Program Files, and ProgramData files
+	;Lastly we drop the files fromt he Dauphion County file in the ewLaunch/Menus
 }

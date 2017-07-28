@@ -15,8 +15,6 @@ __AutoLogon__:
 	DoLogging("===============================================================")
 	DoLogging(" ")
 
-	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
-
 	; because Office machines don't auto-logon
 	If (strComputerRole == "Office") {
 		OfficeAutoLogon()
@@ -28,6 +26,10 @@ __AutoLogon__:
 			PatronAutoLogon()
 		} Else If (strComputerRole == "Catalog") {
 			CatalogAutoLogon()
+		} Else If (strComputerRole == "Self-Check") {
+			SelfCheckAutoLogon()
+		} Else If (strComputerRole == "Kiosk") {
+			KioskAutoLogon()			
 		}
 	}
 
@@ -60,7 +62,7 @@ FrontLineAutoLogon()
 {
 	DoLogging("Configuring for Front Line Auto Logon")
 	Global strLocation
-	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+	strWinLogon := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 	; The Default Usernames for each Location
 	arrAutoLogonUser := {"ESA": "esalogon0"
 							, "KL": "kllogon4"
@@ -80,7 +82,7 @@ FrontLineAutoLogon()
 	
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
-		, 
+		, strWinLogon
 		, "DefaultUserName"
 		, "dcls\" . strAutoLogonUser])
 	ExecuteInternalCommand(["RegWrite"
@@ -103,12 +105,13 @@ PatronAutoLogon()
 	DoLogging("Configuring for Patron Auto Logon")
 
 	Global strLocation
-	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+	strWinLogon := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 
 	;Patron Password for AutoLogon function (Pulled from an external file)
 	IniRead, strALPWPatron											; Variable
-    	, %A_WorkingDir%\Resources\KeysAndPasswords.ini 			; File
-    	, Patron 													; Key
+		, %A_WorkingDir%\Resources\KeysAndPasswords.ini 			; File
+		, Passwords
+		, Patron 													; Key
 
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
@@ -122,6 +125,34 @@ PatronAutoLogon()
 		, strALPWPatron])
 
 	return
+}
+
+SelfCheckAutoLogon()
+{
+	DoLogging("Self-Check Auto Logon is not configured yet")
+}
+
+KioskAutoLogon()
+{
+	DoLogging("Configuring Kiosk Auto Logon")
+
+	Global strLocation
+	strWinLogon := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+	IniRead, strKioskPass											; Variable
+		, %A_WorkingDir%\Resources\KeysAndPasswords.ini 			; File
+		, Passwords
+		, Kiosk 													; Key
+	ExecuteInternalCommand(["RegWrite"
+		, "REG_SZ"
+		, strWinLogon
+		, "DefaultUserName"
+		, "envkiosk"])
+	ExecuteInternalCommand(["RegWrite"
+		, "REG_SZ"
+		, strWinLogon
+		, "DefaultPassword"
+		, strKioskPass])
+
 }
 
 ;===============================================================================
@@ -163,7 +194,7 @@ EnableAutoLogon()
 {
 	DoLogging("Enabling Auto Logon")
 
-	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+	strWinLogon = HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
 		, strWinLogon

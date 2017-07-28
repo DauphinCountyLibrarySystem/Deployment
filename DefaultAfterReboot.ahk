@@ -2,6 +2,13 @@
 
 __DefaultAfterReboot__:
 {
+	DoLogging(" ")
+	DoLogging("===============================================================")
+	DoLogging("		Starting DefaultAfterReboot Operation")
+	DoLogging("===============================================================")
+	DoLogging(" ")
+
+
 	JoinDomain()
 	InstallLogMeIn()
 
@@ -10,6 +17,7 @@ __DefaultAfterReboot__:
 
 JoinDomain()
 {
+	DoLogging("Joining the Domain")
 
 	IniRead, strDomainPassword										; Variable
 		, %A_WorkingDir%\Resources\KeysAndPasswords.ini 			; File
@@ -27,6 +35,7 @@ JoinDomain()
 		. " Add-Computer  -DomainName dcls.org -Credential `$mycred "
 		. " -OUPath '" . CreateOUPath() . "' -Force -PassThru }""")
 
+	DoLogging("")
 	return
 }
 
@@ -72,9 +81,9 @@ CreateOUPath()
 			strOUPath := "OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
 		If (strComputerRole == "Catalog")
 			strOUPath := "OU=Catalog,OU=Patron,OU=DCLS,DC=dcls,DC=org"
-		If (strComputerRole == "Self Checkout")
+		If (strComputerRole == "Self-Check")
 			strOUPath := "OU=Self Service,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
-		If (strComputerRole == "LPT Kiosk")
+		If (strComputerRole == "Kiosk")
 			strOUPath := "OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
 		DoLogging("ii Distinguished Name: " . strOUPath)
 	} Catch {
