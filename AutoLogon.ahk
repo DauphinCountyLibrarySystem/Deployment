@@ -133,20 +133,20 @@ SelfCheckAutoLogon()
 
 	Global strLocation
 	strWinLogon := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
-	IniRead, strSelfCheckPass											; Variable
-		, %A_WorkingDir%\Resources\KeysAndPasswords.ini 				; File
+	IniRead, strKioskPass											; Variable
+		, %A_WorkingDir%\Resources\KeysAndPasswords.ini 			; File
 		, Passwords
-		, SelfCheck 													; Key
+		, Kiosk 													; Key
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
 		, strWinLogon
 		, "DefaultUserName"
-		, "Self-Check"])
+		, "envkiosk"])
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
 		, strWinLogon
 		, "DefaultPassword"
-		, strSelfCheckPass])
+		, strKioskPass])
 
 KioskAutoLogon()
 {
