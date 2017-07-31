@@ -51,7 +51,7 @@ __Reboot__:
 		, "AutoLogonCount", 0x00000001])
 	iTotalErrors += DoInternalTasks(arrAddAutoLogonList, bIsVerbose)
 
-	Run %comspec% /c "shutdown.exe /r /t 3" ;Restarts after 3 seconds
+	Run %comspec% /c "shutdown.exe /r /t 0" ;Restarts after 3 seconds
 	
 	Return
 }
