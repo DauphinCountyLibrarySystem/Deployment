@@ -129,8 +129,24 @@ PatronAutoLogon()
 
 SelfCheckAutoLogon()
 {
-	DoLogging("Self-Check Auto Logon is not configured yet")
-}
+	DoLogging("Configuring Self-Check Auto Logon")
+
+	Global strLocation
+	strWinLogon := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+	IniRead, strSelfCheckPass											; Variable
+		, %A_WorkingDir%\Resources\KeysAndPasswords.ini 				; File
+		, Passwords
+		, SelfCheck 													; Key
+	ExecuteInternalCommand(["RegWrite"
+		, "REG_SZ"
+		, strWinLogon
+		, "DefaultUserName"
+		, "Self-Check"])
+	ExecuteInternalCommand(["RegWrite"
+		, "REG_SZ"
+		, strWinLogon
+		, "DefaultPassword"
+		, strSelfCheckPass])
 
 KioskAutoLogon()
 {
@@ -221,7 +237,7 @@ RemoveAutoLogon()
 {
 	DoLogging("Disabling autologn")
 
-	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+	strWinLogon := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
 		, strWinLogon
