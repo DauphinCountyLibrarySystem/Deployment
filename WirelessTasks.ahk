@@ -30,9 +30,10 @@ __WirelessTasks__:
 AddWirelessProfile()
 {
 	DoLogging("Adding the Wireless Profile")
+	Global strResourcesPath
 
 	; Install wireless profile
-	ExecuteExternalCommand("netsh wlan add profile filename`="strResourcesPath 
+	ExecuteExternalCommand("netsh wlan add profile filename`=" . strResourcesPath 
 		. "\WirelessProfile-dclsstaff.xml user`=all") 
 
 	return
@@ -53,9 +54,9 @@ InstallSpiceWorksAgent()
 		, Keys 														; Section
 		, Spiceworks 												; Key
 	ExecuteExternalCommand("msiexec.exe "
-		. "/i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi " 
-		. " SPICEWORKS_SERVER`=""spiceworks.dcls.org"" 
-		. " SPICEWORKS_AUTH_KEY`=""" . strSpiceworksKey . """ 
+		. " /i "A_ScriptDir . "\Resources\Installers\_Spiceworks.msi " 
+		. " SPICEWORKS_SERVER`=""spiceworks.dcls.org"" "
+		. " SPICEWORKS_AUTH_KEY`=""" . strSpiceworksKey . """ "
 		. " SPICEWORKS_PORT=443 "
 		. " /quiet /norestart /log "A_ScriptDir . "\Spiceworks_install.log") 
 
