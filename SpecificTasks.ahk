@@ -68,6 +68,12 @@ OfficeTasks()
 		. " C:\Users\Default\Desktop\Printers" 						; Dest
 		. " /s /UNILOG+:C:\Deployment\robocopy_Printers.log")		; Options
 
+	FileCreateDir, C:\IT\Icons
+	ExecuteExternalCommand("robocopy "
+		. strResourcesPath . "\shortcuts "
+		. " C:\IT\Icons"
+		. " /s /UNILOG+:C:\Deployment\robocopy_icons.log")
+
 	;This section handles different Windows tasks
 	;These variables will be local
 	strOfficePath := "C:\Program Files (x86)\Microsoft Office\root\Office16"
@@ -99,7 +105,7 @@ OfficeTasks()
 		, ; Standard Working directory							; WorkingDirr
 		, ; No Arguments										; Args 
 		, Launch the ADP Website								; Description
-		, C:\Icons\adp.ico 										; Icon
+		, C:\IT\Icons\adp.ico 			; Icon
 		, ; No Shortcut Key										; Shortcut Key
 		, 1														; Icon Number
 		, 1														; Run State
@@ -109,7 +115,7 @@ OfficeTasks()
 		, ; Standard Working directory							; WorkingDir
 		, ; No Arguments										; Args 
 		, Launch the Help Desk Portal							; Description 
-		, C:\Icons\helpdeskportal.ico 							; Icon
+		, C:\IT\Icons\spiceworks.ico		; Icon
 		, ; No Shortcut Key										; Shortcut Key
 		, 1														; Icon Number
 		, 1														; Run State
@@ -119,12 +125,12 @@ OfficeTasks()
 		, C:\Sierra Desktop App									; WorkingDir
 		, ; No Arguments										; Args 
 		, Launch the Sierra Desktop App							; Description
-		, C:\Icons\sierra.ico 									; Icon
+		, C:\IT\Icons\Sierra.ico			; Icon
 		, ; No Shortcut Key										; Shortcut Key
 		, 1														; Icon Number
 		, 1														; Run State
 
-	FileCreateShortcut, %officePath%\WINWORD.EXE				; Target
+	FileCreateShortcut, %strOfficePath%\WINWORD.EXE				; Target
 		, C:\Users\Default\Desktop\Word 2016.lnk				; Link File
 		, ; Standard Working directory							; WorkingDir
 		, ; No Arguments										; Args 
@@ -134,7 +140,7 @@ OfficeTasks()
 		, 1														; Icon Number
 		, 1														; Run State
 
-	FileCreateShortcut, %officePath%\EXCEL.EXE					; Target
+	FileCreateShortcut, %strOfficePath%\EXCEL.EXE					; Target
 		, C:\Users\Default\Desktop\Excel 2016.lnk				; Link File
 		, ; Standard Working directory							; WorkingDir
 		, ; No Arguments										; Args 
@@ -144,7 +150,7 @@ OfficeTasks()
 		, 1														; Icon Number
 		, 1														; Run State
 
-	FileCreateShortcut, %officePath%\POWERPNT.EXE				; Target
+	FileCreateShortcut, %strOfficePath%\POWERPNT.EXE				; Target
 		, C:\Users\Default\Desktop\PowerPoint 2016.lnk			; Link File
 		, ; Standard Working directory							; WorkingDir
 		, 														; Args
@@ -154,7 +160,7 @@ OfficeTasks()
 		, 1														; Icon Number
 		, 1														; Run State
 
-	FileCreateShortcut, %officePath%\MSPUB.EXE					; Target
+	FileCreateShortcut, %strOfficePath%\MSPUB.EXE					; Target
 		, C:\Users\Default\Desktop\Publisher 2016.lnk			; Link File
 		, ; Standard Working directory							; WorkingDir
 		, ; No Arguments										; Args 
@@ -164,7 +170,7 @@ OfficeTasks()
 		, 1														; Icon Number
 		, 1														; Run State
 
-	FileCreateShortcut, %officePath%OUTLOOK.EXE					; Target
+	FileCreateShortcut, %strOfficePath%\OUTLOOK.EXE					; Target
 		, C:\Users\Default\Desktop\Outlook 2016.lnk				; Link File
 		, ; Standard Working directory							; WorkingDir
 		, ; No Arguments										; Args 
@@ -459,7 +465,7 @@ SelfCheckTasks()
 	Global strResourcesPath
 	strInstallersPath :=  strResourcesPath . "\Installers"
 	
-	ExecuteExternalCommand(strInstallersPath . "\_SelfCheckoout.exe /S")
+	ExecuteExternalCommand(strInstallersPath . "\_SelfCheckout.exe /S")
 
 	;Move the License
 	;Envisionware License
@@ -514,7 +520,7 @@ KioskTasks()
 	; install second step will robocopy things over that we needed to configure
 	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers"
 		. "\_LPTOnePrintRelease.exe /S host`=" . strEwareServer)
-	;LPTOne cannot connect to JQE? may need to robocopy in a config
+	;LPTOne cannot connect to JQE? may need to robocopy in a configs
 	ExecuteExternalCommand("del ""C:\Users\Public\Desktop\LPT One Print Release"
 		. " Terminal.lnk""")
 
