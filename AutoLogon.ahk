@@ -181,7 +181,7 @@ CatalogAutoLogon()
 {
 	DoLogging("Configuring for Catalog Auto Logon")
 
-	strWinLogon = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+	strWinLogon := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 	;Catalog Password for AutoLogon function (Pulled from an external file)
 	IniRead, strALPWCatalog
 		, %A_WorkingDir%\Resources\KeysAndPasswords.ini
@@ -193,6 +193,7 @@ CatalogAutoLogon()
 		, strWinLogon
 		, "DefaultUserName"
 		, "dcls\esacatalog"])
+
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
 		, strWinLogon
@@ -210,7 +211,7 @@ EnableAutoLogon()
 {
 	DoLogging("Enabling Auto Logon")
 
-	strWinLogon = HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+	strWinLogon := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 	ExecuteInternalCommand(["RegWrite"
 		, "REG_SZ"
 		, strWinLogon
