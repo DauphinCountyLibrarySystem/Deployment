@@ -147,7 +147,7 @@ SelfCheckAutoLogon()
 		, strWinLogon
 		, "DefaultPassword"
 		, strKioskPass])
-
+} 
 KioskAutoLogon()
 {
 	DoLogging("Configuring Kiosk Auto Logon")
