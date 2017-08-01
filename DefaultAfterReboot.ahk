@@ -34,6 +34,8 @@ JoinDomain()
 		. " -ArgumentList unattend,`$pass; "
 		. " Add-Computer  -DomainName dcls.org -Credential `$mycred "
 		. " -OUPath '" . CreateOUPath() . "' -Force -PassThru }""")
+	;Enables file sharing
+	ExecuteExternalCommand("netsh advfirewall firewall set rule group=”File and Printer Sharing” new enable=Yes")
 
 	DoLogging("")
 	return
