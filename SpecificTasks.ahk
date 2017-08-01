@@ -491,6 +491,8 @@ SelfCheckTasks()
 KioskTasks()
 {
 	DoLogging("Configuring Kiosk Tasks")
+	Global strLocation
+
 	IniRead, strEwareServer
 		, %A_WorkingDir%\Resources\Servers.ini
 		, Servers
@@ -543,6 +545,8 @@ KioskTasks()
 		, ; No Shortcut Key										; Shortcut Key
 		, 1														; Icon Number
 		, 1														; Run State
+
+	CreateEWLaunchIndex()
 	ExecuteExternalCommand("robocopy "								; Command
 		. """" . strResourcesPath . "\Launch Command"""				; Source
 		. " C:\" 													; Dest
