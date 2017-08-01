@@ -296,7 +296,7 @@ CreateFrontLineEwareConfig(location)
   . "<entry name='Network: Management Service Port'>9432</entry> `n"
   . "<entry name='Printer Name'></entry> `n"
   . "<entry name='Receipt Fields'>0</entry> `n"
-  . "<entry name='Staff Managed'>0</entry> `n"
+  . "<entry name='Staff Managed'>1</entry> `n"
   . "<entry name='Window Height'>0</entry> `n"
   . "<entry name='Window Position X'>0</entry>  `n"
   . "<entry name='Window Position Y'>0</entry> `n"
