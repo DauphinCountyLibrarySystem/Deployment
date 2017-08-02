@@ -35,7 +35,7 @@ JoinDomain()
 		. " Add-Computer  -DomainName dcls.org -Credential `$mycred "
 		. " -OUPath '" . CreateOUPath() . "' -Force -PassThru }""")
 	;Enables file sharing
-	ExecuteExternalCommand("netsh advfirewall firewall set rule group=”File and Printer Sharing” new enable=Yes")
+	;ExecuteExternalCommand("netsh advfirewall firewall set rule group=""File and Printer Sharing"" new enable=Yes")
 
 	DoLogging("")
 	return
@@ -90,7 +90,7 @@ CreateOUPath()
 		DoLogging("ii Distinguished Name: " . strOUPath)
 	} Catch {
 		DoLogging("!! Failure to create distinguished name!")
-		iTotalErrors++
+		iTotalErrors +=1
 	}
 
 	Return strOUPath

@@ -66,7 +66,7 @@ DoExternalTasks(arrTasks, Verbosity)
       ;
       If !exec.StdErr.AtEndOfStream ; It's important to note that this does NOT get StdErr in parallel with StdOut - if you stack four commands in a row, and the first two fail, you will get their error output AFTER the 3rd and 4th commands finish StdOut.
       {
-        iTotalErrors = iTotalErrors + 1 ; This will only count once even if you stack commands! At least my error handling counts for something again...
+        iTotalErrors += 1 ; This will only count once even if you stack commands! At least my error handling counts for something again...
         DoLogging("!! STDERR:")
         While !exec.StdErr.AtEndOfStream
         {
@@ -75,7 +75,7 @@ DoExternalTasks(arrTasks, Verbosity)
       }
       DoLogging("")
     } Catch {
-      iTotalErrors = iTotalErrors + 1
+      iTotalErrors += 1
       DoLogging("!! Error attempting External Task: "Task . "!")
     }
   }
@@ -117,12 +117,12 @@ DoInternalTasks(arrTasks, Verbosity)
         #(Task[1], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10]
           , P[11], P[12], P[13], P[14], P[15], P[16], P[17], P[18], P[19])
       } Catch {
-        iTotalErrors = iTotalErrors + 1
+        iTotalErrors += 1
         DoLogging("!! Error attempting Internal Task: "Output . "A_LastError: " . A_LastError)
       }
     }
   } Catch {
-    iTotalErrors = iTotalErrors + 1
+    iTotalErrors += 1
     DoLogging("!! Error during parsing!")
   }
 
