@@ -465,6 +465,7 @@ SelfCheckTasks()
 	Global strResourcesPath
 	strInstallersPath :=  strResourcesPath . "\Installers"
 	
+	Run, ClickInstallThread.exe
 	ExecuteExternalCommand(strInstallersPath . "\_SelfCheckout.exe /S")
 
 	;Move the License
@@ -474,6 +475,16 @@ SelfCheckTasks()
 		. """C:\Program Files (x86)\EnvisionWare"""					; Dest
 		. " envisionware.lic " ; Will Only Copy this File 			; Options
 		. " /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")		; Options
+
+	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\OneStop\ewSelfCheck.exe	; Target
+		, C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\OneStop.lnk ; Link Frenameile
+		, C:\Program Files (x86)\EnvisionWare\OneStop\			; WorkingDirr
+		, ; No Arguments										; Args 
+		, Launch OneStop controller								; Description
+		, ; Takes icon from file								; Icon
+		, ; No Shortcut Key										; Shortcut Key
+		, 1														; Icon Number
+		, 1														; Run State
 
 	;Check the OneStop configure found on one note
 	;this definetly will need config
