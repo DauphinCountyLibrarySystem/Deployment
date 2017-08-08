@@ -37,9 +37,9 @@ JoinDomain()
 	;Enables file sharing
 	ExecuteExternalCommand("powershell.exe -Command ""& { "
 		. " get-NetFirewallRule "
-		. " | where {$_.DisplayName -like ""*file*""} "
+		. " | where {$_.DisplayName -like '*file*'} "
 		. " | Set-NetFirewallRule -enabled True "
-		. " }" )
+		. " }""" )
 
 	DoLogging("")
 	return
