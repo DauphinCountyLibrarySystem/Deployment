@@ -39,7 +39,7 @@ JoinDomain()
 		. " get-NetFirewallRule "
 		. " | where {$_.DisplayName -like ""*file*""} "
 		. " | Set-NetFirewallRule -enabled True "
-		. " }"
+		. " }" )
 
 	DoLogging("")
 	return
