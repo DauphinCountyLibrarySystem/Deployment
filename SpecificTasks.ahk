@@ -534,6 +534,7 @@ ConfigureSelfCheck()
 												, strLibraryName
 												, 0 ;OutputVarCount
 												, -1 ;Limit
+				)
 			}
 			FileAppend, strCurrentLine, receipt_en_us.htm
 		}
@@ -559,6 +560,7 @@ ConfigureSelfCheck()
 												, strLibraryName
 												, 0 ;OutputVarCount
 												, -1 ;Limit
+				)
 			}
 			FileAppend, strCurrentLine, custom_text_en_us.js
 		}
