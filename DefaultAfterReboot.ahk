@@ -10,7 +10,7 @@ __DefaultAfterReboot__:
 
 
 	JoinDomain()
-	InstallLogMeIn()
+	;InstallLogMeIn()
 
 	Return
 }
@@ -35,7 +35,11 @@ JoinDomain()
 		. " Add-Computer  -DomainName dcls.org -Credential `$mycred "
 		. " -OUPath '" . CreateOUPath() . "' -Force -PassThru }""")
 	;Enables file sharing
-	;ExecuteExternalCommand("netsh advfirewall firewall set rule group=""File and Printer Sharing"" new enable=Yes")
+	ExecuteExternalCommand("powershell.exe -Command ""& { "
+		. " get-NetFirewallRule "
+		. " | where {$_.DisplayName -like ""*file*""} "
+		. " | Set-NetFirewallRule -enabled True "
+		. " }"
 
 	DoLogging("")
 	return
