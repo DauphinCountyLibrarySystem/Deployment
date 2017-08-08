@@ -1,14 +1,19 @@
 MsgBox Cthuhlu! ; This should never run!
 __subMainGUI__: ; Label which creates the main GUI.
 {
-  DoLogging("-- Creating GUI...")
-  Gui 2: New, ,Computer Deployment
+    DoLogging("-- Creating GUI...")
+    Gui 2: New, ,Computer Deployment
 
  ;----This Section contains the Computer Name label and field.----
   Gui 2: Font, Bold s10
   Gui 2: Add, Text,, Type in Computer Name:
   Gui 2: Font, Norm
   Gui 2: Add, Edit, Uppercase vstrComputerName,
+  Gui 2: Font, Bold s10
+  Gui 2: Add, Text,, Type in ilsusername: (Only used for Self-Check)
+  Gui 2: Font, Norm
+  Gui 2: Add, Edit, vstrILSUsername,
+  
 
  ;----This section contains a Drop Down Lists for Library locations and computer types.----
   Gui 2: Font, Bold s10
@@ -31,7 +36,7 @@ __subMainGUI__: ; Label which creates the main GUI.
  ;----This Section contains Submit and Exit Buttons.----
   Gui 2: Add, Button, Section xm+50 gButtonStart w100 Default, Start
   Gui 2: Add, Button, yp xp+110 gButtonExit w100, Exit
-  Gui 2: Show
+  Gui 2: Show, 
   Return
 }
 MsgBox Cthuhlu! ; This should never run!
@@ -157,6 +162,7 @@ __subWriteXML__:
   data.Set("ComputerRole", strcomputerRole)
   data.Set("WirelessState", bIsWireless)
   data.Set("VerboseState", bIsVerbose)
+  data.Set("ILSUsername", strILSUsername)
   return
 }
 
@@ -513,6 +519,8 @@ __subLoadUserInput__:
   DoLogging("bIsWireless loaded to " bIsWireless)
   bIsVerbose := data.Get("VerboseState")
   DoLogging("bIsVerbose loaded to " bIsVerbose)
+  strILSUsername := data.Get("ILSUsername")
+  DoLogging("strILSUsername loaded to " . strILSUsername)
   return
 }
 
