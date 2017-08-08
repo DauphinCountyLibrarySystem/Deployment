@@ -528,46 +528,49 @@ ConfigureSelfCheck()
 		If (ErrorLevel == 1) { ;If we reached end of file we are done
 			boolIsDone = True
 		} Else {
-			If (IfInString, strCurrentLine, "Library Name Goes Here") {
+			strToken = Library Name Goes Here
+			IfInString, strCurrentLine, %strToken%
+			{
 				strCurrentLine := StrReplace(strCurrentLine
-												, "Library Name Goes Here"
-												, strLibraryName
-												, 0 ;OutputVarCount
-												, -1 )
-			}
-			FileAppend, strCurrentLine, receipt_en_us.htm
+					, strToken
+					, strLibraryName
+					, 0 ;OutputVarCount
+					, -1 )
+			} 
+			FileAppend, %strCurrentLine% `n , testFile.txt
 		}
-		intLineNumber++
+		intLineNumber += 1
 	}
-	FileMove, receipt_en_us.htm, C:\Program Files (x86)\EnvisionWare\OneStop\html\receipts , 1
+	FileMove, receipt_en_us.htm, C:\Program Files (x86)\EnvisionWare\OneStop\html\reciepts, 1
 	If (A_LastError == 87) { ; The Windows could not find file error code
-		DoLogging("!!!The System failed to find the generated receipt_en_us.htm!!!")
-		iTotalErrors++
+		;DoLogging("!!!The System failed to find the generated custom_text_en_us.js!!!")
+		iTotalErrors += 1
 	}
-
 
 	intLineNumber := 1 ; ahk starts lines at 1
 	boolIsDone := false
 	while (!boolIsDone) {
-		FileReadLine, strCurrentLine, %strResourcesPath%\One Stop Configs\tempcustom_text_en_us.js, intLineNumber
+		FileReadLine, strCurrentLine, C:\Users\mkramer\Documents\GIT\Deployment\Resources\One Stop Configs\tempcustom_text_en_us.js, intLineNumber
 		If (ErrorLevel == 1) { ;If we reached end of file we are done
 			boolIsDone = True
 		} Else {
-			If (IfInString, strCurrentLine, "Library Name Goes Here") {
+			strToken = Library Name Goes Here
+			IfInString, strCurrentLine, %strToken%
+			{
 				strCurrentLine := StrReplace(strCurrentLine
-												, "Library Name Goes Here"
-												, strLibraryName
-												, 0 ;OutputVarCount
-												, -1 )
-			}
-			FileAppend, strCurrentLine, custom_text_en_us.js
+					, strToken
+					, strLibraryName
+					, 0 ;OutputVarCount
+					, -1 )
+			} 
+			FileAppend, %strCurrentLine% `n , testFile.txt
 		}
-		intLineNumber++
+		intLineNumber += 1
 	}
 	FileMove, custom_text_en_us.js, C:\Program Files (x86)\EnvisionWare\OneStop\html\scripts, 1
 	If (A_LastError == 87) { ; The Windows could not find file error code
-		DoLogging("!!!The System failed to find the generated custom_text_en_us.js!!!")
-		iTotalErrors++
+		;DoLogging("!!!The System failed to find the generated custom_text_en_us.js!!!")
+		iTotalErrors += 1
 	}
 
 	intLineNumber := 1 ; ahk starts lines at 1
@@ -577,22 +580,26 @@ ConfigureSelfCheck()
 		If (ErrorLevel == 1) { ;If we reached end of file we are done
 			boolIsDone = True
 		} Else {
-			If (IfInString, strCurrentLine, "ILS Username Goes Here") {
+			strToken = Library Name Goes Here
+			IfInString, strCurrentLine, %strToken%
+			{
 				strCurrentLine := StrReplace(strCurrentLine
-												, "ILS Username Goes Here"
-												, strILSUsername
-												, 0 ;OutputVarCount
-												, -1 )
-			}
-			FileAppend, strCurrentLine, receipt_en_us.htm
+					, strToken
+					, strLibraryName
+					, 0 ;OutputVarCount
+					, -1 )
+			} 
+			FileAppend, %strCurrentLine% `n , testFile.txt
 		}
-		intLineNumber++
+		intLineNumber += 1
 	}
 	FileMove, ewSelfCheck.ewp, C:\ProgramData\EnvisionWare\OneStop\config, 1
 	If (A_LastError == 87) { ; The Windows could not find file error code
-		DoLogging("!!!The System failed to find the generated ewSelfCheck.ewp!!!")
-		iTotalErrors++
+		;DoLogging("!!!The System failed to find the generated custom_text_en_us.js!!!")
+		iTotalErrors += 1
 	}
+	
+
 	Global strResourcesPath
 	FileMove, %strResourcesPath%\One Stop Configs\itemDetails.js, C:\Program Files (x86)\EnvisionWare\OneStop\html\scripts, 1
 

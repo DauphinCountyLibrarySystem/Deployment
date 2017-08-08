@@ -302,6 +302,7 @@ loadUserInput()
   Global strComputerRole
   Global bIsWireless
   Global bIsVerbose
+  Global strILSUserName
 
   DoLogging("Loading the saved deployment info from " . strSavedInputPath)
 
@@ -315,6 +316,8 @@ loadUserInput()
   DoLogging("bIsWireless loaded to " bIsWireless)
   bIsVerbose := data.Get("VerboseState")
   DoLogging("bIsVerbose loaded to " bIsVerbose)
+  strILSUsername := data.Get("ILSUsername")
+  DoLogging("strILSUsername loaded to " . strILSUsername)
 
   return
 }

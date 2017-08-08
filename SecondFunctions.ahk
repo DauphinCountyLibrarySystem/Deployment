@@ -32,7 +32,7 @@ ExecuteExternalCommand(task)
     }
     DoLogging("")
   } Catch {
-    iTotalErrors = iTotalErrors + 1
+    iTotalErrors += 1
     DoLogging("!! Error attempting External Task: "Task . "!")
   }
 }
