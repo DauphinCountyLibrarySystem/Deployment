@@ -467,6 +467,7 @@ SelfCheckTasks()
 	
 	Run, ClickInstallThread.exe
 	ExecuteExternalCommand(strInstallersPath . "\_SelfCheckout.exe /S")
+	ConfigureSelfCheck()
 
 	;Move the License
 	;Envisionware License
@@ -491,6 +492,89 @@ SelfCheckTasks()
 	;Config will be in custom_text_en_us.js
 	;ewSelfCheck.ewp
 	;may need to change it to auto start but not sure. 
+}
+
+ConfigureSelfCheck()
+{
+	;Build Reciept.htm
+	Global strLocation
+	Global iTotalErrors
+	If (strLocation = "ESA") {
+		strLibraryName := "East Shore Area Library"
+	} Else If (strLocation= "EV") {
+		strLibraryName := " Elizabethville Area Library"
+	} Else If (strLocation= "JOH") {
+		strLibraryName := "Johnson Memorial Library"
+	} Else If (strLocation= "ND") {
+		strLibraryName := "Northern Dauphin Library"
+	} Else If (strLocation= "AFL") {
+		strLibraryName := "William H. & Marion C. Alexander Family Library"
+	} Else If (strLocation= "KL") {
+		strLibraryName := "Kline Library"
+	} Else If (strLocation= "MOM") {
+		strLibraryName := "Madeline L. Olewine Memorial Library"
+	} Else If (strLocation= "MRL") {
+		strLibraryName := "McCormick Riverfront Library"
+	} Else {
+		;This is servering as the default case in the event that
+		; the location is not reconized. It shouldn't happen
+		strLibraryName := "The Library"
+	}
+	
+	intLineNumber := 1 ; ahk starts lines at 1
+	boolIsDone := false
+	while (!boolIsDone) {
+		FileReadLine, strCurrentLine, %strResourcesPath%\One Stop Configs\tempreceipt_en_us.htm, intLineNumber
+		If (ErrorLevel == 1) { ;If we reached end of file we are done
+			boolIsDone = True
+		} Else {
+			If (IfInString, strCurrentLine, "Library Name Goes Here") {
+				strCurrentLine := StrReplace(strCurrentLine
+												, "Library Name Goes Here"
+												, strLibraryName
+												, 0 ;OutputVarCount
+												, -1 ;Limit
+			}
+			FileAppend, strCurrentLine, receipt_en_us.htm
+		}
+		intLineNumber++
+	}
+	FileMove, receipt_en_us.htm, C:\Program Files (x86)\EnvisionWare\OneStop\html\receipts , 1
+	If (A_LastError == 87) { ; The Windows could not find file error code
+		DoLogging("!!!The System failed to find the generated receipt_en_us.htm!!!")
+		iTotalErrors++
+	}
+
+
+	intLineNumber := 1 ; ahk starts lines at 1
+	boolIsDone := false
+	while (!boolIsDone) {
+		FileReadLine, strCurrentLine, %strResourcesPath%\One Stop Configs\tempcustom_text_en_us.js, intLineNumber
+		If (ErrorLevel == 1) { ;If we reached end of file we are done
+			boolIsDone = True
+		} Else {
+			If (IfInString, strCurrentLine, "Library Name Goes Here") {
+				strCurrentLine := StrReplace(strCurrentLine
+												, "Library Name Goes Here"
+												, strLibraryName
+												, 0 ;OutputVarCount
+												, -1 ;Limit
+			}
+			FileAppend, strCurrentLine, custom_text_en_us.js
+		}
+		intLineNumber++
+	}
+	FileMove, custom_text_en_us.js, C:\Program Files (x86)\EnvisionWare\OneStop\html\scripts, 1
+	If (A_LastError == 87) { ; The Windows could not find file error code
+		DoLogging("!!!The System failed to find the generated custom_text_en_us.js!!!")
+		iTotalErrors++
+	}
+
+	Global strResourcesPath
+	FileMove, %strResourcesPath%\One Stop Configs\itemDetails.js, C:\Program Files (x86)\EnvisionWare\OneStop\html\scripts, 1
+
+	FileMove, %strResourcesPath%\One Stop Configs\ewSelfCheck.ewp, C:\ProgramData\EnvisionWare\OneStop\config, 1
+
 }
 
 
