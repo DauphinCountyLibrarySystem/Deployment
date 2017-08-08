@@ -533,8 +533,7 @@ ConfigureSelfCheck()
 												, "Library Name Goes Here"
 												, strLibraryName
 												, 0 ;OutputVarCount
-												, -1 ;Limit
-				)
+												, -1 )
 			}
 			FileAppend, strCurrentLine, receipt_en_us.htm
 		}
@@ -559,8 +558,7 @@ ConfigureSelfCheck()
 												, "Library Name Goes Here"
 												, strLibraryName
 												, 0 ;OutputVarCount
-												, -1 ;Limit
-				)
+												, -1 )
 			}
 			FileAppend, strCurrentLine, custom_text_en_us.js
 		}
@@ -572,6 +570,29 @@ ConfigureSelfCheck()
 		iTotalErrors++
 	}
 
+	intLineNumber := 1 ; ahk starts lines at 1
+	boolIsDone := false
+	while (!boolIsDone) {
+		FileReadLine, strCurrentLine, %strResourcesPath%\One Stop Configs\tempewSelfCheck.ewp, intLineNumber
+		If (ErrorLevel == 1) { ;If we reached end of file we are done
+			boolIsDone = True
+		} Else {
+			If (IfInString, strCurrentLine, "ILS Username Goes Here") {
+				strCurrentLine := StrReplace(strCurrentLine
+												, "ILS Username Goes Here"
+												, strILSUsername
+												, 0 ;OutputVarCount
+												, -1 )
+			}
+			FileAppend, strCurrentLine, receipt_en_us.htm
+		}
+		intLineNumber++
+	}
+	FileMove, ewSelfCheck.ewp, C:\ProgramData\EnvisionWare\OneStop\config, 1
+	If (A_LastError == 87) { ; The Windows could not find file error code
+		DoLogging("!!!The System failed to find the generated ewSelfCheck.ewp!!!")
+		iTotalErrors++
+	}
 	Global strResourcesPath
 	FileMove, %strResourcesPath%\One Stop Configs\itemDetails.js, C:\Program Files (x86)\EnvisionWare\OneStop\html\scripts, 1
 
