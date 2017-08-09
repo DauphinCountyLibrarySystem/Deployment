@@ -227,6 +227,19 @@ __subConfirmGUI__:
     typeText := "This will install:`n"
       . "- EncoreAlways`n"
       . "- Auto Logon configuration for catalogs"
+  If (strComputerRole == "Self-Check")
+    typeText := "This will install: `n"
+      . "- One Stop `n"
+      . "- LPT One `n"
+      . "- PC Reservation `n"
+      . "- RFID Link `n"
+      . "- AutoLogon for Self-Checks"
+  If (strComputerRole == "Kiosk")
+    typeText := "This will install `n"
+      . "- EW Launch `n"
+      . "- LPT One `n"
+      . "- PC Reservation `n"
+      . "- Auto Logon for Kiosks"
   SoundPlay *32
   confirmMsg := "Please confirm the follow `n" 
       . typeText . "`n"
