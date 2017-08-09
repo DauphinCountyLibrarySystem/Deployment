@@ -537,11 +537,11 @@ ConfigureSelfCheck()
 					, 0 ;OutputVarCount
 					, -1 )
 			} 
-			FileAppend, %strCurrentLine% `n , testFile.txt
+			FileAppend, %strCurrentLine% `n , receipt_en_us.htm
 		}
 		intLineNumber += 1
 	}
-	FileMove, receipt_en_us.htm, C:\Program Files (x86)\EnvisionWare\OneStop\html\reciepts, 1
+	FileMove, receipt_en_us.htm, C:\Program Files (x86)\EnvisionWare\OneStop\html\receipts, 1
 	If (A_LastError == 87) { ; The Windows could not find file error code
 		;DoLogging("!!!The System failed to find the generated custom_text_en_us.js!!!")
 		iTotalErrors += 1
@@ -550,7 +550,7 @@ ConfigureSelfCheck()
 	intLineNumber := 1 ; ahk starts lines at 1
 	boolIsDone := false
 	while (!boolIsDone) {
-		FileReadLine, strCurrentLine, C:\Users\mkramer\Documents\GIT\Deployment\Resources\One Stop Configs\tempcustom_text_en_us.js, intLineNumber
+		FileReadLine, strCurrentLine, %strResourcesPath%\One Stop Configs\tempcustom_text_en_us.js, intLineNumber
 		If (ErrorLevel == 1) { ;If we reached end of file we are done
 			boolIsDone = True
 		} Else {
@@ -563,7 +563,7 @@ ConfigureSelfCheck()
 					, 0 ;OutputVarCount
 					, -1 )
 			} 
-			FileAppend, %strCurrentLine% `n , testFile.txt
+			FileAppend, %strCurrentLine% `n , custom_text_en_us.js
 		}
 		intLineNumber += 1
 	}
@@ -580,16 +580,27 @@ ConfigureSelfCheck()
 		If (ErrorLevel == 1) { ;If we reached end of file we are done
 			boolIsDone = True
 		} Else {
-			strToken = Library Name Goes Here
-			IfInString, strCurrentLine, %strToken%
+			Global strILSUsername
+			Global strLocation
+			strILSToken = ILS Username Goes Here
+			strLocationToken = Location Goes Here
+			IfInString, strCurrentLine, %strILSToken%
 			{
 				strCurrentLine := StrReplace(strCurrentLine
-					, strToken
-					, strLibraryName
+					, strILSToken
+					, strILSUsername
+					, 0 ;OutputVarCount
+					, -1 )
+			}
+			IfInString, strCurrentLine, %strLocationToken%
+			{
+				strCurrentLine := StrReplace(strCurrentLine
+					, strLocationToken
+					, strLocation
 					, 0 ;OutputVarCount
 					, -1 )
 			} 
-			FileAppend, %strCurrentLine% `n , testFile.txt
+			FileAppend, %strCurrentLine% `n , ewSelfCheck.ewp
 		}
 		intLineNumber += 1
 	}
