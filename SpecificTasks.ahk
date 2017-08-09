@@ -1,3 +1,4 @@
+#Include, functions.ahk
 #Include, SecondFunctions.ahk ; This file will be renamed at some point 
 
 ;======================================||=======================================
@@ -610,12 +611,45 @@ ConfigureSelfCheck()
 		iTotalErrors += 1
 	}
 	
-
 	Global strResourcesPath
 	FileMove, %strResourcesPath%\One Stop Configs\itemDetails.js, C:\Program Files (x86)\EnvisionWare\OneStop\html\scripts, 1
 
-	FileMove, %strResourcesPath%\One Stop Configs\ewSelfCheck.ewp, C:\ProgramData\EnvisionWare\OneStop\config, 1
+	ExecuteExternalCommand(strResourcesPath . "\Installers\_PCReservationStation.exe /S")
 
+	createFrontLineEwareConfig(strLocation)
+	strPCResPath := "C:\ProgramData\EnvisionWare\PC Reservation"
+	; Moves the Config File to the proper location
+	ExecuteExternalCommand("robocopy "								; Command
+		. strResourcesPath . "\EwareConfig"							; Source
+		. " """ . strPCResPath . "\Reservation Station\config""" 	; Dest
+		. " /mov")													; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
+	ExecuteExternalCommand("del ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\PC Reservation Reservation Station.lnk""")	
+
+	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers"
+		. "\_LPTOnePrintRelease.exe /S host`=" . strEwareServer)
+	;LPTOne cannot connect to JQE? may need to robocopy in a configs
+	ExecuteExternalCommand("del ""C:\Users\Public\Desktop\LPT One Print Release"
+		. " Terminal.lnk""")
+
+	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\lptPRT.exe 	; Target
+		, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk ; Link Frenameile
+		, ; Standard Working directory							; WorkingDirr
+		, -host:%strEwareServer% -runmode:prompt				; Args 
+		, Launch LPT One Print Release Terminal					; Description
+		, ; Takes icon from file								; Icon
+		, ; No Shortcut Key										; Shortcut Key
+		, 1														; Icon Number
+		, 1														; Run State
+	
+	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk 	; Target
+		, C:\Users\Public\Desktop\LPT One Print Realease Terminal.lnk ; Link Frenameile
+		, ; Standard Working directory							; WorkingDirr
+		, 														; Args 
+		, Launch LPT One Print Release Terminal					; Description
+		, ; Takes icon from file								; Icon
+		, ; No Shortcut Key										; Shortcut Key
+		, 1														; Icon Number
+		, 1														; Run State
 }
 
 
