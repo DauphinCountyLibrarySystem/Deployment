@@ -22,9 +22,9 @@ __subCleanupJobs__:
 	arrCleanupJobsList.Insert(["RegWrite", "REG_DWORD"
 		, "HKEY_LOCAL_MACHINE\SOFTWARE\LogMeIn\V5\Gui", "EnableSystray", "0"])
 	;arrCleanupJobsList.Insert(["FileDelete"
-		, "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"])
+	;	, "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Control Panel.lnk"])
 	;arrCleanupJobsList.Insert(["FileDelete"
-		, "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"])
+	;	, "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LogMeIn Client.lnk"])
 	If (strComputerRole == "Patron")
 	{
 		arrCleanupJobsList.Insert(["RegWrite", "REG_SZ"
