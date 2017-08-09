@@ -303,7 +303,6 @@ CreateFrontLineEwareConfig(location)
   . "<entry name='Window Width'>0</entry> `n"
   . "</Settings> `n"
 
-
   FileAppend, %fileContent%, %fileName%
 }
 
