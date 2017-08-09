@@ -9,10 +9,6 @@ __subMainGUI__: ; Label which creates the main GUI.
   Gui 2: Add, Text,, Type in Computer Name:
   Gui 2: Font, Norm
   Gui 2: Add, Edit, Uppercase vstrComputerName,
-  Gui 2: Font, Bold s10
-  Gui 2: Add, Text,, Type in ilsusername: (Only used for Self-Check)
-  Gui 2: Font, Norm
-  Gui 2: Add, Edit, vstrILSUsername,
   
 
  ;----This section contains a Drop Down Lists for Library locations and computer types.----
@@ -23,7 +19,7 @@ __subMainGUI__: ; Label which creates the main GUI.
   Gui 2: Font, Bold s10
   Gui 2: Add, Text, ys, Select computer type:
   Gui 2: Font, Norm
-  Gui 2: Add, DDL, vstrComputerRole, Computer...||Office|Frontline|Patron|Catalog|Self-Check|Kiosk
+  Gui 2: Add, DDL, vstrComputerRole gRoleCheck, Computer...||Office|Frontline|Patron|Catalog|Self-Check|Kiosk
 
  ;----This section contains Checkbox toggles.----
   Gui 2: Font, Bold s10
@@ -38,6 +34,109 @@ __subMainGUI__: ; Label which creates the main GUI.
   Gui 2: Add, Button, yp xp+110 gButtonExit w100, Exit
   Gui 2: Show, 
   Return
+}
+RoleCheck:
+{
+  Gui 2: Submit, NoHide
+  If (strLastRole == strComputerRole) {
+    ; Only care if there is a change
+    return
+  } Else {
+    DoLogging("Role is " strComputerRole)
+    DoLogging("Last role was:" strLastRole)
+    ;Update what the last role was
+    If (strComputerRole == "Self-Check") {
+      Gui 2: Destroy
+      ;If the current Role is self check then we need to add the ILS element
+        Gui 2: New, ,Computer Deployment
+
+       ;----This Section contains the Computer Name label and field.----
+        Gui 2: Font, Bold s10
+        Gui 2: Add, Text,, Type in Computer Name:
+        Gui 2: Font, Norm
+        Gui 2: Add, Edit, Uppercase vstrComputerName,
+        GuiControl, ,strComputerName, %strComputerName%
+        Gui 2: Font, Bold s10
+        Gui 2: Add, Text,, Type in ilsusername: (Only used for Self-Check)
+        Gui 2: Font, Norm
+        Gui 2: Add, Edit, vstrILSUsername,
+        GuiControl, ,strILSUsername, %strILSUsername%
+        
+
+        ;----This section contains a Drop Down Lists for Library locations and computer types.----
+        Gui 2: Font, Bold s10
+        Gui 2: Add, Text, Section, Select Branch:
+        Gui 2: Font, Norm
+        Gui 2: Add, DDL, vstrLocation, Branch...||ESA|MRL|MOM|KL|AFL|EV|JOH|ND|VAN
+        GuiControl, Choose, strLocation, %strLocation%
+        Gui 2: Font, Bold s10
+        Gui 2: Add, Text, ys, Select computer type:
+        Gui 2: Font, Norm
+        Gui 2: Add, DDL, vstrComputerRole gRoleCheck, Computer...||Office|Frontline|Patron|Catalog|Self-Check|Kiosk
+        GuiControl, Choose, strComputerRole, %strComputerRole%
+
+        ;----This section contains Checkbox toggles.----
+        Gui 2: Font, Bold s10
+        ; Wireless Checkbox
+        Gui 2: Add, Checkbox, Section xm vbIsWireless, This is a Wireless computer.
+        GuiControl, , bIsWireless, %bIsWireless%
+        ;Verbose logging checkbox
+        Gui 2: Add, Checkbox, vbIsVerbose, Use Verbose logging. 
+        GuiControl, , bIsVerbose, %bIsVerbose%
+        Gui 2: Font, Norm
+
+        ;----This Section contains Submit and Exit Buttons.----
+        Gui 2: Add, Button, Section xm+50 gButtonStart w100 Default, Start
+        Gui 2: Add, Button, yp xp+110 gButtonExit w100, Exit
+        Gui 2: Show
+    } Else {
+      If (strLastRole == "Self-Check") {
+        Gui 2: Destroy
+        ;If the current role is not self-check but last one is then we need To
+        ; remove the ils username field
+        Gui 2: New, ,Computer Deployment
+
+        ;----This Section contains the Computer Name label and field.----
+        Gui 2: Font, Bold s10
+        Gui 2: Add, Text,, Type in Computer Name:
+        Gui 2: Font, Norm
+        Gui 2: Add, Edit, Uppercase vstrComputerName,
+        GuiControl, ,strComputerName, %strComputerName%
+
+        ;----This section contains a Drop Down Lists for Library locations and computer types.----
+        Gui 2: Font, Bold s10
+        Gui 2: Add, Text, Section, Select Branch:
+        Gui 2: Font, Norm
+        Gui 2: Add, DDL, vstrLocation, Branch...||ESA|MRL|MOM|KL|AFL|EV|JOH|ND|VAN
+        GuiControl, Choose, strLocation, %strLocation%
+        Gui 2: Font, Bold s10
+        Gui 2: Add, Text, ys, Select computer type:
+        Gui 2: Font, Norm
+        Gui 2: Add, DDL, vstrComputerRole gRoleCheck, Computer...||Office|Frontline|Patron|Catalog|Self-Check|Kiosk
+        GuiControl, Choose, strComputerRole, %strComputerRole%
+
+        ;----This section contains Checkbox toggles.----
+        Gui 2: Font, Bold s10
+        ; Wireless Checkbox
+        Gui 2: Add, Checkbox, Section xm vbIsWireless, This is a Wireless computer.
+        GuiControl, , bIsWireless, %bIsWireless%
+        ;Verbose logging checkbox
+        Gui 2: Add, Checkbox, vbIsVerbose, Use Verbose logging. 
+        GuiControl, , bIsVerbose, %bIsVerbose%
+        Gui 2: Font, Norm
+
+        ;----This Section contains Submit and Exit Buttons.----
+        Gui 2: Add, Button, Section xm+50 gButtonStart w100 Default, Start
+        Gui 2: Add, Button, yp xp+110 gButtonExit w100, Exit
+        Gui 2: Show
+      } Else {
+        ; If the current role is not Self-Check and the Last one is not either
+        ; Then we don;t need to add or remove and elements and should jst do nothing]
+      }
+    }
+  }
+  strLastRole = %strComputerRole% 
+  return
 }
 MsgBox Cthuhlu! ; This should never run!
 
@@ -56,7 +155,11 @@ MsgBox Cthuhlu! ; This should never run!
 __subConfirmGUI__: 
 {
   Gui +OwnDialogs
-
+  If ( (strComputerRole == "Self-Check") And (strIlsUsername == "")) {
+    SoundPlay *48
+    MsgBox, 48, ,Please enter an ILS Username for the Self-Check
+    Return
+  }
   If ((strComputerRole != "Patron") And (strLocation == "VAN"))
   {
     SoundPlay *48
@@ -135,6 +238,7 @@ __subConfirmGUI__:
     GuiControl 2: Disable, strComputerName
     GuiControl 2: Disable, strLocation
     GuiControl 2: Disable, strComputerRole
+    GuiControl 2: Disable, strILSusername
     GuiControl 2: Disable, bIsWireless
     GuiControl 2: Disable, bIsVerbose
     GuiControl 2: Disable, Start
