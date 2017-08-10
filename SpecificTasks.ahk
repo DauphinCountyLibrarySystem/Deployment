@@ -208,7 +208,7 @@ FrontLineTasks()
 	;This section of FrontLineasks handles the installation of the programs
 	Global strResourcesPath
 
-	InstallPCReservationStation()
+	InstallPCReservationReservationStation()
 	; Moves the Seirra Portable app from Source to Dest
 	ExecuteExternalCommand("robocopy "								; Command
 		. strResourcesPath . "\Sierra Desktop App"""				; Source
@@ -228,8 +228,7 @@ FrontLineTasks()
 		. " /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")		; Options
 
 	; Install staff Print Release Terminal.
-	ExecuteExternalCommand(A_ScriptDir . "\Resources\Installers"
-		. "\_LPTOnePrintRelease.exe /S")
+	InstallLPTOnePrintReleaseTerminal()
 
 	;Envisionware License
 	ExecuteExternalCommand("robocopy "								; Command
@@ -613,39 +612,15 @@ ConfigureSelfCheck()
 	Global strResourcesPath
 	FileMove, %strResourcesPath%\One Stop Configs\itemDetails.js, C:\Program Files (x86)\EnvisionWare\OneStop\html\scripts, 1
 
-	InstallPCReservationStation()
+	bDesktopIcon = False
+	bOnStartup = False
+	InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
 
-	ExecuteExternalCommand("del ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\PC Reservation Reservation Station.lnk""")
-	ExecuteExternalCommand("powershell.exe -Command ""& { "
-		. " Get-NetFirewallRule | where {$_.DisplayName -like '*reservation*'}"
-		. " | Set-NetFirewallRule -Action Allow"
-		. "}")	
+	bLPTOneDesktopIcon = True
+	bLPTOneOnStartup = false
+	InstallLPTOnePrintReleaseTerminal()
 
-	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers"
-		. "\_LPTOnePrintRelease.exe /S host`=" . strEwareServer)
-	;LPTOne cannot connect to JQE? may need to robocopy in a configs
-	ExecuteExternalCommand("del ""C:\Users\Public\Desktop\LPT One Print Release"
-		. " Terminal.lnk""")
-
-	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\lptPRT.exe 	; Target
-		, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk ; Link Frenameile
-		, ; Standard Working directory							; WorkingDirr
-		, -host:%strEwareServer% -runmode:prompt				; Args 
-		, Launch LPT One Print Release Terminal					; Description
-		, ; Takes icon from file								; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-	
-	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk 	; Target
-		, C:\Users\Public\Desktop\LPT One Print Realease Terminal.lnk ; Link Frenameile
-		, ; Standard Working directory							; WorkingDirr
-		, 														; Args 
-		, Launch LPT One Print Release Terminal					; Description
-		, ; Takes icon from file								; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
+	return
 }
 
 
@@ -658,51 +633,21 @@ KioskTasks()
 {
 	DoLogging("Configuring Kiosk Tasks")
 	Global strLocation
-
-	IniRead, strEwareServer
-		, %A_WorkingDir%\Resources\Servers.ini
-		, Servers
-		, %strLocation%
-	;Check OneNote / GitHub to see if there are more details on what this has 
-	;installed
+	Global strResourcesPath
 
 	; Install Reservation Station
-	InstallPCReservationStation()
-	ExecuteExternalCommand("del ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\PC Reservation Reservation Station.lnk""")
-
+	bDesktopIcon = False
+	bOnStartup = False
+	InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
+	
 	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers\_InstallAAM.exe /S")
 
 	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers\mysql-connector-odbc-5.3.2-win32.msi /passive")
-	; Install staff Print Release Terminal.
-	; Because fuck all logic EnvisionWare does not allow you to silently
-	; install a configure system. So instead the installation for Printer thing
-	; Will actually have to happen in two steps. First step does the silent del
-	; install second step will robocopy things over that we needed to configure
-	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers"
-		. "\_LPTOnePrintRelease.exe /S host`=" . strEwareServer)
-	;LPTOne cannot connect to JQE? may need to robocopy in a configs
-	ExecuteExternalCommand("del ""C:\Users\Public\Desktop\LPT One Print Release"
-		. " Terminal.lnk""")
 
-	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\lptPRT.exe 	; Target
-		, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk ; Link Frenameile
-		, ; Standard Working directory							; WorkingDirr
-		, -host:%strEwareServer% -runmode:prompt				; Args 
-		, Launch LPT One Print Release Terminal					; Description
-		, ; Takes icon from file								; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-	
-	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk 	; Target
-		, C:\Users\Public\Desktop\LPT One Print Realease Terminal.lnk ; Link Frenameile
-		, ; Standard Working directory							; WorkingDirr
-		, 														; Args 
-		, Launch LPT One Print Release Terminal					; Description
-		, ; Takes icon from file								; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
+	; Install LPT One Print Release Terminal
+	bLPTDesktopIcon = true
+	bLPTOnStartup = true
+	InstallLPTOnePrintReleaseTerminal(bLPTDesktopIcon, bLPTOnStartup)
 
 	CreateEWLaunchIndex()
 	ExecuteExternalCommand("robocopy "								; Command
@@ -719,15 +664,6 @@ KioskTasks()
 		, ; No Shortcut Key										; Shortcut Key
 		, 1														; Icon Number
 		, 1														; Run State
-	
-
-
-
-	;Installing kiosk is the prolly the most complex task we Have
-	;Need to install all the things from kiosk folder
-	;With some interesting configuring
-	; then drop the Program Files, and ProgramData files
-	;Lastly we drop the files fromt he Dauphion County file in the ewLaunch/Menus
 }
 
 ;-------------------------------------------------------------------------------
@@ -735,23 +671,113 @@ KioskTasks()
 ; computer reservations but does not lock the computers. As of now, the config 
 ; file does not make the computer a dedicated Reservation Station but instead 
 ; has Reservation Station be a smaller window that does not interfere with other
-; uses.
+; uses. By Default this function creates a desktop shortcut for 
+; Reservation Station. Because EnvisionWare's silent Installer does not support
+; Command Line Configuaration (You can configure the install via command line 
+; but this prevents you from installing silently) we have to do Configuaration 
+; after the install.
 ;-------------------------------------------------------------------------------
-InstallPCReservationStation()
+InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
 {
 	DoLogging("Installing PC Reservation Station")
 	Global strResourcesPath
+	Global strInstallersPath
 	Global strLocation
 
 	; Install Reservation Station
-	ExecuteExternalCommand(strResourcesPath . "\Installers\_PCReservationStation.exe /S")
+	ExecuteExternalCommand(strInstallersPath . "\_PCReservationStation.exe /S")
 
 	;Check that this is not needed to be changed to be a staff controlled computer
-	createFrontLineEwareConfig(strLocation)
+	createFrontLineEwareConfig(strLocation) ;Fixme: This method should be improved so that it is similar to the way that Self-Check builds its config files Issue #32
 	strPCResPath := "C:\ProgramData\EnvisionWare\PC Reservation"
+	
 	; Moves the Config File to the proper location
 	ExecuteExternalCommand("robocopy "								; Command
 		. strResourcesPath . "\EwareConfig"							; Source
 		. " """ . strPCResPath . "\Reservation Station\config""" 	; Dest
 		. " /mov")													; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
+
+	; This command enables the firewall rules that PC Reservation Reservation 
+	; Station creates
+	ExecuteExternalCommand("powershell.exe -Command ""& { "
+		. " Get-NetFirewallRule | where {$_.DisplayName -like '*reservation*'}"
+		. " | Set-NetFirewallRule -Action Allow"
+		. "}")
+
+	If (!bDesktopIcon) {
+		DoLogging("Deleteing PC Reservation Reservation Station Desktop Icon")
+		ExecuteExternalCommand("del ""C:\Users\Public\Desktop\PC Reservation "
+			. "Reservation Station.lnk""")
+	} Else {
+		; By Default PC Reservation Station gets a desktop Icon so we don't have
+		; to change anything
+		; DO NOTHING
+	}
+
+	If (!bOnStartup) {
+		DoLogging("Removing PC Reservation Reservation Station from Startup")
+		ExecuteExternalCommand("del ""C:\ProgramData\Microsoft\Windows\"
+			. "Start Menu\Programs\StartUp\"
+			."PC Reservation Reservation Station.lnk""")
+	} Else {
+		; By Default PC Reservation starts on startup so if we want  don't have
+		; to change anything
+		; DO NOTHING
+	}
+}
+
+;-------------------------------------------------------------------------------
+; Installs LPT One Print Release Terminal. LPT One Print Release Terminal
+; functions in some bizarre way where the config files are not actually what 
+; specifiy the target server. Instead the target IP and port and indiciated via
+; the desktop shortcut, because of this LPT One Print Release will always
+; create and leave behind a desktop icon, otherwise it would not be possible to
+; indicate what server we are trying to target. Additionally, it creates another
+; shortcut that it plays in the LPT One folder that calls the exe with the 
+; proper command line arguments. This shortcut will be created regardless of the
+; what you specify for Desktop Icon because otherwise LPT One is completely 
+; useless.
+;-------------------------------------------------------------------------------
+InstallLPTOnePrintReleaseTerminal(bDesktopIcon, bOnStartup)
+{
+	ExecuteExternalCommand(A_ScriptDir . "\Resources\Installers"
+		. "\_LPTOnePrintRelease.exe /S")
+	; This desktop Icon is created with the default IP and is incorrect and 
+	; needs to be deleted.
+	ExecuteExternalCommand("del ""C:\Users\Public\Desktop\LPT One Print Release"
+		. " Terminal.lnk""")
+
+	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk 	; Target
+		, C:\Users\Public\Desktop\LPT One Print Realease Terminal.lnk ; Link Filename
+		, ; Standard Working directory							; WorkingDirr
+		, 														; Args 
+		, Launch LPT One Print Release Terminal					; Description
+		, ; Takes icon from file								; Icon
+		, ; No Shortcut Key										; Shortcut Key
+		, 1														; Icon Number
+		, 1														; Run State
+
+	If (!bDesktopIcon) {
+		DoLogging("Error: It was specified not to create a LPT One Print"
+			. " Release Terminal but the system requires that you create one.")
+		FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\lptPRT.exe 	; Target
+		, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk ; Link Filename
+		, ; Standard Working directory							; WorkingDirr
+		, -host:%strEwareServer% -runmode:prompt				; Args 
+		, Launch LPT One Print Release Terminal					; Description
+		, ; Takes icon from file								; Icon
+		, ; No Shortcut Key										; Shortcut Key
+		, 1														; Icon Number
+		, 1														; Run State
+	} Else {
+		FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\lptPRT.exe 	; Target
+			, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\LPT One Print Release Terminal.lnk ; Link Filename
+			, ; Standard Working directory							; WorkingDirr
+			, -host:%strEwareServer% -runmode:prompt				; Args 
+			, Launch LPT One Print Release Terminal					; Description
+			, ; Takes icon from file								; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+	}
 }
