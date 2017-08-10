@@ -56,11 +56,7 @@ RoleCheck:
         Gui 2: Font, Norm
         Gui 2: Add, Edit, Uppercase vstrComputerName,
         GuiControl, ,strComputerName, %strComputerName%
-        Gui 2: Font, Bold s10
-        Gui 2: Add, Text,, Type in ilsusername: (Only used for Self-Check)
-        Gui 2: Font, Norm
-        Gui 2: Add, Edit, vstrILSUsername,
-        GuiControl, ,strILSUsername, %strILSUsername%
+
         
 
         ;----This section contains a Drop Down Lists for Library locations and computer types.----
@@ -74,6 +70,12 @@ RoleCheck:
         Gui 2: Font, Norm
         Gui 2: Add, DDL, vstrComputerRole gRoleCheck, Computer...||Office|Frontline|Patron|Catalog|Self-Check|Kiosk
         GuiControl, Choose, strComputerRole, %strComputerRole%
+
+        Gui 2: Font, Bold s10
+        Gui 2: Add, Text, Section xm , Type in ilsusername: (Only used for Self-Check)
+        Gui 2: Font, Norm
+        Gui 2: Add, Edit,  vstrILSUsername,
+        GuiControl, ,strILSUsername, %strILSUsername%
 
         ;----This section contains Checkbox toggles.----
         Gui 2: Font, Bold s10
