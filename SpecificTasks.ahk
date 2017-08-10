@@ -468,11 +468,16 @@ SelfCheckTasks()
 	
 	Run, ClickInstallThread.exe
 	ExecuteExternalCommand(strInstallersPath . "\_SelfCheckout.exe /S")
-	ExecuteExternalCommand("powershell.exe -Command ""& { "
-		. " Get-NetFirewallRule | where {$_.DisplayName -like '*self check*'}"
-		. " | Set-NetFirewallRule -Action Allow"
-		. "}")
+	;In order for Self-Check to create the firewall rules it needs to have been opened
+	Run, "C:Program Files (x86)\EnvisionWare\OneStop\ewSelfCheck.exe"
+	SetTitleMatchMode, 2
+	WinWait, OneStop
+	WinClose
 	ConfigureSelfCheck()
+	ExecuteExternalCommand("powershell.exe -Command ""& { "
+		. " Get-NetFirewallRule | where {$_.DisplayName -like '*self check*'} "
+		. " | Set-NetFirewallRule -Action Allow "
+		. "} ")
 
 	;Move the License
 	;Envisionware License
