@@ -207,7 +207,9 @@ FrontLineTasks()
 {
 	;This section of FrontLineasks handles the installation of the programs
 	Global strResourcesPath
-	; Moves the Seirra Portable app from Source to Dest 
+
+	InstallPCReservationStation()
+	; Moves the Seirra Portable app from Source to Dest
 	ExecuteExternalCommand("robocopy "								; Command
 		. strResourcesPath . "\Sierra Desktop App"""				; Source
 		. " ""C:\Sierra Desktop App"" "								; Dest
@@ -224,18 +226,6 @@ FrontLineTasks()
 		. strResourcesPath . "\Printers "							; Source
 		. " C:\Users\Default\Desktop\Printers "						; Dest
 		. " /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")		; Options
-
-	; Install Reservation Station
-	ExecuteExternalCommand(strResourcesPath . "\Installers\_PCReservationStation.exe /S")
-
-	;Check that this is not needed to be changed to be a staff controlled computer
-	createFrontLineEwareConfig(strLocation)
-	strPCResPath := "C:\ProgramData\EnvisionWare\PC Reservation"
-	; Moves the Config File to the proper location
-	ExecuteExternalCommand("robocopy "								; Command
-		. strResourcesPath . "\EwareConfig"							; Source
-		. " """ . strPCResPath . "\Reservation Station\config""" 	; Dest
-		. " /mov")													; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
 
 	; Install staff Print Release Terminal.
 	ExecuteExternalCommand(A_ScriptDir . "\Resources\Installers"
@@ -623,15 +613,8 @@ ConfigureSelfCheck()
 	Global strResourcesPath
 	FileMove, %strResourcesPath%\One Stop Configs\itemDetails.js, C:\Program Files (x86)\EnvisionWare\OneStop\html\scripts, 1
 
-	ExecuteExternalCommand(strResourcesPath . "\Installers\_PCReservationStation.exe /S")
+	InstallPCReservationStation()
 
-	createFrontLineEwareConfig(strLocation)
-	strPCResPath := "C:\ProgramData\EnvisionWare\PC Reservation"
-	; Moves the Config File to the proper location
-	ExecuteExternalCommand("robocopy "								; Command
-		. strResourcesPath . "\EwareConfig"							; Source
-		. " """ . strPCResPath . "\Reservation Station\config""" 	; Dest
-		. " /mov")													; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
 	ExecuteExternalCommand("del ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\PC Reservation Reservation Station.lnk""")
 	ExecuteExternalCommand("powershell.exe -Command ""& { "
 		. " Get-NetFirewallRule | where {$_.DisplayName -like '*reservation*'}"
@@ -684,15 +667,7 @@ KioskTasks()
 	;installed
 
 	; Install Reservation Station
-	ExecuteExternalCommand(strResourcesPath . "\Installers\_PCReservationStation.exe /S")
-
-	createFrontLineEwareConfig(strLocation)
-	strPCResPath := "C:\ProgramData\EnvisionWare\PC Reservation"
-	; Moves the Config File to the proper location
-	ExecuteExternalCommand("robocopy "								; Command
-		. strResourcesPath . "\EwareConfig"							; Source
-		. " """ . strPCResPath . "\Reservation Station\config""" 	; Dest
-		. " /mov")													; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
+	InstallPCReservationStation()
 	ExecuteExternalCommand("del ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\PC Reservation Reservation Station.lnk""")
 
 	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers\_InstallAAM.exe /S")
@@ -753,4 +728,30 @@ KioskTasks()
 	;With some interesting configuring
 	; then drop the Program Files, and ProgramData files
 	;Lastly we drop the files fromt he Dauphion County file in the ewLaunch/Menus
+}
+
+;-------------------------------------------------------------------------------
+;	Installs PC Reservation Station the version of PC Res that is used to make
+; computer reservations but does not lock the computers. As of now, the config 
+; file does not make the computer a dedicated Reservation Station but instead 
+; has Reservation Station be a smaller window that does not interfere with other
+; uses.
+;-------------------------------------------------------------------------------
+InstallPCReservationStation()
+{
+	DoLogging("Installing PC Reservation Station")
+	Global strResourcesPath
+	Global strLocation
+
+	; Install Reservation Station
+	ExecuteExternalCommand(strResourcesPath . "\Installers\_PCReservationStation.exe /S")
+
+	;Check that this is not needed to be changed to be a staff controlled computer
+	createFrontLineEwareConfig(strLocation)
+	strPCResPath := "C:\ProgramData\EnvisionWare\PC Reservation"
+	; Moves the Config File to the proper location
+	ExecuteExternalCommand("robocopy "								; Command
+		. strResourcesPath . "\EwareConfig"							; Source
+		. " """ . strPCResPath . "\Reservation Station\config""" 	; Dest
+		. " /mov")													; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
 }
