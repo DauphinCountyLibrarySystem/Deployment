@@ -228,7 +228,9 @@ FrontLineTasks()
 		. " /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")		; Options
 
 	; Install staff Print Release Terminal.
-	InstallLPTOnePrintReleaseTerminal()
+	bLPTDesktopIcon = True
+	bLPTOnStartup = False
+	InstallLPTOnePrintReleaseTerminal(bLPTDesktopIcon, bLPTOnStartup)
 
 	;Envisionware License
 	ExecuteExternalCommand("robocopy "								; Command
@@ -618,7 +620,7 @@ ConfigureSelfCheck()
 
 	bLPTOneDesktopIcon = True
 	bLPTOneOnStartup = false
-	InstallLPTOnePrintReleaseTerminal()
+	InstallLPTOnePrintReleaseTerminal(bLPTDesktopIcon, bLPTOnStartup)
 
 	return
 }
