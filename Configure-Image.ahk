@@ -16,14 +16,14 @@ strVersion := "2.6.4"
             Hopefully this will help us catch what is happening when the domain join fails.
             Also moved the Office icons for patrons from Default to Public desktop.
     2.6.3 - Added RegDelete to clear out 'AutoLogonCount', which was set by the unattend.xml.
-            Autologon information should no longer be cleared on reboot.
+            Autologon information should no longer be cleared on Restart.
     2.6.2 - Powershell/Command Shell syntax is a minefield.
     2.6.1 - turned out %comspec% doesn't work via RunOnce. using cmd.exe now.
             The passwords file is now in the Resources folder.
-            The finish dialog now gives you a chance to decline rebooting.
+            The finish dialog now gives you a chance to decline Restarting.
             The cleanup RunOnce should now leave behind log files.
             Add-Computer now includes "-Options JoinWithNewName".
-            If that fails, I might have to have the user manually rename the computer and then reboot it.
+            If that fails, I might have to have the user manually rename the computer and then Restart it.
             Add-Computer now only includes "-NewName". I might be going insane.
     2.6.0 - After tedious assessment of AHK "commands", I have pulled in a function from https://autohotkey.com/board/topic/37397-onelinecommands-execute-ahk-code-dynamically/
             This obviously makes it more difficult to distribute. I'll have to look into that. It's also not lost on me that I removed some functions back in 2.5.0 that were obviously doing something.
@@ -177,7 +177,7 @@ OnExit("ExitWait")
 ;   INITIALIZATION
 ;===============================================================================
 __init__:
-;Check if the version has been marked as rebooted.
+;Check if the version has been marked as Restarted.
 
 Try {
   Gui 1: Font,, Lucida Console
@@ -192,19 +192,23 @@ Try {
 }
 
 
-bIsRebooted := false ; Will be used to track if this is first run
+bIsRestarted := false ; Will be used to track if this is first run
+bIsSecondRestart := false
 DoLogging(%0% . " arguments found.")
 ;This loops through the command line arguments
 Loop, %0% {
   DoLogging("A_Index is: " . %A_Index%)
-  ;If it finds that it has been rebooted it flags itself as rebooted
-  If (%A_Index% == "rebooted") {
-    bIsRebooted = true
-    break
+  ;If it finds that it has been Restarted it flags itself as Restarted
+  If (%A_Index% == "firstrestart") {
+  	DoLogging("The System has detected that this is the first Restart.")
+    bIsRestarted = true
+  } Else If (%A_Index% == "secondrestart"){
+  	DoLogging("The System has detected that this is the second Restart.")
+  	bIsSecondRestart = true
   }
 }
 Try {
-  If (!bIsRebooted) {
+  If (!bIsRestarted And !bIsSecondRestart) {
     DoLogging("")
     DoLogging("***************************************************************")
     DoLogging("       Configure-Image " . strVersion                           )
@@ -212,7 +216,7 @@ Try {
     DoLogging("***************************************************************")
     DoLogging("")
   } else {
-    ;bIsRebooted == True
+    ;bIsRestarted == True
     DoLogging("")
     DoLogging("***************************************************************")
     DoLogging("       Resuming Configure-Image " . strVersion                  )
@@ -230,19 +234,21 @@ Try {
 ;===============================================================================
 __startup__:
 {
-  DoLogging("")
-  DoLogging("__ __startup__")
-  WinMinimizeAll
-  WinRestore, Console Window
+	DoLogging("")
+	DoLogging("__ __startup__")
+	WinMinimizeAll
+	WinRestore, Console Window
 
-  If (!bIsRebooted) {
-    ;Constructs the GUI and gets the specific information that we need
-    ;We only want to do this if this is not the rebooted version of the app
-    Gosub __subMainGUI__
-  } Else {
-    ;bIsRebooted == true
-    Gosub, __afterReboot__
-  }
+	If (!bIsRestarted And !bIsSecondRestart) {
+		;Constructs the GUI and gets the specific information that we need
+		;We only want to do this if this is not the Restarted version of the app
+		Gosub __subMainGUI__
+	} Else If (bIsRestarted) {
+		;bIsRestarted == true
+		Gosub, __afterRestart__
+	} Else If (bIsSecondRestart) {
+		Gosub, __afterSecondRestart__
+	}
 
 }
 
@@ -254,35 +260,36 @@ MsgBox Cthuhlu! ; This should never run!
 ; if we're in __main__, we should have all the input we need from the user.
 __main__:
 {
-  DoLogging("")
-  DoLogging("__ __main__")
-  
-    If (bIsWireless == 1) {
-      Gosub, __WirelessTasks__ ; FixMe should be changed to WirelessTasks Issue #25
-    } 
+	DoLogging("")
+	DoLogging("__ __main__")
 
-  Gosub, __DefaultTasks__ 
-  
-  Gosub, __Reboot__
+	If (bIsWireless == 1) {
+		Gosub, __WirelessTasks__ ; FixMe should be changed to WirelessTasks Issue #25
+	} 
 
-  Exit 0 ;After it triggers the reboot it should exit the script.
-  MsgBox Cthuhlu! ; This should never run!
+	Gosub, __DefaultTasks__  
+	Gosub, __FirstRestart__
+
+	Exit 0 ;After it triggers the Restart it should exit the script.
+	MsgBox Cthuhlu! ; This should never run!
 }
 
-__afterReboot__:
+__afterRestart__:
 {
-  loadUserInput()
+	loadUserInput()
 
-  GoSub, __DefaultAfterReboot__
+	GoSub, __DefaultAfterFirstRestart__
+	GoSub, __SecondRestart__
 
-  GoSub, __SpecificTasks__
+}
 
-  GoSub, __AutoLogon__
+__afterSecondRestart__:
+{
+	loadUserInput()
 
-  GoSub, __Finish__
-
-  DoLogging(" Advancing to task reserved for after the reboot.")
-
+	GoSub, __SpecificTasks__
+	GoSub, __AutoLogon__
+	GoSub, __Finish__
 }
 
 ;===============================================================================
@@ -333,9 +340,8 @@ MsgBox Cthuhlu! ; This should never run!
 #Include, DynamicCommand.ahk
 #Include, KeyValStore.ahk
 #Include, Finish.ahk
-#Include, DefaultAfterReboot.ahk
 #Include, SpecificTasks.ahk
 #Include, AutoLogon.ahk
-#Include, Reboot.ahk
+#Include, Restart.ahk
 #Include, DefaultTasks.ahk
 #Include, WireLessTasks.ahk

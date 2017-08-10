@@ -16,7 +16,28 @@ __DefaultTasks__:
 
 	RenameComputer()
 	CopyPrinters()
-	RegisterRestart()
+
+	Return
+}
+
+__DefaultAfterFirstRestart__:
+{
+	DoLogging(" ")
+	DoLogging("===============================================================")
+	DoLogging("		Starting DefaultAfterFirstRestart Operation")
+	DoLogging("===============================================================")
+	DoLogging(" ")
+
+	;After the
+	arrExternalCleanupJobs := []
+	arrExternalCleanupJobs.insert("powershell.exe -Command ""& { "
+		. " Unregister-ScheduledTask "
+		. " -TaskName RestartConfigureImage "
+		. " -Confirm:$false }""")
+	iTotalErrors += DoExternalTasks(arrExternalCleanupJobs, bIsVerbose)
+
+	JoinDomain()
+	;InstallLogMeIn()
 
 	Return
 }
@@ -71,23 +92,89 @@ CopyPrinters()
 	return
 }
 
-;===============================================================================
-; 								Register Restart
-;
-; This functions will register a task using Windows Task Scheduler to start the
-; Configure Image exe on user logon.
-;
-;===============================================================================
-RegisterRestart()
+JoinDomain()
 {
-	DoLogging("Registering the task to restart Configure Image")
-	strTaskFilePath := A_ScriptDir . "\Configure-ImageTask.xml"
+	DoLogging("Joining the Domain")
 
-	ExecuteExternalCommand("powershell.exe "
-		. " -Command ""& { "
-		. " Register-ScheduledTask "
-		. " -Xml (get-content '" . strTaskFilePath . "' | out-string) "
-		. " -Taskname RestartConfigureImage}""")
+	IniRead, strDomainPassword										; Variable
+		, %A_WorkingDir%\Resources\KeysAndPasswords.ini 			; File
+		, Passwords 												; Section
+		, DomainJoin 												; Key
+
+	;Adds computer to Domain
+	ExecuteExternalCommand("powershell.exe -Command ""& { "
+		. " Start-Sleep -s 3; "
+		. " `$pass `= ConvertTo-SecureString -String " . strDomainPassword 
+		. " -AsPlainText -Force; "
+		. " `$mycred `= New-Object -TypeName "
+		. " System.Management.Automation.PSCredential "
+		. " -ArgumentList unattend,`$pass; "
+		. " Add-Computer  -DomainName dcls.org -Credential `$mycred "
+		. " -OUPath '" . CreateOUPath() . "' -Force -PassThru }""")
+	;Enables file sharing
+	ExecuteExternalCommand("powershell.exe -Command ""& { "
+		. " get-NetFirewallRule "
+		. " | where {$_.DisplayName -like '*file*'} "
+		. " | Set-NetFirewallRule -enabled True "
+		. " }""" )
+
+	DoLogging("")
+	return
+}
+
+InstallLogMeIn()
+{
+	Global strResourcesPath
+
+	ExecuteExternalCommand("msiexec.exe /i " . strResourcesPath . "\Installers\_LogMeIn.msi "
+    	. " /quiet /norestart /log "A_ScriptDir . "\logmein_install.log")
 
 	return
 }
+
+;===============================================================================
+;
+;
+;===============================================================================
+CreateOUPath()
+{
+	Global iTotalErrors
+	Global strLocation
+	;Local strOUPath
+
+	DoLogging("ii Creating distinguished name for domain join...")
+	Try {
+		If (strComputerRole == "Office")
+			strOUPath := "OU=Offices,OU=Systems,OU="
+						. strLocation
+						. ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
+		If (strComputerRole == "Frontline")
+			strOUPath := "OU=Frontline,OU=Systems,OU=" 
+						. strLocation 
+						. ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
+		If (strComputerRole == "Frontline" and bIsWireless == 1) ;Staff Laptop
+			strOUPath := "OU=Laptops,OU=Systems,OU=" 
+						. strLocation
+						. ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
+		If (strComputerRole == "Patron")
+			strOUPath := "OU=" 
+						. strLocation 
+						. ",OU=Patron,OU=DCLS,DC=dcls,DC=org"  
+		If (strComputerRole == "Patron" and bIsWireless == 1) ;Patron Laptop
+			strOUPath := "OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
+		If (strComputerRole == "Catalog")
+			strOUPath := "OU=Catalog,OU=Patron,OU=DCLS,DC=dcls,DC=org"
+		If (strComputerRole == "Self-Check")
+			strOUPath := "OU=Self Service,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
+		If (strComputerRole == "Kiosk")
+			strOUPath := "OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
+		DoLogging("ii Distinguished Name: " . strOUPath)
+	} Catch {
+		DoLogging("!! Failure to create distinguished name!")
+		iTotalErrors +=1
+	}
+
+	Return strOUPath
+}
+
+

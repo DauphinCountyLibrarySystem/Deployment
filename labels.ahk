@@ -116,6 +116,7 @@ RoleCheck:
         Gui 2: Font, Norm
         Gui 2: Add, DDL, vstrComputerRole gRoleCheck, Computer...||Office|Frontline|Patron|Catalog|Self-Check|Kiosk
         GuiControl, Choose, strComputerRole, %strComputerRole%
+        GuiControl, Focus, strComputerRole
 
         ;----This section contains Checkbox toggles.----
         Gui 2: Font, Bold s10
@@ -490,7 +491,6 @@ __subSpecificTasks__:
 }
 MsgBox Cthuhlu! ; This should never run!
 
-
 __subAddAutoLogon__:
 {
   DoLogging(" ")
@@ -588,12 +588,12 @@ __subCleanupJobs2__:
 } 
 
 
-__subReboot__:
+__subRestart__:
 {
   ;We have the user's input saved to DeploymentInfo.xml and will use that after
-  ; the reboot to continue running this with the same configuration
+  ; the restart to continue running this with the same configuration
   ; but first we need to create an autologon key with admin credentials
-  ; to ensure it logs back in after reboot
+  ; to ensure it logs back in after restart
   arrAddAutoLogonList := []
   arrAddAutoLogonList.Insert(["RegWrite", "REG_SZ"
     , "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
@@ -625,7 +625,7 @@ MsgBox Cthuhlu! ; This should never run!
 __subLoadUserInput__:
 {
   ;We need to load the data from the xml document that was created before the
-  ;reboot in order to maintain the user's input.
+  ;restart in order to maintain the user's input.
   DoLogging(" Loading Saved input from the User.")
   data := new KeyValStore("DeploymentInfo.xml")
   strComputerName := data.Get("ComputerName")
@@ -643,7 +643,7 @@ __subLoadUserInput__:
   return
 }
 
-__subDefaultAfterReboot__:
+__subDefaultAfterRestart__:
 {
   DoLogging("Joins the domain and installs LogMeIn")
   arrDefaultTaskListAR := []  
@@ -679,7 +679,7 @@ __subFinishAndExit2__:
     MsgBox, 1, Configuration Successful,  %successMsg%, 10 
     IfMsgBox, Cancel
       ExitApp, 0
-    Shutdown, 2 ; Reboots computer.
+    Shutdown, 2 ; Restarts computer.
     ExitApp, 0 ; indicates success
   }
 }
