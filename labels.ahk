@@ -91,6 +91,7 @@ RoleCheck:
         Gui 2: Add, Button, Section xm+50 gButtonStart w100 Default, Start
         Gui 2: Add, Button, yp xp+110 gButtonExit w100, Exit
         Gui 2: Show
+        GuiControl, Focus, strComputerRole
     } Else {
       If (strLastRole == "Self-Check") {
         Gui 2: Destroy
@@ -116,7 +117,6 @@ RoleCheck:
         Gui 2: Font, Norm
         Gui 2: Add, DDL, vstrComputerRole gRoleCheck, Computer...||Office|Frontline|Patron|Catalog|Self-Check|Kiosk
         GuiControl, Choose, strComputerRole, %strComputerRole%
-        GuiControl, Focus, strComputerRole
 
         ;----This section contains Checkbox toggles.----
         Gui 2: Font, Bold s10
@@ -132,6 +132,7 @@ RoleCheck:
         Gui 2: Add, Button, Section xm+50 gButtonStart w100 Default, Start
         Gui 2: Add, Button, yp xp+110 gButtonExit w100, Exit
         Gui 2: Show
+        GuiControl, Focus, strComputerRole
       } Else {
         ; If the current role is not Self-Check and the Last one is not either
         ; Then we don;t need to add or remove and elements and should jst do nothing]
