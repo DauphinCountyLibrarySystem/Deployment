@@ -468,6 +468,10 @@ SelfCheckTasks()
 	
 	Run, ClickInstallThread.exe
 	ExecuteExternalCommand(strInstallersPath . "\_SelfCheckout.exe /S")
+	ExecuteExternalCommand("powershell.exe -Command ""& { "
+		. " Get-NetFirewallRule | where {$_.DisplayName -like '*self check*'}"
+		. " | Set-NetFirewallRule -Action Allow"
+		. "}")
 	ConfigureSelfCheck()
 
 	;Move the License
@@ -623,7 +627,11 @@ ConfigureSelfCheck()
 		. strResourcesPath . "\EwareConfig"							; Source
 		. " """ . strPCResPath . "\Reservation Station\config""" 	; Dest
 		. " /mov")													; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
-	ExecuteExternalCommand("del ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\PC Reservation Reservation Station.lnk""")	
+	ExecuteExternalCommand("del ""C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\PC Reservation Reservation Station.lnk""")
+	ExecuteExternalCommand("powershell.exe -Command ""& { "
+		. " Get-NetFirewallRule | where {$_.DisplayName -like '*reservation*'}"
+		. " | Set-NetFirewallRule -Action Allow"
+		. "}")	
 
 	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers"
 		. "\_LPTOnePrintRelease.exe /S host`=" . strEwareServer)
