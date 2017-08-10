@@ -157,6 +157,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;   symbols are allowed other than dash and period, so...
 Global ValidHostnameRegex := "i)^[a-z0-9]{1}[a-z0-9-\.]{0,14}$"
 Global strResourcesPath := A_ScriptDir . "\Resources"
+Global strInstallersPath := A_ScriptDir . "\Resources\Installers"
 Global strSavedInputPath = "DeploymentInfo.xml"
 Global strComputerName
 Global strComputerRole
