@@ -52,16 +52,11 @@ OfficeTasks()
 	;This section of OfficeTasks handles the installation of the programs
 	Global strResourcesPath
 
-	; Moves the Seirra Portable app to C: drive
-	ExecuteExternalCommand("robocopy " 								; Command
-	 	. " """ . strResourcesPath . "\Sierra Desktop App"""		; Target
-		. " ""C:\Sierra Desktop App"" "								; Dest
-		. " /s  /UNILOG+:C:\Deployment\robocopy_Sierra.log")		; Options
+	bSierraDesktopIcon = True
+	InstallSierra(bSierraDesktopIcon)
 
-	; Calls Office 365 installer and runs it with customConfiguration
-	ExecuteExternalCommand(strResourcesPath . "\Office365\setup.exe"
-		. " /configure " 											
-		. strResourcesPath . "\Office365\customconfiguration_staff.xml")
+	bOfficeDesktopIcons = True
+	InstallOffice365(bOfficeDesktopIcons)
 
 	; Copy links to staff printers.
 	ExecuteExternalCommand("robocopy "								; Command
@@ -77,7 +72,6 @@ OfficeTasks()
 
 	;This section handles different Windows tasks
 	;These variables will be local
-	strOfficePath := "C:\Program Files (x86)\Microsoft Office\root\Office16"
 	strPublicDesktop := "C:\Users\Public\Desktop"
 	strDefaultDesktop := "C:\Users\Default\Desktop"
 
@@ -121,66 +115,6 @@ OfficeTasks()
 		, 1														; Icon Number
 		, 1														; Run State
 
-	FileCreateShortcut, C:\Sierra Desktop App\iiirunner.exe		; Target
-		, C:\Users\Public\Desktop\Sierra Desktop App.lnk		; Link File
-		, C:\Sierra Desktop App									; WorkingDir
-		, ; No Arguments										; Args 
-		, Launch the Sierra Desktop App							; Description
-		, C:\IT\Icons\Sierra.ico			; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-
-	FileCreateShortcut, %strOfficePath%\WINWORD.EXE				; Target
-		, C:\Users\Default\Desktop\Word 2016.lnk				; Link File
-		, ; Standard Working directory							; WorkingDir
-		, ; No Arguments										; Args 
-		, Launch Microsoft Word									; Description
-		, ; Takes the Icon from the Word exe					; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-
-	FileCreateShortcut, %strOfficePath%\EXCEL.EXE					; Target
-		, C:\Users\Default\Desktop\Excel 2016.lnk				; Link File
-		, ; Standard Working directory							; WorkingDir
-		, ; No Arguments										; Args 
-		, Launch Microsoft Excel								; Description
-		, ; Takes the Icon from the Excel exe					; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-
-	FileCreateShortcut, %strOfficePath%\POWERPNT.EXE				; Target
-		, C:\Users\Default\Desktop\PowerPoint 2016.lnk			; Link File
-		, ; Standard Working directory							; WorkingDir
-		, 														; Args
-		, Launch Microsoft PowerPoint							; Description
-		, ; Takes the Icon from the PowerPoint exe				; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-
-	FileCreateShortcut, %strOfficePath%\MSPUB.EXE					; Target
-		, C:\Users\Default\Desktop\Publisher 2016.lnk			; Link File
-		, ; Standard Working directory							; WorkingDir
-		, ; No Arguments										; Args 
-		, Launch Microsoft Publisher							; Description
-		, ; Takes the Icon from the Publisher exe				; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-
-	FileCreateShortcut, %strOfficePath%\OUTLOOK.EXE					; Target
-		, C:\Users\Default\Desktop\Outlook 2016.lnk				; Link File
-		, ; Standard Working directory							; WorkingDir
-		, ; No Arguments										; Args 
-		, Launch Microsoft Outlook								; Description
-		, ; Takes the Icon from the Outlook exe					; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-
 	FileCreateShortcut, c:\windows\explorer.exe					; Target
 		, :\Users\Default\Desktop\File Explorer.lnk				; Link File
 		, ; Standard Working directory							; WorkingDir
@@ -208,12 +142,12 @@ FrontLineTasks()
 	;This section of FrontLineasks handles the installation of the programs
 	Global strResourcesPath
 
-	InstallPCReservationReservationStation()
-	; Moves the Seirra Portable app from Source to Dest
-	ExecuteExternalCommand("robocopy "								; Command
-		. strResourcesPath . "\Sierra Desktop App"""				; Source
-		. " ""C:\Sierra Desktop App"" "								; Dest
-		. " /s /UNILOG+:C:\Deployment\robocopy_Sierra.log")			; Options
+	bDesktopIcon = False
+	bOnStartup = False
+	InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
+
+	bSierraDesktopIcon = True
+	InstallSierra(bSierraDesktopIcon)
 
 	; Moves Offline circ files from Source to Dest 
 	ExecuteExternalCommand("robocopy "								; Command
@@ -284,16 +218,6 @@ FrontLineTasks()
 		, 1														; Icon Number
 		, 1														; Run State
 
-	FileCreateShortcut, C:\Sierra Desktop App\iiirunner.exe		; Target
-		, C:\Users\Public\Desktop\Sierra Desktop App.lnk		; Link File
-		, C:\Sierra Desktop App									; WorkingDir
-		, ; No Arguments										; Args 
-		, Launch the Sierra Desktop App							; Description
-		, C:\Icons\sierra.ico 									; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-
 	FileCreateShortcut, C:\Millennium\Offline\offlinecirc.exe	; Target
 		, C:\Users\Public\Desktop\Offline Circulation.lnk		; Link File
 		, C:\Millenium\Offline									; WorkingDir
@@ -341,8 +265,8 @@ PatronTasks()
 	  	. " /s "													; Options
 	  	. "/UNILOG+:C:\Deployment\robocopy_PatronAdminPanel.log")	; Options
 
-	; Installs Office 2016
-	ExecuteExternalCommand(""A_ScriptDir . "\Resources\Office2016\setup.exe ")
+	bOfficeDesktopIcons = True
+	InstallOffice2016(bOfficeDesktopIcons)
 
 	If (strLocation == "VAN") {
 		; Do Nothing
@@ -370,60 +294,7 @@ PatronTasks()
 		. " envisionware.lic " ; Will Only Copy this File 			; Options
 		. " /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")		; Options
 
-	strOfficePath := "C:\Program Files (x86)\Microsoft Office\Office16"
-	strPublicDesktop := "C:\Users\Public\Desktop"
-	strDefaultDesktop := "C:\Users\Default\Desktop"
-
-
-	; Notes about Public vs Default Desktop
-	; Public Desktop:
-	; 	- Creates Icons for ALL users of the computer
-	;	- Icons need admin privileges to delete from them desktop
-	; 	- Requires Admin privileges to delete from the Public Folder
-	; Default Desktop :
-	;	- Creates Icons for NEW users of the computer 
-	;	- Can be deleted from desktop without admin privileges
-	; 	- Requires Admin privileges to delete from the Default Folder
-
-	FileCreateShortcut, %strOfficePath%\WINWORD.EXE				; Target
-		, C:\Users\Public\Desktop\Word 2016.lnk					; Link File
-		, ; Standard Working directory							; WorkingDir
-		, ; No Arguments										; Args  
-		, Launch Microsoft Word									; Description
-		, ; Takes the icon from Word exe 						; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-
-	FileCreateShortcut, %strOfficePath%\EXCEL.EXE				; Target
-	  , C:\Users\Public\Desktop\Excel 2016.lnk					; Link File
-		, ; Standard Working directory							; WorkingDir
-		, ; No Arguments										; Args 
-		, Launch Microsoft Excel								; Description
-		, ; Takes the icon from excel exe 						; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-
-	FileCreateShortcut, %strOfficePath%\POWERPNT.EXE			; Target
-	, C:\Users\Public\Desktop\PowerPoint 2016.lnk				; Link File
-		, ; Standard Working directory							; WorkingDir
-		, ; No Arguments										; Args 
-		, Launch Microsoft PowerPoint							; Description
-		, ; Takes the icon from PowerPoint exe 					; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
-
-	FileCreateShortcut, %strOfficePath%\MSPUB.EXE				; Target
-		, C:\Users\Public\Desktop\Publisher 2016.lnk			; Link File
-		, ; Standard Working directory							; WorkingDir
-		, ; No Arguments										; Args  
-		, Launch Microsoft Publisher							; Description
-		, ; Takes the Icon from Publisher exe 					; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
+	
 }
 
 ;======================================||=======================================
@@ -455,20 +326,21 @@ SelfCheckTasks()
 	DoLogging("Configuring Self Check Tasks")
 
 	Global strResourcesPath
-	strInstallersPath :=  strResourcesPath . "\Installers"
 	
-	Run, ClickInstallThread.exe
-	ExecuteExternalCommand(strInstallersPath . "\_SelfCheckout.exe /S")
-	;In order for Self-Check to create the firewall rules it needs to have been opened
-	Run, "C:Program Files (x86)\EnvisionWare\OneStop\ewSelfCheck.exe"
-	SetTitleMatchMode, 2
-	WinWait, OneStop
-	WinClose
+	bOneStopDesktopIcon = True
+	bOneStopOnStartup = True
+	InstallOneStop(bOneStopDesktopIcon, bOneStopOnStartup)
 	ConfigureSelfCheck()
-	ExecuteExternalCommand("powershell.exe -Command ""& { "
-		. " Get-NetFirewallRule | where {$_.DisplayName -like '*self check*'} "
-		. " | Set-NetFirewallRule -Action Allow "
-		. "} ")
+
+
+	bDesktopIcon = False
+	bOnStartup = False
+	InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
+
+	bLPTOneDesktopIcon = True
+	bLPTOneOnStartup = false
+	InstallLPTOnePrintReleaseTerminal(bLPTDesktopIcon, bLPTOnStartup)
+
 
 	;Move the License
 	;Envisionware License
@@ -477,16 +349,6 @@ SelfCheckTasks()
 		. """C:\Program Files (x86)\EnvisionWare"""					; Dest
 		. " envisionware.lic " ; Will Only Copy this File 			; Options
 		. " /UNILOG+:C:\Deployment\robocopy_EWareLicense.log")		; Options
-
-	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\OneStop\ewSelfCheck.exe	; Target
-		, C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\OneStop.lnk ; Link Frenameile
-		, C:\Program Files (x86)\EnvisionWare\OneStop\			; WorkingDirr
-		, ; No Arguments										; Args 
-		, Launch OneStop controller								; Description
-		, ; Takes icon from file								; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
 
 	;Check the OneStop configure found on one note
 	;this definetly will need config
@@ -614,13 +476,16 @@ ConfigureSelfCheck()
 	Global strResourcesPath
 	FileMove, %strResourcesPath%\One Stop Configs\itemDetails.js, C:\Program Files (x86)\EnvisionWare\OneStop\html\scripts, 1
 
-	bDesktopIcon = False
-	bOnStartup = False
-	InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
+	;In order for Self-Check to create the firewall rules it needs to have been opened
+	Run, "C:Program Files (x86)\EnvisionWare\OneStop\ewSelfCheck.exe"
+	SetTitleMatchMode, 2
+	WinWait, OneStop
+	WinClose
 
-	bLPTOneDesktopIcon = True
-	bLPTOneOnStartup = false
-	InstallLPTOnePrintReleaseTerminal(bLPTDesktopIcon, bLPTOnStartup)
+	ExecuteExternalCommand("powershell.exe -Command ""& { "
+		. " Get-NetFirewallRule | where {$_.DisplayName -like '*self check*'} "
+		. " | Set-NetFirewallRule -Action Allow "
+		. "} ")
 
 	return
 }
@@ -642,30 +507,18 @@ KioskTasks()
 	bOnStartup = False
 	InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
 	
-	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers\_InstallAAM.exe /S")
 
-	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers\mysql-connector-odbc-5.3.2-win32.msi /passive")
 
 	; Install LPT One Print Release Terminal
 	bLPTDesktopIcon = true
 	bLPTOnStartup = true
 	InstallLPTOnePrintReleaseTerminal(bLPTDesktopIcon, bLPTOnStartup)
 
-	CreateEWLaunchIndex()
-	ExecuteExternalCommand("robocopy "								; Command
-		. """" . strResourcesPath . "\Launch Command"""				; Source
-		. " C:\" 													; Dest
-		. " /e /is /move")											; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
+	bEWLaunchDesktopIcon = True
+	bEWLaunchOnStartup = True
+	InstallEWLaunch(bEWLaunchDesktopIcon, bEWLaunchOnStartup)
 
-	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\ewLaunch\ewlaunch.exe	; Target
-		, C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\ewLaunch.lnk ; Link Frenameile
-		, ; Standard Working directory							; WorkingDirr
-		, ; No Arguments										; Args 
-		, Launch ewLaunch kiosk controller						; Description
-		, ; Takes icon from file								; Icon
-		, ; No Shortcut Key										; Shortcut Key
-		, 1														; Icon Number
-		, 1														; Run State
+
 }
 
 ;-------------------------------------------------------------------------------
@@ -782,4 +635,233 @@ InstallLPTOnePrintReleaseTerminal(bDesktopIcon, bOnStartup)
 			, 1														; Icon Number
 			, 1														; Run State
 	}
+
+	If (!bOnStartup) {
+		; LPT One Printer Terminal defaults to not starting at startup so no
+		; change is required
+		; DO NOTHING
+	} Else {
+		DoLogging("Error: Having LPT One Print Release Terminal launch on"
+			. " startup is not supported yet.") ; FIXME:
+	}
+
+	Return
+}
+
+;-------------------------------------------------------------------------------
+; Installing Sierra is actually pretty simple because instead of actually 
+; installing the program we instead simiply robocopy the files to where they are
+; supposed to be.
+;-------------------------------------------------------------------------------
+InstallSierra(bSierraDesktopIcon)
+{
+	Global strResourcesPath
+
+	; Moves the Seirra Portable app to C: drive
+	ExecuteExternalCommand("robocopy " 								; Command
+	 	. " """ . strResourcesPath . "\Sierra Desktop App"""		; Target
+		. " ""C:\Sierra Desktop App"" "								; Dest
+		. " /s  /UNILOG+:C:\Deployment\robocopy_Sierra.log")		; Options
+
+	If (bSierraDesktopIcon) {
+		FileCreateShortcut, C:\Sierra Desktop App\iiirunner.exe		; Target
+			, C:\Users\Public\Desktop\Sierra Desktop App.lnk		; Link File
+			, C:\Sierra Desktop App									; WorkingDir
+			, ; No Arguments										; Args 
+			, Launch the Sierra Desktop App							; Description
+			, C:\IT\Icons\Sierra.ico			; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+	} Else {
+		; By Default This will not create a desktop icon for sierra so if there 
+		; is no change needed to not get a desktop icon.
+		; Do Nothing
+	}
+
+	Return
+}
+
+InstallOneStop (bOneStopDesktopIcon, bOneStopOnStartup) 
+{
+	Run, ClickInstallThread.exe
+	ExecuteExternalCommand(strInstallersPath . "\_SelfCheckout.exe /S")
+
+	If (bOneStopDesktopIcon) {
+		; By default it will create a desktop Icon so we don't have to change
+		; anything
+		; DO NOTHING
+	} Else {
+		DoLogging("Error: Not having a selfcheck desktop Icon is not supported yet.") ; FixMe
+	}
+	If (bOneStopOnStartup) {
+	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\OneStop\ewSelfCheck.exe	; Target
+		, C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\OneStop.lnk ; Link Frenameile
+		, C:\Program Files (x86)\EnvisionWare\OneStop\			; WorkingDirr
+		, ; No Arguments										; Args 
+		, Launch OneStop controller								; Description
+		, ; Takes icon from file								; Icon
+		, ; No Shortcut Key										; Shortcut Key
+		, 1														; Icon Number
+		, 1														; Run State
+	} Else {
+		; The Default is for self Check to not start on starup so we don't
+		; have to change anything
+		; DO NOTHING
+	}
+
+	Return
+}
+
+InstallOffice2016(bOfficeDesktopIcons)
+{
+	; Installs Office 2016
+	ExecuteExternalCommand(""A_ScriptDir . "\Resources\Office2016\setup.exe ")
+
+	If (bOfficeDesktopIcons) {
+		strOfficePath := "C:\Program Files (x86)\Microsoft Office\Office16"
+		strPublicDesktop := "C:\Users\Public\Desktop"
+		strDefaultDesktop := "C:\Users\Default\Desktop"
+
+		; Notes about Public vs Default Desktop
+		; Public Desktop:
+		; 	- Creates Icons for ALL users of the computer
+		;	- Icons need admin privileges to delete from them desktop
+		; 	- Requires Admin privileges to delete from the Public Folder
+		; Default Desktop :
+		;	- Creates Icons for NEW users of the computer 
+		;	- Can be deleted from desktop without admin privileges
+		; 	- Requires Admin privileges to delete from the Default Folder
+
+		FileCreateShortcut, %strOfficePath%\WINWORD.EXE				; Target
+			, C:\Users\Public\Desktop\Word 2016.lnk					; Link File
+			, ; Standard Working directory							; WorkingDir
+			, ; No Arguments										; Args  
+			, Launch Microsoft Word									; Description
+			, ; Takes the icon from Word exe 						; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+
+		FileCreateShortcut, %strOfficePath%\EXCEL.EXE				; Target
+		  , C:\Users\Public\Desktop\Excel 2016.lnk					; Link File
+			, ; Standard Working directory							; WorkingDir
+			, ; No Arguments										; Args 
+			, Launch Microsoft Excel								; Description
+			, ; Takes the icon from excel exe 						; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+
+		FileCreateShortcut, %strOfficePath%\POWERPNT.EXE			; Target
+		, C:\Users\Public\Desktop\PowerPoint 2016.lnk				; Link File
+			, ; Standard Working directory							; WorkingDir
+			, ; No Arguments										; Args 
+			, Launch Microsoft PowerPoint							; Description
+			, ; Takes the icon from PowerPoint exe 					; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+
+		FileCreateShortcut, %strOfficePath%\MSPUB.EXE				; Target
+			, C:\Users\Public\Desktop\Publisher 2016.lnk			; Link File
+			, ; Standard Working directory							; WorkingDir
+			, ; No Arguments										; Args  
+			, Launch Microsoft Publisher							; Description
+			, ; Takes the Icon from Publisher exe 					; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+	} Else {
+		; By Default Office 2016 Does not create the desktop Icons so no changes
+		; Are needed
+		; DO NOTHING
+	}
+
+	Return
+}
+
+InstallEWLaunch(bEWLaunchDesktopIcon, bEWLaunchOnStartup)
+{
+	Global strResourcesPath
+
+	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers\_InstallAAM.exe /S")
+
+	ExecuteExternalCommand("" . A_ScriptDir . "\Resources\Installers\mysql-connector-odbc-5.3.2-win32.msi /passive")
+
+	CreateEWLaunchIndex()
+	ExecuteExternalCommand("robocopy "								; Command
+		. """" . strResourcesPath . "\Launch Command"""				; Source
+		. " C:\" 													; Dest
+		. " /e /is /move")											; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
+	Return
+}
+
+InstallOffice365 (bOfficeDesktopIcons) {
+	; Calls Office 365 installer and runs it with customConfiguration
+	Global strResourcesPath
+	
+	ExecuteExternalCommand(strResourcesPath . "\Office365\setup.exe"
+		. " /configure " 											
+		. strResourcesPath . "\Office365\customconfiguration_staff.xml")
+
+	If (bOfficeDesktopIcons) {
+		strOfficePath := "C:\Program Files (x86)\Microsoft Office\root\Office16"
+
+		FileCreateShortcut, %strOfficePath%\WINWORD.EXE				; Target
+			, C:\Users\Default\Desktop\Word 2016.lnk				; Link File
+			, ; Standard Working directory							; WorkingDir
+			, ; No Arguments										; Args 
+			, Launch Microsoft Word									; Description
+			, ; Takes the Icon from the Word exe					; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+
+		FileCreateShortcut, %strOfficePath%\EXCEL.EXE					; Target
+			, C:\Users\Default\Desktop\Excel 2016.lnk				; Link File
+			, ; Standard Working directory							; WorkingDir
+			, ; No Arguments										; Args 
+			, Launch Microsoft Excel								; Description
+			, ; Takes the Icon from the Excel exe					; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+
+		FileCreateShortcut, %strOfficePath%\POWERPNT.EXE				; Target
+			, C:\Users\Default\Desktop\PowerPoint 2016.lnk			; Link File
+			, ; Standard Working directory							; WorkingDir
+			, 														; Args
+			, Launch Microsoft PowerPoint							; Description
+			, ; Takes the Icon from the PowerPoint exe				; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+
+		FileCreateShortcut, %strOfficePath%\MSPUB.EXE					; Target
+			, C:\Users\Default\Desktop\Publisher 2016.lnk			; Link File
+			, ; Standard Working directory							; WorkingDir
+			, ; No Arguments										; Args 
+			, Launch Microsoft Publisher							; Description
+			, ; Takes the Icon from the Publisher exe				; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+
+		FileCreateShortcut, %strOfficePath%\OUTLOOK.EXE					; Target
+			, C:\Users\Default\Desktop\Outlook 2016.lnk				; Link File
+			, ; Standard Working directory							; WorkingDir
+			, ; No Arguments										; Args 
+			, Launch Microsoft Outlook								; Description
+			, ; Takes the Icon from the Outlook exe					; Icon
+			, ; No Shortcut Key										; Shortcut Key
+			, 1														; Icon Number
+			, 1														; Run State
+	} Else {
+		; By Default Office 365 Will not create Desktop Icons so no changes are 
+		; needed
+		; DO NOTHING
+	}
+
+	Return
 }
