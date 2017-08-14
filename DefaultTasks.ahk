@@ -144,30 +144,35 @@ CreateOUPath()
 
 	DoLogging("ii Creating distinguished name for domain join...")
 	Try {
-		If (strComputerRole == "Office")
+		If (strComputerRole == "Office" and bIsWireless != 1) {
 			strOUPath := "OU=Offices,OU=Systems,OU="
 						. strLocation
 						. ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
-		If (strComputerRole == "Frontline")
+		} Else If(strComputerRole == "Office" and bIsWireless == 1) {
+			strOUPath := "OU=Laptopss,OU=Systems,OU="
+						 . strLocation
+						 . ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
+		} Else If (strComputerRole == "Frontline" and bIsWireless != 1) {
 			strOUPath := "OU=Frontline,OU=Systems,OU=" 
 						. strLocation 
 						. ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
-		If (strComputerRole == "Frontline" and bIsWireless == 1) ;Staff Laptop
+		} Else If (strComputerRole == "Frontline" and bIsWireless == 1) { ;Staff Laptop
 			strOUPath := "OU=Laptops,OU=Systems,OU=" 
 						. strLocation
-						. ",OU=Staff,OU=DCLS,DC=dcls,DC=org"  
-		If (strComputerRole == "Patron")
+						. ",OU=Staff,OU=DCLS,DC=dcls,DC=org" 
+		} Else If (strComputerRole == "Patron" and bIsWireless != 1) {
 			strOUPath := "OU=" 
 						. strLocation 
 						. ",OU=Patron,OU=DCLS,DC=dcls,DC=org"  
-		If (strComputerRole == "Patron" and bIsWireless == 1) ;Patron Laptop
+		}  Else If (strComputerRole == "Patron" and bIsWireless == 1) {
 			strOUPath := "OU=Laptops,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
-		If (strComputerRole == "Catalog")
+		}  Else If (strComputerRole == "Catalog") {
 			strOUPath := "OU=Catalog,OU=Patron,OU=DCLS,DC=dcls,DC=org"
-		If (strComputerRole == "Self-Check")
+		} Else If (strComputerRole == "Self-Check") {
 			strOUPath := "OU=Self Service,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
-		If (strComputerRole == "Kiosk")
+		} Else If (strComputerRole == "Kiosk") {
 			strOUPath := "OU=Kiosk,OU=Patron,OU=DCLS,DC=dcls,DC=org"    
+		}
 		DoLogging("ii Distinguished Name: " . strOUPath)
 	} Catch {
 		DoLogging("!! Failure to create distinguished name!")
