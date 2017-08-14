@@ -169,7 +169,46 @@ CreateFrontLineEwareConfig(location)
 		}
 		intLineNumber += 1
 	}
+}
 
-	FileAppend, %fileContent%, %fileName%
+
+CreateEWLaunchIndex()
+{
+	DoLogging("Creating EWLaunch Index.html")
+	Global strLocation
+	Global strResourcesPath
+
+	serversPath := A_WorkingDir . "\Resources\Servers.ini"
+	IniRead, strEwareServer
+		, %serversPath%
+		, Servers
+		, %strLocation%
+
+
+	strSourceFileName := "Resources\EwareConfig\TempEWLaunch.index.html"
+	strDestinationFileName := "" . strResourcesPath . "\Launch Command\Program Files (x86)\Envisionware\ewLaunch\menus\index.html" 
+
+	intLineNumber := 1 ; ahk starts lines at 1
+	boolIsDone := false
+	while (!boolIsDone) {
+		FileReadLine, strCurrentLine, %strSourceFileName%, intLineNumber
+		If (ErrorLevel == 1) { ;If we reached end of file we are done
+			boolIsDone := True
+		} Else {
+			strToken = IP Goes Here
+			IfInString, strCurrentLine, %strToken%
+			{
+				strCurrentLine := StrReplace(strCurrentLine
+					, strToken
+					, strEwareServer
+					, 0 ;OutputVarCount
+					, -1 )
+			} 
+			FileAppend, %strCurrentLine% `n , %strDestinationFileName%
+		}
+		intLineNumber += 1
+	}
+
+
 }
 
