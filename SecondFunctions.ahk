@@ -135,3 +135,41 @@ CreatePatronEwareConfig(location)
 	FileAppend, %fileContent%, %destinationFileName%
 }
 
+CreateFrontLineEwareConfig(location)
+{
+	;Path to where Servers.ini is found
+	serversPath := A_WorkingDir . "\Resources\Servers.ini"
+	IniRead, strEwareServer
+		, %serversPath%, Servers, %location%
+	IniRead, strAutoDiscoveryPort
+		, %serversPath%, AutoDiscoveryPort, %location%
+	IniRead, strManagementServicePort
+		, %serversPath%, ManagementServicePort, %location%
+
+	sourcefileName := "Resources\EwareConfig\TemprsConfig.ewp"
+	destinationFileName := "Resources\EwareConfig\rsConfig.ewp"
+
+	intLineNumber := 1 ; ahk starts lines at 1
+	boolIsDone := false
+	while (!boolIsDone) {
+		FileReadLine, strCurrentLine, %sourceFileName%, intLineNumber
+		If (ErrorLevel == 1) { ;If we reached end of file we are done
+			boolIsDone := True
+		} Else {
+			strToken = IP Goes Here
+			IfInString, strCurrentLine, %strToken%
+			{
+				strCurrentLine := StrReplace(strCurrentLine
+					, strToken
+					, strEwareServer
+					, 0 ;OutputVarCount
+					, -1 )
+			} 
+			FileAppend, %strCurrentLine% `n , %destinationFileName%
+		}
+		intLineNumber += 1
+	}
+
+	FileAppend, %fileContent%, %fileName%
+}
+
