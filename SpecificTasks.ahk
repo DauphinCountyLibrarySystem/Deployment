@@ -52,10 +52,10 @@ OfficeTasks()
 	;This section of OfficeTasks handles the installation of the programs
 	Global strResourcesPath
 
-	bSierraDesktopIcon = True
+	bSierraDesktopIcon := True
 	InstallSierra(bSierraDesktopIcon)
 
-	bOfficeDesktopIcons = True
+	bOfficeDesktopIcons := True
 	InstallOffice365(bOfficeDesktopIcons)
 
 	; Copy links to staff printers.
@@ -95,7 +95,7 @@ OfficeTasks()
 		, 138													; Icon Number
 		, 1														; Run State
 
-	FileCreateShortcut, https://portal.adp.com/public/login		; Target
+	FileCreateShortcut, https://online.adp.com/portal/login.html ; Target
 		, C:\Users\Public\Desktop\ADP.lnk 						; Link File
 		, ; Standard Working directory							; WorkingDirr
 		, ; No Arguments										; Args 
@@ -142,11 +142,11 @@ FrontLineTasks()
 	;This section of FrontLineasks handles the installation of the programs
 	Global strResourcesPath
 
-	bDesktopIcon = False
-	bOnStartup = False
-	InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
+	bPCResDesktopIcon := False
+	bPcResOnStartup := False
+	InstallPCReservationReservationStation(bPCResDesktopIcon, bPCResOnStartup)
 
-	bSierraDesktopIcon = True
+	bSierraDesktopIcon := True
 	InstallSierra(bSierraDesktopIcon)
 
 	; Moves Offline circ files from Source to Dest 
@@ -162,8 +162,8 @@ FrontLineTasks()
 		. " /s /UNILOG+:C:\Deployment\robocopy_Shortcuts.log")		; Options
 
 	; Install staff Print Release Terminal.
-	bLPTDesktopIcon = True
-	bLPTOnStartup = False
+	bLPTDesktopIcon := True
+	bLPTOnStartup := False
 	InstallLPTOnePrintReleaseTerminal(bLPTDesktopIcon, bLPTOnStartup)
 
 	;Envisionware License
@@ -327,18 +327,18 @@ SelfCheckTasks()
 
 	Global strResourcesPath
 	
-	bOneStopDesktopIcon = True
-	bOneStopOnStartup = True
+	bOneStopDesktopIcon := True
+	bOneStopOnStartup := True
 	InstallOneStop(bOneStopDesktopIcon, bOneStopOnStartup)
 	ConfigureSelfCheck()
 
 
-	bDesktopIcon = False
-	bOnStartup = False
-	InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
+	bPCResDesktopIcon := False
+	bPCResOnStartup := False
+	InstallPCReservationReservationStation(bPCResDesktopIcon, bPCResOnStartup)
 
-	bLPTOneDesktopIcon = True
-	bLPTOneOnStartup = false
+	bLPTOneDesktopIcon := True
+	bLPTOneOnStartup := False
 	InstallLPTOnePrintReleaseTerminal(bLPTDesktopIcon, bLPTOnStartup)
 
 
@@ -389,7 +389,7 @@ ConfigureSelfCheck()
 	while (!boolIsDone) {
 		FileReadLine, strCurrentLine, %strResourcesPath%\One Stop Configs\tempreceipt_en_us.htm, intLineNumber
 		If (ErrorLevel == 1) { ;If we reached end of file we are done
-			boolIsDone = True
+			boolIsDone := True
 		} Else {
 			strToken = Library Name Goes Here
 			IfInString, strCurrentLine, %strToken%
@@ -415,7 +415,7 @@ ConfigureSelfCheck()
 	while (!boolIsDone) {
 		FileReadLine, strCurrentLine, %strResourcesPath%\One Stop Configs\tempcustom_text_en_us.js, intLineNumber
 		If (ErrorLevel == 1) { ;If we reached end of file we are done
-			boolIsDone = True
+			boolIsDone := True
 		} Else {
 			strToken = Library Name Goes Here
 			IfInString, strCurrentLine, %strToken%
@@ -441,7 +441,7 @@ ConfigureSelfCheck()
 	while (!boolIsDone) {
 		FileReadLine, strCurrentLine, %strResourcesPath%\One Stop Configs\tempewSelfCheck.ewp, intLineNumber
 		If (ErrorLevel == 1) { ;If we reached end of file we are done
-			boolIsDone = True
+			boolIsDone := True
 		} Else {
 			Global strILSUsername
 			Global strLocation
@@ -503,19 +503,19 @@ KioskTasks()
 	Global strResourcesPath
 
 	; Install Reservation Station
-	bDesktopIcon = False
-	bOnStartup = False
+	bDesktopIcon := False
+	bOnStartup := False
 	InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
 	
 
 
 	; Install LPT One Print Release Terminal
-	bLPTDesktopIcon = true
+	bLPTDesktopIcon := true
 	bLPTOnStartup = true
 	InstallLPTOnePrintReleaseTerminal(bLPTDesktopIcon, bLPTOnStartup)
 
-	bEWLaunchDesktopIcon = True
-	bEWLaunchOnStartup = True
+	bEWLaunchDesktopIcon := True
+	bEWLaunchOnStartup := True
 	InstallEWLaunch(bEWLaunchDesktopIcon, bEWLaunchOnStartup)
 
 
@@ -532,7 +532,7 @@ KioskTasks()
 ; but this prevents you from installing silently) we have to do Configuaration 
 ; after the install.
 ;-------------------------------------------------------------------------------
-InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
+InstallPCReservationReservationStation(bPCResDesktopIcon, bPCResOnStartup)
 {
 	DoLogging("Installing PC Reservation Station")
 	Global strResourcesPath
@@ -559,7 +559,7 @@ InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
 		. " | Set-NetFirewallRule -Action Allow"
 		. "}")
 
-	If (!bDesktopIcon) {
+	If (!bPCResDesktopIcon) {
 		DoLogging("Deleteing PC Reservation Reservation Station Desktop Icon")
 		ExecuteExternalCommand("del ""C:\Users\Public\Desktop\PC Reservation "
 			. "Reservation Station.lnk""")
@@ -569,11 +569,11 @@ InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
 		; DO NOTHING
 	}
 
-	If (!bOnStartup) {
+	If (!bPCResOnStartup) {
 		DoLogging("Removing PC Reservation Reservation Station from Startup")
 		ExecuteExternalCommand("del ""C:\ProgramData\Microsoft\Windows\"
 			. "Start Menu\Programs\StartUp\"
-			."PC Reservation Reservation Station.lnk""")
+			. "PC Reservation Reservation Station.lnk""")
 	} Else {
 		; By Default PC Reservation starts on startup so if we want  don't have
 		; to change anything
@@ -593,7 +593,7 @@ InstallPCReservationReservationStation(bDesktopIcon, bOnStartup)
 ; what you specify for Desktop Icon because otherwise LPT One is completely 
 ; useless.
 ;-------------------------------------------------------------------------------
-InstallLPTOnePrintReleaseTerminal(bDesktopIcon, bOnStartup)
+InstallLPTOnePrintReleaseTerminal(bLPTOneDesktopIcon, bLPTOneOnStartup)
 {
 	ExecuteExternalCommand(A_ScriptDir . "\Resources\Installers"
 		. "\_LPTOnePrintRelease.exe /S")
@@ -612,7 +612,7 @@ InstallLPTOnePrintReleaseTerminal(bDesktopIcon, bOnStartup)
 		, 1														; Icon Number
 		, 1														; Run State
 
-	If (!bDesktopIcon) {
+	If (!bLPTOneDesktopIcon) {
 		DoLogging("Error: It was specified not to create a LPT One Print"
 			. " Release Terminal but the system requires that you create one.")
 		FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\Lptone\lptprt\lptPRT.exe 	; Target
@@ -636,7 +636,7 @@ InstallLPTOnePrintReleaseTerminal(bDesktopIcon, bOnStartup)
 			, 1														; Run State
 	}
 
-	If (!bOnStartup) {
+	If (!bLPTOneOnStartup) {
 		; LPT One Printer Terminal defaults to not starting at startup so no
 		; change is required
 		; DO NOTHING
@@ -682,7 +682,7 @@ InstallSierra(bSierraDesktopIcon)
 	Return
 }
 
-InstallOneStop (bOneStopDesktopIcon, bOneStopOnStartup) 
+InstallOneStop(bOneStopDesktopIcon, bOneStopOnStartup) 
 {
 	Run, ClickInstallThread.exe
 	ExecuteExternalCommand(strInstallersPath . "\_SelfCheckout.exe /S")
@@ -797,10 +797,11 @@ InstallEWLaunch(bEWLaunchDesktopIcon, bEWLaunchOnStartup)
 	Return
 }
 
-InstallOffice365 (bOfficeDesktopIcons) {
+InstallOffice365(bOfficeDesktopIcons)
+{
 	; Calls Office 365 installer and runs it with customConfiguration
 	Global strResourcesPath
-	
+
 	ExecuteExternalCommand(strResourcesPath . "\Office365\setup.exe"
 		. " /configure " 											
 		. strResourcesPath . "\Office365\customconfiguration_staff.xml")
