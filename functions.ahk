@@ -225,34 +225,6 @@ WaitForPing(num)
   Return 1
 }
 
-CreatePatronEwareConfig(location)
-{
-    ;Path to where Servers.ini is found
-    serversPath := A_WorkingDir . "\Resources\Servers.ini"
-    IniRead, strEwareServer
-        , %serversPath%, Servers, %location%
-    IniRead, strAutoDiscoveryPort
-        , %serversPath%, AutoDiscoveryPort, %location%
-    IniRead, strManagementServicePort
-        , %serversPath%, ManagementServicePort, %location%
-
-  fileName := "Resources\EwareConfig\pcrClient.ewp"
-  fileContent := ""
-  . "<!DOCTYPE Settings> `n"
-  . "<Settings> `n"
-  . "    <version>1</version> `n"
-  . "    <type>PC Reservation Client</type> `n"
-  . "    <entry name=""Network: Management Service Auto-Discovery Port"">" strAutoDiscoveryPort . "</entry> `n"
-  . "    <entry name=""Network: Management Service IP Address/Host Name"">" strEwareServer . "</entry> `n"
-  . "    <entry name=""Network: Management Service Port"">"  strManagementServicePort . "</entry> `n"
-  . "    <collection name=""Process Exceptions""> `n"
-  . "        <entry name=""LPT:One Print Cost Management"">Skip When Closing</entry> `n"
-  . "    </collection>`n"
-  . "</Settings>"
-
-  FileAppend, %fileContent%, %fileName%
-}
-
 CreateFrontLineEwareConfig(location)
 {
     ;Path to where Servers.ini is found
