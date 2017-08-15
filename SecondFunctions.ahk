@@ -102,7 +102,7 @@ CreatePatronEwareConfig(location)
 		} Else {
 			strToken1 = Discovery Port Goes Here
 			strToken2 = IP Goes Here
-			strToken3 = Management Port Goes here
+			strToken3 = Service Port Goes here
 			IfInString, strCurrentLine, %strToken1%
 			{
 				strCurrentLine := StrReplace(strCurrentLine

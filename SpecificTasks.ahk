@@ -142,6 +142,12 @@ FrontLineTasks()
 	;This section of FrontLineasks handles the installation of the programs
 	Global strResourcesPath
 
+	FileCreateDir, C:\IT\Icons
+	ExecuteExternalCommand("robocopy "
+		. strResourcesPath . "\shortcuts "
+		. " C:\IT\Icons"
+		. " /s /UNILOG+:C:\Deployment\robocopy_icons.log")
+
 	bPCResDesktopIcon := False
 	bPcResOnStartup := False
 	InstallPCReservationReservationStation(bPCResDesktopIcon, bPCResOnStartup)
@@ -198,12 +204,12 @@ FrontLineTasks()
 		, 138													; Icon Number
 		, 1														; Run State
 
-	FileCreateShortcut, https://portal.adp.com/public/login		; Target
+	FileCreateShortcut, https://online.adp.com/portal/login.html ; Target
 		, C:\Users\Public\Desktop\ADP.lnk 						; Link File
 		, ; Standard Working directory							; WorkingDirr
 		, ; No Arguments										; Args 
 		, Launch the ADP Website								; Description
-		, C:\Icons\adp.ico 										; Icon
+		, C:\IT\Icons\adp.ico 			; Icon
 		, ; No Shortcut Key										; Shortcut Key
 		, 1														; Icon Number
 		, 1														; Run State
@@ -213,7 +219,7 @@ FrontLineTasks()
 		, ; Standard Working directory							; WorkingDir
 		, ; No Arguments										; Args 
 		, Launch the Help Desk Portal							; Description 
-		, C:\Icons\helpdeskportal.ico 							; Icon
+		, C:\IT\Icons\spiceworks.ico		; Icon
 		, ; No Shortcut Key										; Shortcut Key
 		, 1														; Icon Number
 		, 1														; Run State
@@ -658,7 +664,7 @@ InstallSierra(bSierraDesktopIcon)
 	; Moves the Seirra Portable app to C: drive
 	ExecuteExternalCommand("robocopy " 								; Command
 	 	. " """ . strResourcesPath . "\Sierra Desktop App"""		; Target
-		. " ""C:\Sierra Desktop App"" "								; Dest
+		. " ""C:\Program Files (x86)\Sierra Desktop App"" "								; Dest
 		. " /s  /UNILOG+:C:\Deployment\robocopy_Sierra.log")		; Options
 
 	If (bSierraDesktopIcon) {
