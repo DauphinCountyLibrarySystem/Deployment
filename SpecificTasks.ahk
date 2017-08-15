@@ -511,12 +511,10 @@ KioskTasks()
 
 	; Install LPT One Print Release Terminal
 	bLPTDesktopIcon := true
-	bLPTOnStartup = true
+	bLPTOnStartup := False
 	InstallLPTOnePrintReleaseTerminal(bLPTDesktopIcon, bLPTOnStartup)
 
-	bEWLaunchDesktopIcon := True
-	bEWLaunchOnStartup := True
-	InstallEWLaunch(bEWLaunchDesktopIcon, bEWLaunchOnStartup)
+	InstallEWLaunch()
 
 
 }
@@ -550,7 +548,7 @@ InstallPCReservationReservationStation(bPCResDesktopIcon, bPCResOnStartup)
 	ExecuteExternalCommand("robocopy "								; Command
 		. strResourcesPath . "\EwareConfig"							; Source
 		. " """ . strPCResPath . "\Reservation Station\config""" 	; Dest
-		. " /mov")													; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
+		. " rsConfig.ewp /mov")										; Options ;
 
 	; This command enables the firewall rules that PC Reservation Reservation 
 	; Station creates
@@ -781,7 +779,7 @@ InstallOffice2016(bOfficeDesktopIcons)
 	Return
 }
 
-InstallEWLaunch(bEWLaunchDesktopIcon, bEWLaunchOnStartup)
+InstallEWLaunch()
 {
 	Global strResourcesPath
 
@@ -794,6 +792,17 @@ InstallEWLaunch(bEWLaunchDesktopIcon, bEWLaunchOnStartup)
 		. """" . strResourcesPath . "\Launch Command"""				; Source
 		. " C:\" 													; Dest
 		. " /e /is /move")											; Options ; Fixme: Have this write a Log similar to how the other robocopies do Issue #26
+
+	FileCreateShortcut, C:\Program Files (x86)\EnvisionWare\ewlaunch\ewLaunch.exe	; Target
+		, C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\ewLaunch.lnk ; Link Frenameile
+		, C:\Program Files (x86)\EnvisionWare\ewLaunch\			; WorkingDirr
+		, ; No Arguments										; Args 
+		, Launch ewLaunch										; Description
+		, ; Takes icon from file								; Icon
+		, ; No Shortcut Key										; Shortcut Key
+		, 1														; Icon Number
+		, 1														; Run State
+	
 	Return
 }
 
