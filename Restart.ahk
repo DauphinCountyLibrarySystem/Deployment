@@ -1,4 +1,5 @@
 ﻿#Include, functions.ahk
+#Include SpecificTasks.ahk
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn  ; Enable warnings to assist with detecting common errors.
@@ -19,6 +20,8 @@ __FirstRestart__:
 	DoLogging("		Starting First Restart Operation")
 	DoLogging("===============================================================")
 	DoLogging(" ")
+	If (strcomputerRole == "Patron")
+		InstallOffice2016(True)
 	RegisterFirstRestart()
 
 
