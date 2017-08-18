@@ -243,6 +243,10 @@ __startup__:
 	If (!bIsRestarted And !bIsSecondRestart) {
 		;Constructs the GUI and gets the specific information that we need
 		;We only want to do this if this is not the Restarted version of the app
+    IfExist, DeploymentInfo.xml
+      HasDeploymentInfo()
+
+
 		Gosub __subMainGUI__
 	} Else If (bIsRestarted) {
 		;bIsRestarted == true
@@ -328,6 +332,12 @@ loadUserInput()
   DoLogging("strILSUsername loaded to " . strILSUsername)
 
   return
+}
+
+HasDeploymentInfo()
+{
+  loadUserInput()
+  Gosub, __main__
 }
 
 
