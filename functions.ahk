@@ -8,16 +8,19 @@ ClosePCReservation(sec)
   Sleep (sec*1000)
   If ProcessExist("PC Reservation Client Module.exe")
   {
-    DoLogging("-- Attempting to close PC Reservation Client...")
-    CoordMode, Mouse, Screen
-    MouseMove, (20), (A_ScreenHeight - 20)
-    Sleep, 250
-    ; this should work better than: Send, {Ctrl Down}{Click}{Ctrl up}
-    Send, ^{Click} ; This == Crtl + Click
-    Sleep, 250
-    Send envisionware{enter}{enter}
-    ; I'm trying to be generous here. It shouldn't take a second to close.
-    Sleep, 1000 
+    ; DoLogging("-- Attempting to close PC Reservation Client...")
+    ; CoordMode, Mouse, Screen
+    ; MouseMove, (20), (A_ScreenHeight - 20)
+    ; Sleep, 250
+    ; ; this should work better than: Send, {Ctrl Down}{Click}{Ctrl up}
+    ; Send, ^{Click} ; This == Crtl + Click
+    ; Sleep, 250
+    ; Send envisionware{enter}{enter}
+    ; ; I'm trying to be generous here. It shouldn't take a second to close.
+    ; Sleep, 1000 
+    ExecuteExternalCommand("Taskkill /IM ""PC Reservation Client Module.exe"" /F")
+    ExecuteExternalCommand("Taskkill /IM ""Explorer.exe"" /F")
+    Run, explorer.exe
   }
   If ProcessExist("PC Reservation Client Module.exe")
   {
