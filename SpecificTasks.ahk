@@ -55,8 +55,10 @@ OfficeTasks()
 	bSierraDesktopIcon := True
 	InstallSierra(bSierraDesktopIcon)
 
-	bOfficeDesktopIcons := True
-	InstallOffice365(bOfficeDesktopIcons)
+	;This causes issue with office attempting to install at the same point as something
+	;else and this will crash office
+	;bOfficeDesktopIcons := True
+	;InstallOffice365(bOfficeDesktopIcons)
 
 	; Copy links to staff printers.
 	ExecuteExternalCommand("robocopy "								; Command
@@ -720,6 +722,8 @@ InstallOneStop(bOneStopDesktopIcon, bOneStopOnStartup)
 InstallOffice2016(bOfficeDesktopIcons)
 {
 	; Installs Office 2016
+	DoLogging("Waitign 10 sec")
+	Sleep, 10000
 	ExecuteExternalCommand(""A_ScriptDir . "\Resources\Office2016\setup.exe ")
 
 	If (bOfficeDesktopIcons) {
